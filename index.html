@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MARKER | Architectural Edition (White)</title>
+    <style>
+        /* --- 1. CORE VARIABLES & RESET --- */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #111111;
+            --accent-color: #FF2A1F;
+            --line-color: #e5e5e5;
+            --secondary-text: #666666;
+            --easing: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Helvetica Neue', 'Inter', Arial, sans-serif;
+            overflow-x: hidden;
+            cursor: none;
+            overflow-y: hidden; /* For preloader */
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* --- 2. PRELOADER --- */
+        .preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: #ffffff; z-index: 10000;
+            display: flex; justify-content: center; align-items: center;
+            transition: transform 1.2s var(--easing);
+            perspective: 1000px;
+            will-change: transform;
+        }
+        .preloader .marker-visual-container { transform: scale(0.8) rotateZ(45deg); }
+        .preloader .layer-front {
+            stroke-dasharray: 600; stroke-dashoffset: 600;
+            animation: loadDraw 2s ease-in-out forwards;
+        }
+        .preloader .layer-mid { opacity: 0; animation: loadFill 1s ease-out forwards 1.8s; }
+        .preloader .layer-back { opacity: 0; animation: loadFill 1s ease-out forwards 0.5s; }
+
+        @keyframes loadDraw { to { stroke-dashoffset: 0; } }
+        @keyframes loadFill { to { opacity: 1; } }
+
+        /* --- 3. CUSTOM PEN CURSOR --- */
+        #cursor-pen {
+            position: fixed; top: 0; left: 0; width: 40px; height: 40px;
+            pointer-events: none; z-index: 9999; 
+            will-change: transform; 
+        }
+        .pen-shape {
+            width: 100%; height: 100%; fill: #111;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.1));
+            transform-origin: bottom left;
+            transform: translate(0%, -100%) rotate(0deg);
+            transition: transform 0.2s var(--easing), fill 0.2s;
+        }
+        body.hovering .pen-shape {
+            fill: var(--accent-color);
+            transform: translate(0%, -100%) rotate(0deg) scale(1.15);
+        }
+
+        /* CANVAS FOR INK TRAIL */
+        #ink-trail {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            pointer-events: none; z-index: 9998; mix-blend-mode: normal;
+        }
+
+        /* --- 4. NAV --- */
+        nav {
+            position: fixed; top: 0; width: 100%; padding: 2rem 3rem;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100; mix-blend-mode: normal;
+        }
+        .logo { font-weight: 900; font-size: 1.2rem; letter-spacing: -0.5px; }
+        .nav-right { display: flex; gap: 2rem; align-items: center; }
+        .nav-link { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; position: relative; }
+        .nav-link::before {
+            content: ''; position: absolute; top: 50%; left: -15px; width: 0; height: 1px;
+            background: var(--accent-color); transition: width 0.3s var(--easing);
+        }
+        .nav-link:hover::before { width: 10px; }
+
+        /* --- 5. HERO & 3D MARKER --- */
+        .hero {
+            height: 100vh; position: relative; perspective: 1000px;
+            display: grid; grid-template-columns: 1fr 1fr;
+            align-items: end; padding: 0 3rem 3rem 3rem;
+        }
+        .hero-text-wrap { z-index: 2; position: relative; }
+        .hero-title {
+            font-size: 15vw; line-height: 0.8; font-weight: 800;
+            letter-spacing: -8px; color: #111; white-space: nowrap;
+        }
+        .hero-subtitle {
+            font-size: 1.2rem; color: var(--secondary-text); margin-bottom: 2rem;
+            margin-left: 10px; opacity: 0; transform: translateX(-50px); max-width: 300px;
+        }
+        .marker-visual-container {
+            width: 400px; height: 600px; transform-style: preserve-3d;
+            z-index: 1; pointer-events: none; will-change: transform;
+        }
+        #hero-marker {
+            position: absolute; top: 45%; left: 60%;
+            transform: translate(-50%, -50%) rotateZ(45deg);
+        }
+        .svg-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            fill: none; will-change: transform;
+        }
+        .layer-back { stroke: #e0e0e0; stroke-width: 1; transform: translateZ(-60px); }
+        .layer-mid {
+            stroke: #111; fill: #ffffff; stroke-width: 2;
+            transform: translateZ(0px); filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1));
+        }
+        .layer-front {
+            stroke: var(--accent-color); stroke-width: 1.5; stroke-dasharray: 600; stroke-dashoffset: 0;
+            transform: translateZ(60px); filter: drop-shadow(0 5px 10px rgba(255, 42, 31, 0.2));
+        }
+        #hero-marker .layer-front {
+            stroke-dashoffset: 600; animation: loadDraw 2.5s var(--easing) forwards 2.2s;
+        }
+
+        /* --- 6. SECTIONS --- */
+        .line-h {
+            width: 0%; height: 1px; background: var(--line-color);
+            margin: 2rem 0; transition: width 1.5s var(--easing);
+        }
+        .active .line-h { width: 100%; }
+        .section-padding { padding: 10rem 3rem; }
+        .section-label {
+            font-size: 0.9rem; color: var(--accent-color); text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 1rem; display: block;
+        }
+        .section-heading { font-size: 4rem; max-width: 600px; line-height: 1; color: #111; }
+        
+        .feature-list { display: flex; flex-direction: column; }
+        .feature-item {
+            position: relative; padding: 2.5rem 0; display: flex;
+            flex-direction: column; justify-content: center;
+            cursor: pointer; transition: background 0.3s;
+        }
+        .feature-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .feature-item h3 { font-size: 2.5rem; color: #999; transition: all 0.4s var(--easing); margin: 0; }
+        .feature-icon { font-size: 2rem; color: #ccc; transition: transform 0.4s var(--easing), color 0.4s; }
+        .feature-desc-wrapper {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.6s var(--easing), opacity 0.6s var(--easing); opacity: 0;
+        }
+        .feature-desc {
+            max-width: 500px; color: var(--secondary-text); font-size: 1.1rem;
+            line-height: 1.6; margin-top: 1.5rem; padding-left: 5px;
+        }
+        .feature-item:hover h3 { color: #000; transform: translateX(10px); }
+        .feature-item:hover .feature-icon { color: var(--accent-color); transform: rotate(90deg); }
+        .feature-item:hover .feature-desc-wrapper { max-height: 200px; opacity: 1; }
+        .feature-line {
+            width: 100%; height: 1px; background: #e5e5e5;
+            transform-origin: left; transform: scaleX(0); transition: transform 1s var(--easing);
+        }
+        .active .feature-line { transform: scaleX(1); }
+
+        .specs-container {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            border-top: 1px solid #e5e5e5; border-bottom: 1px solid #e5e5e5;
+        }
+        .spec-box {
+            padding: 4rem; position: relative; display: flex;
+            flex-direction: column; justify-content: center; border-right: 1px solid #e5e5e5;
+        }
+        .spec-box:last-child { border-right: none; }
+        .spec-value { font-size: 5rem; font-weight: 900; color: #111; line-height: 1; white-space: nowrap; }
+        .spec-label { font-size: 1rem; color: #666; margin-top: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        .marquee-section { padding: 5rem 0; border-bottom: 1px solid #e5e5e5; }
+        .marquee-inner { overflow: hidden; white-space: nowrap; }
+        .marquee-span {
+            font-size: 8rem; font-weight: 900; -webkit-text-stroke: 1px #adadad;
+            color: transparent; display: inline-block; animation: scroll 25s linear infinite; margin-right: 2rem;
+            will-change: transform; 
+        }
+        @keyframes scroll { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
+
+        /* --- ANATOMY SECTION (FIXED ALIGNMENT) --- */
+        .anatomy-section { 
+            padding: 10rem 3rem; 
+            height: 100vh;
+            background: #f9f9f9; 
+            position: relative; 
+            overflow: hidden; 
+            box-sizing: border-box;
+        }
+        
+        .anatomy-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 4rem;
+            width: 100%;
+            height: 100%;
+        }
+
+        .anatomy-visual-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border: 1px solid #e5e5e5; 
+            overflow: hidden;
+        }
+        
+        #anatomy-ballpit {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            outline: none;
+        }
+
+        .anatomy-info {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .anatomy-info h2 { font-size: 3rem; margin-bottom: 3rem; line-height: 1.1; }
+        
+        .anatomy-item {
+            border-bottom: 1px solid #ddd; 
+            padding: 1.5rem 0; 
+            display: flex; 
+            align-items: center;
+            opacity: 0; 
+            transform: translateX(50px);
+            transition: all 0.8s var(--easing);
+        }
+        
+        .anatomy-item.active { opacity: 1; transform: translateX(0); }
+        
+        .anatomy-num {
+            font-size: 0.8rem; font-weight: bold; color: var(--accent-color);
+            margin-right: 2rem; border: 1px solid var(--accent-color);
+            width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%;
+        }
+        .anatomy-text { font-size: 1.2rem; color: #333; }
+
+        /* BLUR TEXT ANIMATION STYLES */
+        .blur-char {
+            display: inline-block;
+            opacity: 0;
+            filter: blur(10px);
+            transform: translate3d(0, 15px, 0); /* direction="bottom" logic */
+            transition: opacity 0.6s var(--easing), filter 0.6s var(--easing), transform 0.6s var(--easing);
+            will-change: opacity, filter, transform;
+        }
+
+        /* Trigger blur animation when the parent row is active */
+        .anatomy-item.active .blur-char {
+            opacity: 1;
+            filter: blur(0px);
+            transform: translate3d(0, 0, 0);
+        }
+
+        @media (max-width: 900px) {
+            .anatomy-section { height: auto; padding: 5rem 3rem; }
+            .anatomy-grid { grid-template-columns: 1fr; grid-template-rows: 50vh auto; }
+            .anatomy-visual-container { height: 50vh; }
+        }
+
+        /* --- OPTIMIZED MAGNET LINES & LAYOUT --- */
+        .magnet-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        .magnet-content { padding-right: 0; }
+        .magnetLines-container {
+            display: grid; justify-items: center; align-items: center;
+            position: relative;
+        }
+        @media (max-width: 900px) {
+            .magnet-layout { grid-template-columns: 1fr; }
+            .magnet-content { padding-right: 0; margin-bottom: 3rem; }
+        }
+        .magnetLines-container span {
+            display: block; transform-origin: center; will-change: transform;
+            transform: rotate(var(--rotate, 0deg)) translateZ(0); /* Force GPU */
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); 
+        }
+
+        /* --- REVOLUTION SECTION (Horizontal Scroll) --- */
+        .revolution-section {
+            height: 500vh; /* Scroll Length */
+            position: relative;
+            z-index: 10;
+        }
+        .rev-sticky-container {
+            position: sticky; top: 0; height: 100vh; width: 100%;
+            overflow: hidden; background: #fff; display: flex; align-items: center;
+        }
+        .rev-title-fixed {
+            position: absolute; top: 10%; left: 3rem; z-index: 20; pointer-events: none;
+        }
+        .rev-title-fixed h2 {
+            font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-color);
+        }
+        .rev-track {
+            display: flex; height: 100%; align-items: center;
+            will-change: transform; padding-left: 20vw;
+        }
+        .rev-card {
+            min-width: 80vw; height: 80vh; margin-right: 10vw;
+            display: grid; grid-template-columns: 1.5fr 1fr;
+            align-items: center; gap: 4rem; position: relative;
+        }
+        .rev-visual-box {
+            width: 100%; height: 100%;
+            background: #f0f0f0; border: 1px solid #e5e5e5;
+            position: relative; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .rev-img-wrap {
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
+        }
+        .rev-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: grayscale(100%) contrast(1.1);
+            transition: transform 0.5s var(--easing);
+        }
+        .rev-card:hover .rev-img-wrap img { transform: scale(1.05); }
+        .rev-text-box h3 { font-size: 3rem; margin-bottom: 1.5rem; color: #111; line-height: 1.1; }
+        .rev-text-box p { color: #666; font-size: 1.1rem; line-height: 1.6; max-width: 400px; }
+        .rev-info-sub { display: block; font-size: 0.9rem; color: var(--accent-color); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        .rev-number {
+            font-size: 8rem; color: #f0f0f0; font-weight: 900;
+            position: absolute; top: -4rem; left: -2rem; z-index: -1;
+        }
+        @media (max-width: 900px) {
+            .rev-card { min-width: 90vw; grid-template-columns: 1fr; grid-template-rows: 1fr auto; height: 70vh; }
+            .rev-visual-box { height: 300px; }
+        }
+
+        /* FOOTER */
+        .cta-section {
+            height: 80vh; display: flex; align-items: center; justify-content: center;
+            flex-direction: column; position: relative;
+        }
+        .cta-bg-text {
+            position: absolute; font-size: 20vw; font-weight: 900; color: #f5f5f5;
+            z-index: -1; white-space: nowrap;
+        }
+        .cta-btn {
+            font-size: 2rem; border: 1px solid #111; padding: 2rem 6rem; border-radius: 100px;
+            transition: all 0.4s var(--easing); position: relative; overflow: hidden; color: #111;
+        }
+        .cta-btn::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 0%; height: 100%;
+            background: var(--accent-color); transition: width 0.4s var(--easing); z-index: -1;
+        }
+        .cta-btn:hover::before { width: 100%; }
+        .cta-btn:hover { border-color: var(--accent-color); color: #fff; }
+
+        /* ANIMATIONS */
+        .char { display: inline-block; opacity: 0; transform: translateY(40px); transition: all 0.5s var(--easing); }
+        .char.revealed { opacity: 1; transform: translateY(0); }
+        .reveal-text { opacity: 0; transform: translateY(30px); transition: all 1s var(--easing); }
+        .active .reveal-text { opacity: 1; transform: translateY(0); }
+
+        footer {
+            background-color: var(--bg-color); color: var(--text-color); border-top: 1px solid var(--line-color);
+            padding-top: 6rem; position: relative; overflow: hidden;
+        }
+        
+        .footer-grid {
+            display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 2rem;
+            padding: 0 3rem 6rem 3rem; max-width: 1600px; margin: 0 auto;
+            position: relative; z-index: 1;
+        }
+        
+        .footer-col h4 {
+            font-size: 0.9rem; color: var(--secondary-text); text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 2rem;
+        }
+        .newsletter-input {
+            width: 100%; border: none; border-bottom: 1px solid var(--line-color); padding: 1rem 0;
+            background: transparent; font-size: 1.5rem; color: var(--text-color); outline: none;
+            transition: border-color 0.3s;
+        }
+        .newsletter-input:focus { border-bottom-color: var(--accent-color); }
+        .footer-links li { margin-bottom: 1rem; }
+        .footer-link {
+            font-size: 1.1rem; color: var(--text-color); position: relative;
+            transition: padding-left 0.3s var(--easing), color 0.3s;
+        }
+        .footer-link::before {
+            content: ''; position: absolute; left: 0; top: 50%; width: 0; height: 1px;
+            background: var(--accent-color); transition: width 0.3s var(--easing);
+        }
+        .footer-link:hover { padding-left: 20px; color: var(--accent-color); }
+        .footer-link:hover::before { width: 15px; }
+        .footer-bottom {
+            border-top: 1px solid var(--line-color); padding: 2rem 3rem;
+            display: flex; justify-content: space-between; align-items: flex-end; position: relative;
+            z-index: 1; pointer-events: none;
+        }
+        .footer-big-text {
+            font-size: 19vw; line-height: 0.8; font-weight: 900; color: transparent;
+            -webkit-text-stroke: 1px #e0e0e0; margin: 0; padding: 0; position: relative;
+            transition: all 0.8s var(--easing); cursor: default;
+        }
+        .footer-big-text::after {
+            content: 'MARKER'; position: absolute; top: 0; left: 0; color: var(--accent-color);
+            width: 0%; overflow: hidden; transition: width 1s var(--easing); -webkit-text-stroke: 0;
+        }
+        footer:hover .footer-big-text::after { width: 100%; }
+        .back-to-top {
+            width: 100px; height: 100px; border: 1px solid var(--line-color); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 2rem; color: var(--text-color);
+            cursor: pointer; transition: all 0.3s; background: var(--bg-color); pointer-events: auto;
+        }
+        .back-to-top:hover {
+            background: var(--accent-color); border-color: var(--accent-color); color: #fff; transform: scale(1.1);
+        }
+        .footer-copy {
+            position: absolute; bottom: 2rem; right: 3rem; color: var(--secondary-text); font-size: 0.8rem;
+        }
+    </style>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/examples/jsm/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+    <canvas id="ink-trail"></canvas>
+
+    <div class="preloader">
+        <div class="marker-visual-container">
+            <svg class="svg-layer layer-back" viewBox="0 0 200 400">
+                <defs>
+                    <pattern id="grid-load" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="0.5" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid-load)" />
+            </svg>
+            <svg class="svg-layer layer-mid" viewBox="0 0 200 400">
+                <path d="M 70,50 L 130,50 L 130,300 L 100,350 L 70,300 Z" />
+                <rect x="65" y="40" width="70" height="80" rx="5" />
+            </svg>
+            <svg class="svg-layer layer-front" viewBox="0 0 200 400">
+                <line x1="100" y1="50" x2="100" y2="340" />
+                <path d="M 70,50 L 70,300 L 100,350 L 130,300 L 130,50" />
+                <rect x="65" y="40" width="70" height="20" rx="2" />
+                <line x1="65" y1="120" x2="135" y2="120" />
+            </svg>
+        </div>
+    </div>
+
+    <div id="cursor-pen">
+        <svg class="pen-shape" viewBox="0 0 24 24">
+            <path d="M14.06,9.02l0.92,0.92L5.92,19H5v-0.92L14.06,9.02 M17.66,3c-0.25,0-0.51,0.1-0.7,0.29l-1.83,1.83
+                l3.75,3.75l1.83-1.83c0.39-0.39,0.39-1.02,0-1.41l-2.34-2.34C18.17,3.09,17.92,3,17.66,3L17.66,3z M14.06,6.19L3,17.25V21h3.75
+                L17.81,9.94L14.06,6.19z" />
+        </svg>
+    </div>
+
+    <nav>
+        <div class="logo">MARKER</div>
+        <div class="nav-right">
+            <a href="#features" class="nav-link hover-trigger">Index</a>
+            <a href="#buy" class="nav-link hover-trigger">Purchase</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-text-wrap">
+            <p class="hero-subtitle" id="hero-sub">The separation between thought and reality.</p>
+            <h1 class="hero-title split-text" id="hero-text">MARKER</h1>
+        </div>
+
+        <div class="marker-visual-container" id="hero-marker">
+            <svg class="svg-layer layer-back" viewBox="0 0 200 400">
+                <defs>
+                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="0.5" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+            <svg class="svg-layer layer-mid" viewBox="0 0 200 400">
+                <path d="M 70,50 L 130,50 L 130,300 L 100,350 L 70,300 Z" />
+                <rect x="65" y="40" width="70" height="80" rx="5" />
+            </svg>
+            <svg class="svg-layer layer-front" viewBox="0 0 200 400">
+                <line x1="100" y1="50" x2="100" y2="340" />
+                <path d="M 70,50 L 70,300 L 100,350 L 130,300 L 130,50" />
+                <rect x="65" y="40" width="70" height="20" rx="2" />
+                <line x1="65" y1="120" x2="135" y2="120" />
+            </svg>
+        </div>
+    </header>
+
+    <section class="section-padding reveal-trigger">
+        <div class="line-h"></div>
+        <div style="display: flex; justify-content: space-between; margin-top: 4rem; flex-wrap: wrap; gap: 2rem;">
+            <div class="reveal-text" style="flex: 1; min-width: 300px;">
+                <span class="section-label">Philosophy</span>
+                <h2 class="section-heading split-text">Designed forspeed of thought.</h2>
+            </div>
+            <div class="reveal-text" style="flex: 1; max-width: 400px; color: #666; line-height: 1.8;">
+                <p>Most styluses are passive. Marker is active. It predicts your stroke before you finish it, utilizing
+                    a neural engine embedded directly in the tip.</p>
+            </div>
+        </div>
+    </section>
+
+<section id="features" class="section-padding">
+    <span class="section-label reveal-text">Capabilities</span>
+    <div class="feature-list">
+
+        <div class="reveal-trigger">
+            <div class="feature-line"></div>
+            <div class="feature-item hover-trigger">
+                <div class="feature-header">
+                    <h3>01. Zero Latency</h3>
+                    <div class="feature-icon">+</div>
+                </div>
+                <div class="feature-desc-wrapper">
+                    <p class="feature-desc">
+                        Experience instant feedback. Our proprietary RF connection protocol
+                        eliminates the delay between hand and screen, achieving a 0.1ms response time.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="reveal-trigger">
+            <div class="feature-line"></div>
+            <div class="feature-item hover-trigger">
+                <div class="feature-header">
+                    <h3>02. Haptic Grain</h3>
+                    <div class="feature-icon">+</div>
+                </div>
+                <div class="feature-desc-wrapper">
+                    <p class="feature-desc">
+                        Feel the texture of the canvas. An advanced vibration engine simulates
+                        the friction of 12 distinct paper types, from rough sketch to smooth vellum.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="reveal-trigger">
+            <div class="feature-line"></div>
+            <div class="feature-item hover-trigger">
+                <div class="feature-header">
+                    <h3>03. Solar Weave</h3>
+                    <div class="feature-icon">+</div>
+                </div>
+                <div class="feature-desc-wrapper">
+                    <p class="feature-desc">
+                        Never plug it in. The casing is wrapped in a translucent solar-weave
+                        material that trickle-charges the capacitor from ambient room light.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="reveal-trigger">
+            <div class="feature-line"></div>
+            <div class="feature-item hover-trigger">
+                <div class="feature-header">
+                    <h3>04. Pressure Intelligence</h3>
+                    <div class="feature-icon">+</div>
+                </div>
+                <div class="feature-desc-wrapper">
+                    <p class="feature-desc">
+                        Draw naturally. With 8192 levels of pressure sensitivity,
+                        every stroke responds precisely to your touch, from light shading
+                        to bold lines.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="reveal-trigger">
+            <div class="feature-line"></div>
+            <div class="feature-item hover-trigger">
+                <div class="feature-header">
+                    <h3>05. Adaptive Grip</h3>
+                    <div class="feature-icon">+</div>
+                </div>
+                <div class="feature-desc-wrapper">
+                    <p class="feature-desc">
+                        Stays comfortable all day. The ergonomic grip automatically adjusts
+                        micro-texture based on hand moisture and temperature for maximum control.
+                    </p>
+                </div>
+            </div>
+            <div class="feature-line"></div>
+        </div>
+
+    </div>
+</section>
+
+    <div class="marquee-section">
+        <div class="marquee-inner">
+            <span class="marquee-span">PRECISION FLOW SPEED MARKER PRECISION FLOW SPEED MARKER</span>
+        </div>
+    </div>
+
+    <section class="anatomy-section">
+        <div class="anatomy-grid">
+            <div class="anatomy-visual-container" id="anatomy-visual-container">
+                <canvas id="anatomy-ballpit"></canvas>
+            </div>
+
+            <div class="anatomy-info">
+                <span class="section-label reveal-text" style="margin-bottom: 2rem;">Anatomy</span>
+                <h2 class="split-text">Internal Architecture</h2>
+                
+                <div class="anatomy-item reveal-trigger hover-trigger">
+                    <div class="anatomy-num">A</div>
+                    <div class="anatomy-text blur-text-target">Titanium Core Shaft</div>
+                </div>
+                <div class="anatomy-item reveal-trigger hover-trigger" style="transition-delay: 0.1s;">
+                    <div class="anatomy-num">B</div>
+                     <div class="anatomy-text blur-text-target">Haptic Resonance Engine</div>
+                </div>
+                <div class="anatomy-item reveal-trigger hover-trigger" style="transition-delay: 0.2s;">
+                    <div class="anatomy-num">C</div>
+                     <div class="anatomy-text blur-text-target">Capacitive Nib Assembly</div>
+                </div>
+                <div class="anatomy-item reveal-trigger hover-trigger" style="transition-delay: 0.3s;">
+                    <div class="anatomy-num">D</div>
+                     <div class="anatomy-text blur-text-target">Solar Weave Skin</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding reveal-trigger">
+        <div class="magnet-layout">
+            <div class="magnet-content">
+                <span class="section-label reveal-text" style="margin-bottom: 2rem; display:block;">Field Sensitivity</span>
+                <h2 class="section-heading split-text" style="font-size: 3.5rem; margin-bottom: 1.5rem;">Magnetic Grid.</h2>
+                <p class="reveal-text" style="max-width: 400px; color: #666; font-size: 1.1rem; line-height: 1.6;">
+                    The nib detects magnetic field variances to orient your stroke with sub-pixel precision. It actively realigns your intent with the digital canvas.
+                </p>
+            </div>
+            <div id="magnet-container" class="magnetLines-container hover-trigger"></div>
+        </div>
+    </section>
+
+    <section id="specs" class="reveal-trigger">
+        <div class="specs-container">
+            <div class="spec-box hover-trigger">
+                <span class="spec-value">
+                    <span class="counter" data-target="4096">0</span>
+                </span>
+                <span class="spec-label reveal-text">Pressure Levels</span>
+            </div>
+            <div class="spec-box hover-trigger">
+                <span class="spec-value">
+                    <span class="counter" data-target="88">0</span>g
+                </span>
+                <span class="spec-label reveal-text">Total Weight</span>
+            </div>
+            <div class="spec-box hover-trigger">
+                <span class="spec-value split-text">Ti</span>
+                <span class="spec-label reveal-text">Titanium Core</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="revolution-section" id="revolution">
+        <div class="rev-sticky-container">
+            <div class="rev-title-fixed">
+                <h2>Evolution</h2>
+            </div>
+            
+            <div class="rev-track">
+                <div class="rev-card hover-trigger">
+                    <div class="rev-text-box">
+                        <div class="rev-number">01</div>
+                        <span class="rev-info-sub">1953 &mdash; Sidney Rosenthal</span>
+                        <h3>The Magic Marker.</h3>
+                        <p>A squat glass bottle filled with oil-based ink and capped with a wool felt wick. The first device capable of writing on any surface.</p>
+                    </div>
+                    <div class="rev-visual-box">
+                        <div class="rev-img-wrap">
+<img src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=800&auto=format&fit=crop" alt="Vintage Ink Bottle Concept">                        </div>
+                    </div>
+                </div>
+
+                <div class="rev-card hover-trigger">
+                    <div class="rev-text-box">
+                        <div class="rev-number">02</div>
+                        <span class="rev-info-sub">1962 &mdash; Yukio Horie</span>
+                        <h3>The Fiber Tip.</h3>
+                        <p>Developed by the Tokyo Stationery Company (Pentel). Replaced the crude felt wick with a precision bamboo (later acrylic) fiber tip, enabling fine writing.</p>
+                    </div>
+                    <div class="rev-visual-box">
+                        <div class="rev-img-wrap">
+<img src="https://images.unsplash.com/photo-1453728013993-6d66e9c9123a?q=80&w=800&auto=format&fit=crop" alt="Technical Pen Concept">                        </div>
+                    </div>
+                </div>
+
+                <div class="rev-card hover-trigger">
+                    <div class="rev-text-box">
+                        <div class="rev-number">03</div>
+                        <span class="rev-info-sub">1993 &mdash; The Digital Bridge</span>
+                        <h3>Pressure Sensing.</h3>
+                        <p>The dawn of the PDA and Wacom tablet. Ink became pixels. The first attempt to translate hand pressure into digital line width.</p>
+                    </div>
+                    <div class="rev-visual-box">
+                        <div class="rev-img-wrap">
+                            <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop" alt="Digital Circuitry">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rev-card hover-trigger">
+                    <div class="rev-text-box">
+                        <div class="rev-number">04</div>
+                        <span class="rev-info-sub">2025 &mdash; MARKER</span>
+                        <h3>Neural Synthesis.</h3>
+                        <p>The distinction between tool and thought disappears. Predictive algorithms and haptic feedback create the ultimate evolution of the stroke.</p>
+                    </div>
+                    <div class="rev-visual-box">
+                        <div class="rev-img-wrap">
+                            <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop" alt="Futuristic Design">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="buy" class="cta-section reveal-trigger">
+        <div class="cta-bg-text">MARKER</div>
+        <a href="#" class="cta-btn hover-trigger reveal-text">Initiate Order</a>
+        <div style="margin-top: 2rem; color: #666; font-size: 0.8rem;">Batch 004 Shipping in October</div>
+    </section>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Stay Updated</h4>
+                <input type="text" class="newsletter-input hover-trigger" placeholder="Email Address">
+            </div>
+            <div class="footer-col">
+                <h4>Sitemap</h4>
+                <ul class="footer-links">
+                    <li><a href="#features" class="footer-link hover-trigger">Capabilities</a></li>
+                    <li><a href="#specs" class="footer-link hover-trigger">Specifications</a></li>
+                    <li><a href="#buy" class="footer-link hover-trigger">Pre-Order</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <ul class="footer-links">
+                    <li><a href="#" class="footer-link hover-trigger">Privacy Policy</a></li>
+                    <li><a href="#" class="footer-link hover-trigger">Terms of Use</a></li>
+                    <li><a href="#" class="footer-link hover-trigger">Warranty</a></li>
+                </ul>
+            </div>
+            <div class="footer-col" style="display: flex; justify-content: flex-end; align-items: flex-start;">
+                <div class="back-to-top hover-trigger" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <h1 class="footer-big-text">MARKER</h1>
+            <p class="footer-copy">&copy; 2025 Marker Industries.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- GLOBAL VARIABLES ---
+        let mouseX = 0;
+        let mouseY = 0;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // --- INK TRAIL LOGIC ---
+        const canvas = document.getElementById('ink-trail');
+        const ctx = canvas.getContext('2d');
+        let points = [];
+        let width, height;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        window.addEventListener('mousemove', (e) => {
+            points.push({ x: e.clientX, y: e.clientY, time: Date.now() });
+        });
+
+        function renderTrail() {
+            ctx.clearRect(0, 0, width, height);
+            const now = Date.now();
+            points = points.filter(p => now - p.time < 1000);
+
+            if (points.length > 1) {
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                for (let i = 1; i < points.length; i++) {
+                    const p1 = points[i - 1];
+                    const p2 = points[i];
+                    const age = (now - p2.time) / 1000;
+                    const opacity = 1 - age;
+                    const lineWidth = 4 * opacity;
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.strokeStyle = `rgba(255, 42, 31, ${opacity})`;
+                    ctx.lineWidth = lineWidth;
+                    ctx.stroke();
+                }
+            }
+            requestAnimationFrame(renderTrail);
+        }
+        renderTrail();
+
+        // --- CURSOR LOGIC ---
+        const cursor = document.getElementById("cursor-pen");
+        function updateCursor() {
+            cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+            requestAnimationFrame(updateCursor);
+        }
+        updateCursor();
+
+        document.querySelectorAll('.hover-trigger').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+        });
+
+        // --- 3D TRANSFORM ---
+        const hero = document.querySelector('.hero');
+        const visual = document.getElementById('hero-marker');
+        let heroFrame = 0;
+        
+        hero.addEventListener('mousemove', (e) => {
+            heroFrame++;
+            if(heroFrame % 2 === 0) { 
+                const x = (window.innerWidth / 2 - e.clientX) / 25;
+                const y = (window.innerHeight / 2 - e.clientY) / 25;
+                visual.style.transform = `translate(-50%, -50%) rotateZ(45deg) rotateY(${x}deg) rotateX(${-y}deg)`;
+            }
+        });
+        hero.addEventListener('mouseleave', () => {
+            visual.style.transform = `translate(-50%, -50%) rotateZ(45deg) rotateY(0deg) rotateX(0deg)`;
+        });
+
+        // --- SPLIT TEXT LOGIC ---
+        function initSplitText() {
+            const targets = document.querySelectorAll('.split-text');
+            targets.forEach(target => {
+                const text = target.innerText;
+                let html = '';
+                for (let i = 0; i < text.length; i++) {
+                    let letter = text[i] === ' ' ? '&nbsp;' : text[i];
+                    html += `<span class="char" style="transition-delay: ${i * 0.05}s">${letter}</span>`;
+                }
+                target.innerHTML = html;
+            });
+        }
+
+        // --- BLUR TEXT LOGIC (New Addition) ---
+        // This simulates the React BlurText component
+        function initBlurText() {
+            const targets = document.querySelectorAll('.blur-text-target');
+            targets.forEach(target => {
+                const text = target.innerText;
+                let html = '';
+                for (let i = 0; i < text.length; i++) {
+                    let letter = text[i] === ' ' ? '&nbsp;' : text[i];
+                    // Stagger delay by 0.03s per letter (approx 30ms)
+                    html += `<span class="blur-char" style="transition-delay: ${i * 0.03}s">${letter}</span>`;
+                }
+                target.innerHTML = html;
+            });
+        }
+
+        // --- COUNTER LOGIC ---
+        const runCounter = (el) => {
+            const target = +el.getAttribute('data-target');
+            const duration = 2000; 
+            const start = performance.now();
+
+            const step = (currentTime) => {
+                const elapsed = currentTime - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                const currentVal = Math.floor(ease * target);
+                el.innerText = currentVal;
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    el.innerText = target;
+                }
+            };
+            requestAnimationFrame(step);
+        };
+
+        // --- OBSERVERS ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal-trigger').forEach(el => observer.observe(el));
+        document.querySelectorAll('.reveal-text').forEach(el => observer.observe(el));
+
+        const featureObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.5 });
+        document.querySelectorAll('.feature-item').forEach(el => featureObserver.observe(el));
+
+        const anatomyObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.2 });
+        document.querySelectorAll('.anatomy-item').forEach(el => anatomyObserver.observe(el));
+
+        const charObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const chars = entry.target.querySelectorAll('.char');
+                    chars.forEach(c => c.classList.add('revealed'));
+                }
+            });
+        }, { threshold: 0.1 });
+
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counters = entry.target.querySelectorAll('.counter');
+                    counters.forEach(c => runCounter(c));
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        // --- MAGNET LINES ---
+        function initMagnetLines() {
+            const config = { rows: 10, columns: 14, containerSizeW: "100%", containerSizeH: "50vmin", lineColor: "#111", lineWidth: "2px", lineHeight: "20px", baseAngle: 0 };
+            const container = document.getElementById('magnet-container');
+            if (!container) return;
+
+            container.style.width = config.containerSizeW;
+            container.style.height = config.containerSizeH;
+            container.style.gridTemplateColumns = `repeat(${config.columns}, 1fr)`;
+            container.style.gridTemplateRows = `repeat(${config.rows}, 1fr)`;
+
+            const total = config.rows * config.columns;
+            const fragment = document.createDocumentFragment();
+
+            for (let i = 0; i < total; i++) {
+                const span = document.createElement('span');
+                span.style.backgroundColor = config.lineColor;
+                span.style.width = config.lineWidth;
+                span.style.height = config.lineHeight;
+                span.style.setProperty('--rotate', `${config.baseAngle}deg`);
+                fragment.appendChild(span);
+            }
+            container.appendChild(fragment);
+
+            let magnetItems = [];
+            const spans = container.querySelectorAll('span');
+            function calculatePositions() {
+                magnetItems = Array.from(spans).map(span => {
+                    const rect = span.getBoundingClientRect();
+                    return { element: span, centerX: rect.left + rect.width / 2 + window.scrollX, centerY: rect.top + rect.height / 2 + window.scrollY };
+                });
+            }
+            window.addEventListener('resize', calculatePositions);
+            setTimeout(calculatePositions, 500);
+
+            let isVisible = false;
+            let rafId = null;
+            const magnetObserver = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    isVisible = true; calculatePositions(); loop();
+                } else {
+                    isVisible = false; cancelAnimationFrame(rafId);
+                }
+            }, { threshold: 0 }); 
+            magnetObserver.observe(container);
+
+            function loop() {
+                if (!isVisible) return;
+                const pageMouseX = mouseX + window.scrollX;
+                const pageMouseY = mouseY + window.scrollY;
+                magnetItems.forEach(item => {
+                    const dx = pageMouseX - item.centerX;
+                    const dy = pageMouseY - item.centerY;
+                    const distSq = dx*dx + dy*dy;
+                    if(distSq < 160000) { 
+                        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                        item.element.style.setProperty('--rotate', `${angle}deg`);
+                    }
+                });
+                rafId = requestAnimationFrame(loop);
+            }
+        }
+
+        // --- REVOLUTION SCROLL ---
+        function initRevolution() {
+            const section = document.querySelector('.revolution-section');
+            const track = document.querySelector('.rev-track');
+            
+            function handleScroll() {
+                const rect = section.getBoundingClientRect();
+                const totalHeight = section.offsetHeight - window.innerHeight;
+                
+                if (rect.top <= 0 && rect.bottom >= 0) {
+                    const progress = Math.abs(rect.top) / totalHeight;
+                    const clampedProgress = Math.max(0, Math.min(1, progress));
+                    const moveAmount = clampedProgress * (track.scrollWidth - window.innerWidth + 200); 
+                    
+                    track.style.transform = `translate3d(-${moveAmount}px, 0, 0)`;
+                }
+            }
+
+            let lastScrollY = window.scrollY;
+            function loop() {
+                if(Math.abs(window.scrollY - lastScrollY) < 0.1) {
+                    // optimization
+                } else {
+                    handleScroll();
+                    lastScrollY = window.scrollY;
+                }
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        // --- LOAD SEQUENCE ---
+        window.addEventListener('load', () => {
+            initSplitText();
+            initBlurText(); // Initialize the blur effect
+            document.querySelectorAll('.split-text').forEach(el => charObserver.observe(el));
+
+            const specsSection = document.getElementById('specs');
+            if (specsSection) counterObserver.observe(specsSection);
+
+            initMagnetLines();
+            initRevolution();
+
+            const preloader = document.querySelector('.preloader');
+            const sub = document.getElementById('hero-sub');
+
+            setTimeout(() => {
+                preloader.style.transform = "translateY(-100%)";
+                document.body.style.overflowY = "auto";
+                setTimeout(() => {
+                    sub.style.transition = "all 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s";
+                    sub.style.opacity = "1"; sub.style.transform = "translateY(0)";
+                }, 500);
+            }, 2500);
+        });
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+
+        // --- CLASSES from Original Code (Converted) ---
+        class x {
+            constructor(e) {
+                this._e = { ...e };
+                this._m(); this._d(); this._p(); this.resize(); this._g();
+            }
+            _m() { this.camera = new THREE.PerspectiveCamera(); this.cameraFov = this.camera.fov; }
+            _d() { this.scene = new THREE.Scene(); }
+            _p() {
+                this.canvas = this._e.canvas;
+                const e = { canvas: this.canvas, powerPreference: 'high-performance', ...(this._e.rendererOptions ?? {}) };
+                this.renderer = new THREE.WebGLRenderer(e);
+                this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+            }
+            _g() {
+                window.addEventListener('resize', this._f.bind(this));
+                this._o = new IntersectionObserver(this._u.bind(this), { root: null, rootMargin: '0px', threshold: 0 });
+                this._o.observe(this.canvas);
+            }
+            _u(e) { this._s = e[0].isIntersecting; this._s ? this._w() : this._z(); }
+            _f() { clearTimeout(this._a); this._a = setTimeout(this.resize.bind(this), 100); }
+            resize() {
+                const e = this.canvas.parentNode.offsetWidth;
+                const t = this.canvas.parentNode.offsetHeight;
+                this.renderer.setSize(e, t);
+                this.camera.aspect = e / t;
+                this.camera.updateProjectionMatrix();
+                
+                // Fire custom hook for resizing physics bounds
+                if(this.onAfterResize) this.onAfterResize();
+            }
+            _w() {
+                if (this._n) return;
+                const animate = () => {
+                    this._l = requestAnimationFrame(animate);
+                    this.renderer.render(this.scene, this.camera);
+                    this.onBeforeRender(); // Hook for physics update
+                };
+                this._n = true; animate();
+            }
+            _z() { cancelAnimationFrame(this._l); this._n = false; }
+        }
+
+        // Full Physics Logic Ported from React Code
+        // Uses Standard O(N^2) collision + Mouse Repulsion
+        class Physics {
+            constructor(config) {
+                this.config = config;
+                this.count = config.count;
+                
+                // State Arrays
+                this.position = new Float32Array(3 * this.count);
+                this.velocity = new Float32Array(3 * this.count);
+                this.radius = new Float32Array(this.count);
+                
+                // Temp Vectors for Calculation
+                this.v1 = new THREE.Vector3();
+                this.v2 = new THREE.Vector3();
+                this.diff = new THREE.Vector3();
+                this.normal = new THREE.Vector3();
+                
+                // Mouse Interaction State
+                this.mousePos = new THREE.Vector3(0, -1000, 0); // Start far away
+                this.mouseEnabled = false;
+
+                this.init();
+            }
+
+            init() {
+                const { maxX, maxY, maxZ, minSize, maxSize } = this.config;
+                for (let i = 0; i < this.count; i++) {
+                    const idx = i * 3;
+                    this.position[idx] = (Math.random() - 0.5) * maxX * 2;
+                    this.position[idx + 1] = (Math.random() - 0.5) * maxY * 2; 
+                    this.position[idx + 2] = (Math.random() - 0.5) * maxZ * 2;
+                    
+                    this.radius[i] = Math.random() * (maxSize - minSize) + minSize;
+                }
+            }
+
+            // External update for mouse position from DOM
+            setMouse(x, y, z) {
+                this.mousePos.set(x, y, z);
+                this.mouseEnabled = true;
+            }
+
+            // Update Bounds Dynamically
+            setBounds(x, y) {
+                this.config.maxX = x;
+                this.config.maxY = y;
+            }
+
+            update() {
+                const { gravity, friction, wallBounce, maxX, maxY, maxZ, maxVelocity } = this.config;
+                const count = this.count;
+
+                // 1. Apply Forces (Gravity + Mouse Repulsion + Friction)
+                for (let i = 0; i < count; i++) {
+                    const idx = i * 3;
+                    
+                    // Load current pos/vel
+                    this.v1.set(this.position[idx], this.position[idx+1], this.position[idx+2]); // Pos
+                    this.v2.set(this.velocity[idx], this.velocity[idx+1], this.velocity[idx+2]); // Vel
+
+                    // Gravity
+                    this.v2.y -= 0.01 * gravity * this.radius[i];
+
+                    // Mouse Repulsion
+                    if(this.mouseEnabled) {
+                        this.diff.copy(this.mousePos).sub(this.v1);
+                        const dist = this.diff.length();
+                        if (dist < 4) { // Interaction Radius
+                            this.diff.normalize().multiplyScalar(4 - dist).multiplyScalar(0.1);
+                            this.v2.sub(this.diff);
+                        }
+                    }
+
+                    // CENTRAL MARKER COLLISION (Cylinder)
+                    const distToCenter = Math.sqrt(this.v1.x * this.v1.x + this.v1.z * this.v1.z);
+                    const markerRadius = 2.5; // Radius of interaction for the marker
+                    if(distToCenter < markerRadius + this.radius[i]) {
+                        // Push out
+                        const angle = Math.atan2(this.v1.z, this.v1.x);
+                        const pushDist = markerRadius + this.radius[i];
+                        
+                        this.v1.x = Math.cos(angle) * pushDist;
+                        this.v1.z = Math.sin(angle) * pushDist;
+
+                        // Reflect Velocity
+                        this.v2.x *= -wallBounce;
+                        this.v2.z *= -wallBounce;
+                    }
+
+                    // Friction & Clamp
+                    this.v2.multiplyScalar(friction);
+                    this.v2.clampLength(0, maxVelocity);
+
+                    // Update Position
+                    this.v1.add(this.v2);
+
+                    // Store Back
+                    this.position[idx] = this.v1.x;
+                    this.position[idx+1] = this.v1.y;
+                    this.position[idx+2] = this.v1.z;
+                    this.velocity[idx] = this.v2.x;
+                    this.velocity[idx+1] = this.v2.y;
+                    this.velocity[idx+2] = this.v2.z;
+                }
+
+                // 2. Resolve Collisions & Walls
+                for (let i = 0; i < count; i++) {
+                    const idx = i * 3;
+                    const r1 = this.radius[i];
+                    let px = this.position[idx];
+                    let py = this.position[idx+1];
+                    let pz = this.position[idx+2];
+                    let vx = this.velocity[idx];
+                    let vy = this.velocity[idx+1];
+                    let vz = this.velocity[idx+2];
+
+                    // Sphere-Sphere Collisions
+                    for (let j = i + 1; j < count; j++) {
+                        const jdx = j * 3;
+                        const r2 = this.radius[j];
+                        
+                        const dx = this.position[jdx] - px;
+                        const dy = this.position[jdx+1] - py;
+                        const dz = this.position[jdx+2] - pz;
+                        const distSq = dx*dx + dy*dy + dz*dz;
+                        const minDist = r1 + r2;
+
+                        if (distSq < minDist * minDist) {
+                            const dist = Math.sqrt(distSq);
+                            const overlap = minDist - dist;
+                            
+                            // Normal vector
+                            const nx = dx / dist;
+                            const ny = dy / dist;
+                            const nz = dz / dist;
+
+                            // Separate spheres (0.5 overlap each)
+                            const sepX = nx * overlap * 0.5;
+                            const sepY = ny * overlap * 0.5;
+                            const sepZ = nz * overlap * 0.5;
+
+                            px -= sepX; py -= sepY; pz -= sepZ;
+                            this.position[jdx] += sepX;
+                            this.position[jdx+1] += sepY;
+                            this.position[jdx+2] += sepZ;
+
+                            // Reflect Velocity (Simplified Elastic)
+                            const v1Dot = vx*nx + vy*ny + vz*nz;
+                            const v2Dot = this.velocity[jdx]*nx + this.velocity[jdx+1]*ny + this.velocity[jdx+2]*nz;
+                            
+                            // Impulse calc
+                            const impulse = (v1Dot - v2Dot) * 0.5; // Restitution approx
+
+                            vx -= impulse * nx;
+                            vy -= impulse * ny;
+                            vz -= impulse * nz;
+                            
+                            this.velocity[jdx] += impulse * nx;
+                            this.velocity[jdx+1] += impulse * ny;
+                            this.velocity[jdx+2] += impulse * nz;
+                        }
+                    }
+
+                    // Wall Collisions
+                    if (px + r1 > maxX) { px = maxX - r1; vx *= -wallBounce; }
+                    else if (px - r1 < -maxX) { px = -maxX + r1; vx *= -wallBounce; }
+
+                    // Floor/Ceiling
+                    if (py + r1 > maxY) { py = maxY - r1; vy *= -wallBounce; }
+                    else if (py - r1 < -maxY) { py = -maxY + r1; vy *= -wallBounce; }
+
+                    if (pz + r1 > maxZ) { pz = maxZ - r1; vz *= -wallBounce; }
+                    else if (pz - r1 < -maxZ) { pz = -maxZ + r1; vz *= -wallBounce; }
+
+                    // Apply back
+                    this.position[idx] = px; this.position[idx+1] = py; this.position[idx+2] = pz;
+                    this.velocity[idx] = vx; this.velocity[idx+1] = vy; this.velocity[idx+2] = vz;
+                }
+            }
+        }
+
+        // --- Custom Plastic/Glass Shader Material (Class Y port) ---
+        class CustomMaterial extends THREE.MeshPhysicalMaterial {
+            constructor(params) {
+                super(params);
+                this.uniforms = {
+                    thicknessDistortion: { value: 0.1 },
+                    thicknessAmbient: { value: 0 },
+                    thicknessAttenuation: { value: 0.1 },
+                    thicknessPower: { value: 2 },
+                    thicknessScale: { value: 10 }
+                };
+                
+                this.onBeforeCompile = (shader) => {
+                    Object.assign(shader.uniforms, this.uniforms);
+                    shader.fragmentShader = `
+                        uniform float thicknessPower;
+                        uniform float thicknessScale;
+                        uniform float thicknessDistortion;
+                        uniform float thicknessAmbient;
+                        uniform float thicknessAttenuation;
+                    ` + shader.fragmentShader;
+                    
+                    shader.fragmentShader = shader.fragmentShader.replace(
+                        'void main() {',
+                        `
+                        void RE_Direct_Scattering(const in IncidentLight directLight, const in vec2 uv, const in vec3 geometryPosition, const in vec3 geometryNormal, const in vec3 geometryViewDir, const in vec3 geometryClearcoatNormal, inout ReflectedLight reflectedLight) {
+                            vec3 scatteringHalf = normalize(directLight.direction + (geometryNormal * thicknessDistortion));
+                            float scatteringDot = pow(saturate(dot(geometryViewDir, -scatteringHalf)), thicknessPower) * thicknessScale;
+                            vec3 scatteringIllu = (scatteringDot + thicknessAmbient) * diffuse;
+                            reflectedLight.directDiffuse += scatteringIllu * thicknessAttenuation * directLight.color;
+                        }
+                        void main() {
+                        `
+                    );
+
+                    shader.fragmentShader = shader.fragmentShader.replace(
+                        'RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );',
+                        `
+                        RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );
+                        RE_Direct_Scattering(directLight, vUv, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, reflectedLight);
+                        `
+                    );
+                };
+            }
+        }
+
+        function createBallpit(canvas) {
+            const app = new x({ canvas });
+            app.camera.position.set(0, 0, 20); 
+            app.renderer.setClearColor(0x000000, 0); 
+
+            // Scene Environment
+            const pmremGenerator = new THREE.PMREMGenerator(app.renderer);
+            const sceneEnv = new RoomEnvironment();
+            app.scene.environment = pmremGenerator.fromScene(sceneEnv).texture;
+
+            // --- 1. PROCEDURAL 3D MARKER ---
+            const markerGroup = new THREE.Group();
+            
+            // Body
+            const bodyGeo = new THREE.CylinderGeometry(0.8, 0.8, 12, 32);
+            const bodyMat = new THREE.MeshStandardMaterial({ 
+                color: 0x111111, roughness: 0.3, metalness: 0.2 
+            });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            markerGroup.add(body);
+
+            // Cap
+            const capGeo = new THREE.CylinderGeometry(0.9, 0.9, 4, 32);
+            const cap = new THREE.Mesh(capGeo, bodyMat);
+            cap.position.y = 5;
+            markerGroup.add(cap);
+
+            // Tip
+            const tipGeo = new THREE.ConeGeometry(0.4, 1.5, 32);
+            const tipMat = new THREE.MeshStandardMaterial({ 
+                color: 0xFF2A1F, emissive: 0xFF2A1F, emissiveIntensity: 0.2 
+            });
+            const tip = new THREE.Mesh(tipGeo, tipMat);
+            tip.position.y = -6.5;
+            tip.rotation.x = Math.PI;
+            markerGroup.add(tip);
+
+            // Tilt and Add
+            markerGroup.rotation.z = Math.PI / 8;
+            markerGroup.rotation.y = Math.PI / 4;
+            app.scene.add(markerGroup);
+
+            // --- 2. BALLPIT ---
+            const geometry = new THREE.SphereGeometry(1, 32, 32);
+            const material = new CustomMaterial({
+                color: 0xffffff,
+                metalness: 0.1,
+                roughness: 0.2,
+                transmission: 0, 
+                thickness: 1, 
+                roughness: 0.1
+            });
+
+            const config = {
+                count: 80,
+                gravity: 0.2,
+                friction: 0.995,
+                wallBounce: 0.95,
+                maxVelocity: 0.6,
+                minSize: 0.6, maxSize: 1.4,
+                maxX: 8, maxY: 10, maxZ: 5 // Bounds for left column
+            };
+            
+            const physics = new Physics(config);
+
+            const updateBounds = () => {
+                const vFOV = THREE.MathUtils.degToRad(app.camera.fov);
+                const height = 2 * Math.tan(vFOV / 2) * app.camera.position.z;
+                const width = height * app.camera.aspect;
+                physics.setBounds(width / 2, height / 2);
+            };
+            updateBounds();
+            app.onAfterResize = updateBounds; 
+
+            const mesh = new THREE.InstancedMesh(geometry, material, config.count);
+            app.scene.add(mesh);
+
+            const colors = [new THREE.Color(0x111111), new THREE.Color(0xe5e5e5), new THREE.Color(0xFF2A1F)];
+            for (let i = 0; i < config.count; i++) {
+                const col = colors[Math.floor(Math.random() * colors.length)];
+                mesh.setColorAt(i, col);
+            }
+            mesh.instanceColor.needsUpdate = true;
+
+            // Mouse Raycasting
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0); 
+            const target = new THREE.Vector3();
+
+            window.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, app.camera);
+                raycaster.ray.intersectPlane(plane, target);
+                
+                physics.setMouse(target.x, target.y, target.z);
+            });
+
+            const dummy = new THREE.Object3D();
+
+            // Animate Marker Float
+            let time = 0;
+
+            app.onBeforeRender = () => {
+                physics.update();
+                
+                // Float Marker
+                time += 0.01;
+                markerGroup.position.y = Math.sin(time) * 0.5;
+                markerGroup.rotation.y += 0.005;
+
+                for (let i = 0; i < config.count; i++) {
+                    dummy.position.set(
+                        physics.position[i*3],
+                        physics.position[i*3+1],
+                        physics.position[i*3+2]
+                    );
+                    dummy.scale.setScalar(physics.radius[i]);
+                    dummy.updateMatrix();
+                    mesh.setMatrixAt(i, dummy.matrix);
+                }
+                mesh.instanceMatrix.needsUpdate = true;
+            };
+        }
+
+        // Initialize on Load (Correct ID)
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('anatomy-ballpit');
+            if (canvas) createBallpit(canvas);
+        });
+    </script>
+</body>
+
+</html>
