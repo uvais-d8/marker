@@ -71,12 +71,28 @@
         body {
             margin: 0;
             overflow-x: hidden;
+            /* Prevent native scroll bounce to keep cursor smooth */
+            overscroll-behavior: none; 
         }
 
         /* Lock scroll during loading */
         body.is-loading {
             overflow: hidden;
             height: 100vh;
+        }
+
+        /* =========================================
+           GLOBAL CURSOR STYLES
+           ========================================= */
+        #global-cursor-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10000; /* Ensures it sits on top of everything */
+            pointer-events: none; /* CRITICAL: Allows you to click through the canvas */
+            mix-blend-mode: difference; /* Makes cursor visible on both black and white */
         }
 
         .page-header {
@@ -627,6 +643,7 @@
             .reveal-text-style {
                 font-size: 4.5rem;
             }
+
         }
 
         .opacity-reveal {
@@ -1115,10 +1132,202 @@
             grid-column: span 2;
             opacity: 0;
         }
+
+        /* =========================================
+           RESPONSIVE MEDIA QUERIES (NEW ADDITION)
+           ========================================= */
+
+        /* Tablet and smaller */
+        @media (max-width: 1024px) {
+            #scroll-section h2 {
+                width: 80%;
+                font-size: 48px;
+            }
+
+            .container {
+                padding: 0 2rem;
+            }
+        }
+
+        /* Mobile Devices */
+        @media (max-width: 768px) {
+
+            /* 1. Journey / Grid Section Fixes */
+            #scroll-section {
+                padding-block-start: 5vh;
+            }
+
+            .line-svg {
+                display: none; /* Hide the complex line on mobile as the grid breaks */
+            }
+
+            .layout-container {
+                display: flex;
+                flex-direction: column;
+                gap: 40px;
+                padding-top: 4rem;
+            }
+
+            /* Reset Grid Placements for Stacked Layout */
+            .box-1, .box-2, .box-3, .box-4, 
+            .image-1, .image-2, .image-3 {
+                grid-column: auto;
+                grid-row: auto;
+                margin: 0 !important; /* Reset margins */
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .image-2, .image-3 {
+                justify-self: center;
+                align-self: center;
+            }
+
+            #scroll-section h2 {
+                width: 100%;
+                text-align: center;
+                font-size: 36px;
+                padding-top: 20px;
+            }
+
+            .box {
+                padding: 2rem;
+            }
+
+            .box h3 {
+                font-size: 32px;
+            }
+
+            /* 2. Urbanist Section Fixes */
+            #urbanist-integration .content-layer {
+                padding-inline: 5vw;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            #urbanist-integration h1 {
+                font-size: 18vw;
+            }
+
+            #urbanist-integration p {
+                width: 90vw;
+                font-size: 16px;
+            }
+
+            /* Stack descriptions naturally instead of absolute positioning */
+            #urbanist-integration .desc-2,
+            #urbanist-integration .desc-3 {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                right: auto;
+                top: auto;
+                margin-top: 1.5rem;
+            }
+
+            .urbanist-floating-img {
+                width: 50vw;
+                top: 75%;
+                left: 50%;
+                right: auto;
+                translate: -50% -50% !important; /* Force center */
+            }
+            
+            .pane:nth-of-type(2) .urbanist-floating-img,
+            .pane:nth-of-type(3) .urbanist-floating-img {
+                 translate: -50% -50% !important;
+            }
+
+            /* 3. Perspective Zoom Fixes */
+            .heading-zoom {
+                font-size: 3rem;
+            }
+            
+            /* Make floating images larger on mobile */
+            .zoom-item {
+                width: 40vw !important; /* Override individual widths */
+                max-height: 30vh;
+            }
+
+            /* Reposition slightly to avoid clustering too much */
+            .zoom-item:nth-child(2) { left: 5%; top: 15%; }
+            .zoom-item:nth-child(3) { left: 55%; top: 10%; }
+            .zoom-item:nth-child(4) { left: 10%; top: 60%; }
+            .zoom-item:nth-child(5) { right: 5%; top: 40%; }
+            .zoom-item:nth-child(6) { right: 50%; top: 80%; }
+            
+            .reveal-text-style {
+                font-size: 1.8rem;
+                width: 90%;
+            }
+
+            /* 4. Carousel Fixes */
+            #carousel-section .slide-content h1 {
+                font-size: 20vw;
+            }
+
+            #carousel-section .slide-img {
+                width: 200px;
+                height: 100vh;
+            }
+
+            #carousel-section .slide-img img {
+                width: 200px;
+                height: 400px;
+            }
+
+            /* 5. Footer Fixes */
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                padding-top: 2rem;
+            }
+
+            .footer-left {
+                height: auto;
+                text-align: center;
+                align-items: center;
+            }
+
+            .footer-right {
+                height: auto;
+                align-items: center;
+                text-align: center;
+            }
+
+            .footer-big-text {
+                font-size: 18vw;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 2rem;
+                margin-top: 2rem;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+                padding-bottom: 2rem;
+            }
+            
+            /* Alice Section Text Size */
+            #alice-wrapper .intro__heading {
+                font-size: 3rem;
+            }
+            
+            #alice-wrapper .hero-reveal__header {
+                font-size: 4rem;
+            }
+        }
     </style>
 </head>
 
 <body class="is-loading">
+
+    <canvas id="global-cursor-canvas"></canvas>
 
     <section class="loader-screen">
         <div class="loader-content">
@@ -1160,8 +1369,6 @@
             </div>
         </header>
 
-        <div class="custom-cursor" id="custom-cursor"></div>
-
         <main class="page page--home">
 
             <section class="hero">
@@ -1175,7 +1382,7 @@
             <section id="scroll-section">
                 <svg class="line-svg" role="presentational" preserveAspectRatio="xMidYMin slice" width="100%"
                     fill="none" viewBox="-480 0 2300 2241">
-                    <path class="anim-overview-stroke" stroke="#C7DBF4" stroke-width="160"
+                    <path class="anim-overview-stroke" stroke="#B1EAFB" stroke-width="60"
                         d="M-841 100H584c124 0 225 101 225 225v0c0 124-101 225-225 225h-95a281 281 0 00-281 281v0c0 155 125 281 281 281h442c167 0 304 136 304 304v0c0 168-137 304-304 304H795a439 439 0 00-439 439v82"
                         opacity=".45"></path>
                 </svg>
@@ -1270,7 +1477,7 @@
 
             <div id="perspective-wrap">
                 <div style="background-color: white; " class="zoom-container">
-                    <h1 class="heading-zoom" style="color: rgb(43, 43, 43);">Marker<br /></h1>
+                    <h1 class="heading-zoom" style="color: rgb(43, 43, 43);">MARKER ARTS<br /></h1>
 
                     <div class="zoom-item" data-layer="2">
                         <img src="https://images.unsplash.com/photo-1620619767323-b95a89183081?q=80&w=600&auto=format&fit=crop"
@@ -1581,9 +1788,111 @@
         document.addEventListener('DOMContentLoaded', () => {
             initLoader();
             initCarousel();
+            initGlobalPageCursor();
             initFooterCursor();
             initFooterAnimations();
         });
+
+        // --- GLOBAL PAGE CURSOR ANIMATION (NEW FUNCTION) ---
+        function initGlobalPageCursor() {
+            const globalCanvas = document.querySelector('#global-cursor-canvas');
+            if (!globalCanvas) return;
+
+            const globalCtx = globalCanvas.getContext('2d');
+            let globalMouseMoved = false;
+
+            const globalPointer = {
+                x: 0.5 * window.innerWidth,
+                y: 0.5 * window.innerHeight,
+            };
+
+            const params = {
+                pointsNumber: 40,
+                widthFactor: 0.3,
+                mouseThreshold: 0.6,
+                spring: 0.4,
+                friction: 0.5,
+            };
+
+            const trail = new Array(params.pointsNumber);
+            for (let i = 0; i < params.pointsNumber; i++) {
+                trail[i] = {
+                    x: globalPointer.x,
+                    y: globalPointer.y,
+                    dx: 0,
+                    dy: 0,
+                };
+            }
+
+            window.addEventListener('click', e => {
+                updateGlobalMousePosition(e.clientX, e.clientY);
+            });
+            window.addEventListener('mousemove', e => {
+                globalMouseMoved = true;
+                updateGlobalMousePosition(e.clientX, e.clientY);
+            });
+            window.addEventListener('touchmove', e => {
+                globalMouseMoved = true;
+                updateGlobalMousePosition(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
+            });
+
+            function updateGlobalMousePosition(eX, eY) {
+                globalPointer.x = eX;
+                globalPointer.y = eY;
+            }
+
+            function setupGlobalCanvas() {
+                globalCanvas.width = window.innerWidth;
+                globalCanvas.height = window.innerHeight;
+            }
+
+            function updateGlobal(t) {
+                // Idle motion when mouse isn't moving
+                if (!globalMouseMoved) {
+                    globalPointer.x = (0.5 + 0.3 * Math.cos(0.002 * t) * Math.sin(0.005 * t)) * window.innerWidth;
+                    globalPointer.y = (0.5 + 0.2 * Math.cos(0.005 * t) + 0.1 * Math.cos(0.01 * t)) * window.innerHeight;
+                }
+
+                globalCtx.clearRect(0, 0, globalCanvas.width, globalCanvas.height);
+
+                trail.forEach((p, pIdx) => {
+                    const prev = pIdx === 0 ? globalPointer : trail[pIdx - 1];
+                    const spring = pIdx === 0 ? 0.4 * params.spring : params.spring;
+                    p.dx += (prev.x - p.x) * spring;
+                    p.dy += (prev.y - p.y) * spring;
+                    p.dx *= params.friction;
+                    p.dy *= params.friction;
+                    p.x += p.dx;
+                    p.y += p.dy;
+                });
+
+                globalCtx.lineCap = 'round';
+                // Set color to white because we used mix-blend-mode: difference in CSS
+                // This makes it look inverted on all backgrounds
+                globalCtx.strokeStyle = '#ffffff';
+
+                globalCtx.beginPath();
+                globalCtx.moveTo(trail[0].x, trail[0].y);
+
+                for (let i = 1; i < trail.length - 1; i++) {
+                    const xc = 0.5 * (trail[i].x + trail[i + 1].x);
+                    const yc = 0.5 * (trail[i].y + trail[i + 1].y);
+                    globalCtx.quadraticCurveTo(trail[i].x, trail[i].y, xc, yc);
+                    globalCtx.lineWidth = params.widthFactor * (params.pointsNumber - i);
+                    globalCtx.stroke();
+                }
+                globalCtx.lineTo(trail[trail.length - 1].x, trail[trail.length - 1].y);
+                globalCtx.stroke();
+
+                window.requestAnimationFrame(updateGlobal);
+            }
+
+            window.addEventListener('resize', setupGlobalCanvas);
+
+            // Initialize
+            setupGlobalCanvas();
+            updateGlobal(0);
+        }
 
         // --- 1. URBANIST LOGIC ---
         const integrationSection = document.getElementById("urbanist-integration");
