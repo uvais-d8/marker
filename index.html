@@ -1,2229 +1,1906 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MARKER | Architectural Edition (White)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MARKER</title>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.159.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <link rel="preload" href="./assets/fonts/Presicav.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="./assets/fonts/Calibre-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="./assets/fonts/Arial.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+        rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=neue-montreal@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.ui.min.js"></script>
+
+    <script type="module" crossorigin="" src="./js/index.min.js?v=1754734869502"></script>
+    <link rel="stylesheet" crossorigin="" href="./css/index.min.css?v=1754734869502">
+
     <style>
-        /* --- 1. CORE VARIABLES & RESET --- */
-        :root {
-            --bg-color: #ffffff;
-            --text-color: #111111;
-            --accent-color: #FF2A1F;
-            --line-color: #e5e5e5;
-            --secondary-text: #666666;
-            --easing: cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        /* =========================================
+           GLOBAL & ANIMATIONS
+           ========================================= */
+        @keyframes stroke {
+            from {
+                stroke-dashoffset: 5414.29;
+            }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            font-size: 16px;
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Helvetica Neue', 'Inter', Arial, sans-serif;
-            overflow-x: hidden;
-            cursor: none;
-            overflow-y: hidden;
-            /* For preloader */
-            -webkit-font-smoothing: antialiased;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        ul {
-            list-style: none;
-        }
-
-        img {
-            max-width: 100%;
-            display: block;
-        }
-
-        /* --- 2. PRELOADER (SINK LEFT BOTTOM) --- */
-        .preloader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background: #ffffff;
-            z-index: 10000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 1s ease-in-out, visibility 1s;
-            perspective: 1000px;
-        }
-
-        .preloader.fade-out {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .preloader .marker-visual-container {
-            transform: scale(0.8) rotateZ(45deg);
-            transition: transform 1.2s var(--easing), opacity 0.8s ease;
-        }
-
-        /* ACTION: Marker drops to BOTTOM LEFT corner */
-        .preloader.fade-out .marker-visual-container {
-            opacity: 0;
-            /* Moves to bottom left off-screen */
-            transform: scale(0.6) rotateZ(-15deg) translate(-50vw, 110vh);
-        }
-
-        .preloader .layer-front {
-            stroke-dasharray: 600;
-            stroke-dashoffset: 600;
-            animation: loadDraw 2s ease-in-out forwards;
-        }
-
-        .preloader .layer-mid {
-            opacity: 0;
-            animation: loadFill 1s ease-out forwards 1.8s;
-        }
-
-        .preloader .layer-back {
-            opacity: 0;
-            animation: loadFill 1s ease-out forwards 0.5s;
-        }
-
-        @keyframes loadDraw {
             to {
                 stroke-dashoffset: 0;
             }
         }
 
-        @keyframes loadFill {
-            to {
-                opacity: 1;
+        @keyframes reveal {
+            from {
+                clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0% 100%);
+                opacity: 0;
             }
         }
 
-        /* --- 3. CUSTOM PEN CURSOR --- */
-        #cursor-pen {
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                scale: .2;
+            }
+        }
+
+        @keyframes revealText {
+            from {
+                clip-path: polygon(0 0, 0% 0, 0% 100%, 0 100%);
+            }
+        }
+
+        html {
+            background-color: rgb(255, 255, 255);
+        }
+
+        body {
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Lock scroll during loading */
+        body.is-loading {
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .page-header {
+            align-items: center;
+            display: flex;
+            height: 100vh;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .page-header h1 {
+            color: white;
+            font-size: 3rem;
+        }
+
+        /* =========================================
+           LOADER STYLES
+           ========================================= */
+        .loader-screen {
             position: fixed;
             top: 0;
             left: 0;
-            width: 40px;
-            height: 40px;
-            pointer-events: none;
-            z-index: 9999;
-            will-change: transform;
-            display: block;
-        }
-
-        /* Disable custom cursor on touch devices */
-        @media (hover: none) and (pointer: coarse) {
-            #cursor-pen {
-                display: none;
-            }
-
-            body {
-                cursor: auto;
-            }
-        }
-
-        .pen-shape {
             width: 100%;
             height: 100%;
-            fill: #111;
-            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.1));
-            transform-origin: bottom left;
-            transform: translate(0%, -100%) rotate(0deg);
-            transition: transform 0.2s var(--easing), fill 0.2s;
+            background-color: #f4f4f4;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Neue Montreal', sans-serif;
         }
 
-        body.hovering .pen-shape {
-            fill: var(--accent-color);
-            transform: translate(0%, -100%) rotate(0deg) scale(1.15);
+        .loader-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            position: relative;
         }
 
-        #ink-trail {
-            position: fixed;
+        .willem__h1 {
+            white-space: nowrap;
+            justify-content: center;
+            font-size: clamp(3rem, 12vw, 12.5em);
+            font-weight: 500;
+            line-height: .75;
+            display: flex;
+            position: relative;
+            color: #201d1d;
+        }
+
+        .willem__h1-start,
+        .willem__h1-end {
+            display: flex;
+            overflow: hidden;
+        }
+
+        .willem__h1-start {
+            justify-content: flex-end;
+            width: auto;
+        }
+
+        .willem__h1-end {
+            justify-content: flex-start;
+            width: auto;
+        }
+
+        .willem__letter {
+            display: block;
+            position: relative;
+        }
+
+        .willem-loader__box {
+            flex-flow: column;
+            justify-content: center;
+            align-items: center;
+            width: 0;
+            display: flex;
+            position: relative;
+            margin: 0 0.1em;
+        }
+
+        .willem-loader__box-inner {
+            justify-content: center;
+            align-items: center;
+            min-width: 1em;
+            height: 95%;
+            display: flex;
+            position: relative;
+        }
+
+        .willem__growing-image {
+            justify-content: center;
+            align-items: center;
+            width: 0%;
+            height: 100%;
+            display: flex;
+            position: absolute;
+            overflow: hidden;
+        }
+
+        .willem__growing-image-wrap {
+            width: 100%;
+            min-width: 1em;
+            height: 100%;
+            position: absolute;
+        }
+
+        .willem__cover-image,
+        .willem__cover-image-extra {
+            pointer-events: none;
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .willem__cover-image-extra.is--1 {
+            z-index: 3;
+        }
+
+        .willem__cover-image-extra.is--2 {
+            z-index: 2;
+        }
+
+        .willem__cover-image-extra.is--3 {
+            z-index: 1;
+        }
+
+        /* =========================================
+           SECTION 2: URBANIST STYLES
+           ========================================= */
+        :root {
+            --theme-main-bg: #b9dcff;
+            --theme-sub-bg: #f2fbfe;
+            --theme-text: #070f36;
+            --theme-title: #8dc9f4;
+            --font-sans: "Urbanist", sans-serif;
+        }
+
+        #urbanist-integration {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            font-family: var(--font-sans);
+            color: var(--theme-text);
+            isolation: isolate;
+            z-index: 20;
+            background: white;
+        }
+
+        #urbanist-integration .urbanist-bg {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 9998;
-            mix-blend-mode: normal;
+            height: 100%;
+            z-index: -1;
+            object-fit: cover;
         }
 
-        /* --- 4. NAV --- */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 2rem 3rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-            mix-blend-mode: normal;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: opacity 1s ease, transform 1s var(--easing);
-        }
-
-        body.hero-active nav {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .logo {
-            font-weight: 900;
-            font-size: 1.2rem;
-            letter-spacing: -0.5px;
-        }
-
-        .nav-right {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-link {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
-        }
-
-        .nav-link::before {
-            content: '';
+        #urbanist-integration .content-layer {
             position: absolute;
-            top: 50%;
-            left: -15px;
-            width: 0;
-            height: 1px;
-            background: var(--accent-color);
-            transition: width 0.3s var(--easing);
-        }
-
-        .nav-link:hover::before {
-            width: 10px;
-        }
-
-        /* --- 5. HERO & 3D MARKER --- */
-        .hero {
-            height: 100vh;
-            position: relative;
-            perspective: 1000px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            align-items: end;
-            padding: 0 3rem 3rem 3rem;
-        }
-
-        .hero-text-wrap {
-            z-index: 2;
-            position: relative;
-            pointer-events: none;
-        }
-
-        .hero-title {
-            font-size: clamp(4rem, 15vw, 12rem);
-            line-height: 0.8;
-            font-weight: 800;
-            letter-spacing: -0.05em;
-            color: #111;
-            white-space: nowrap;
-            opacity: 0;
-            transform: translateY(-80px);
-            transition: opacity 1.5s ease, transform 1.5s var(--easing);
-        }
-
-        .hero-subtitle {
-            font-size: 1.2rem;
-            color: var(--secondary-text);
-            margin-bottom: 2rem;
-            margin-left: 10px;
-            max-width: 300px;
-            opacity: 0;
-            transform: translateX(-50px);
-            transition: opacity 1.5s ease 0.2s, transform 1.5s var(--easing) 0.2s;
-        }
-
-        body.hero-active .hero-title {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        body.hero-active .hero-subtitle {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .marker-visual-container {
-            width: 400px;
-            height: 600px;
-            transform-style: preserve-3d;
+            inset: 0;
+            padding-inline: min(10vw, 100px);
             z-index: 1;
             pointer-events: none;
-            will-change: transform;
         }
 
-        #hero-marker {
-            position: absolute;
-            top: 45%;
-            left: 60%;
-            transform: translate(-50%, -70%) rotateZ(45deg) scale(1.1);
-            opacity: 0;
-            transition: transform 1.6s var(--easing), opacity 1.2s ease;
-        }
-
-        body.hero-active #hero-marker {
-            opacity: 1;
-            transform: translate(-50%, -50%) rotateZ(45deg) scale(1);
-        }
-
-        .svg-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            fill: none;
-            will-change: transform;
-        }
-
-        .layer-back {
-            stroke: #e0e0e0;
-            stroke-width: 1;
-            transform: translateZ(-60px);
-        }
-
-        .layer-mid {
-            stroke: #111;
-            fill: #ffffff;
-            stroke-width: 2;
-            transform: translateZ(0px);
-            filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1));
-        }
-
-        .layer-front {
-            stroke: var(--accent-color);
-            stroke-width: 1.5;
-            stroke-dasharray: 600;
-            stroke-dashoffset: 0;
-            transform: translateZ(60px);
-            filter: drop-shadow(0 5px 10px rgba(255, 42, 31, 0.2));
-        }
-
-        #hero-marker .layer-front {
-            stroke-dashoffset: 600;
-            transition: stroke-dashoffset 2.5s var(--easing);
-        }
-
-        body.hero-active #hero-marker .layer-front {
-            stroke-dashoffset: 0;
-            transition-delay: 0.5s;
-        }
-
-        /* --- 6. SECTIONS (General) --- */
-        .line-h {
-            width: 0%;
-            height: 1px;
-            background: var(--line-color);
-            margin: 2rem 0;
-            transition: width 1.5s var(--easing);
-        }
-
-        .active .line-h {
-            width: 100%;
-        }
-
-        .section-padding {
-            padding: 10rem 3rem;
-        }
-
-        .section-label {
-            font-size: 0.9rem;
-            color: var(--accent-color);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .section-heading {
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            max-width: 600px;
-            line-height: 1;
-            color: #111;
-        }
-
-        /* Features */
-        .feature-list {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .feature-item {
-            position: relative;
-            padding: 2.5rem 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.3s;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .feature-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-
-        .feature-item h3 {
-            font-size: clamp(1.5rem, 3vw, 2.5rem);
-            color: #999;
-            transition: all 0.4s var(--easing);
+        #urbanist-integration h1 {
+            font-size: clamp(10vw, 250px, 20vw);
+            color: var(--theme-title);
             margin: 0;
-        }
-
-        .feature-icon {
-            font-size: 2rem;
-            color: #ccc;
-            transition: transform 0.4s var(--easing), color 0.4s;
-        }
-
-        .feature-desc-wrapper {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.6s var(--easing), opacity 0.6s var(--easing);
-            opacity: 0;
-        }
-
-        .feature-desc {
-            max-width: 500px;
-            color: var(--secondary-text);
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-top: 1.5rem;
-            padding-left: 5px;
-        }
-
-        /* Hover state for desktop */
-        @media (hover: hover) {
-            .feature-item:hover h3 {
-                color: #000;
-                transform: translateX(10px);
-            }
-
-            .feature-item:hover .feature-icon {
-                color: var(--accent-color);
-                transform: rotate(90deg);
-            }
-
-            .feature-item:hover .feature-desc-wrapper {
-                max-height: 200px;
-                opacity: 1;
-            }
-        }
-
-        /* Click/Tap state for mobile (controlled by JS) */
-        .feature-item.mobile-active h3 {
-            color: #000;
-            transform: translateX(10px);
-        }
-
-        .feature-item.mobile-active .feature-icon {
-            color: var(--accent-color);
-            transform: rotate(90deg);
-        }
-
-        .feature-item.mobile-active .feature-desc-wrapper {
-            max-height: 400px;
-            opacity: 1;
-        }
-
-        .feature-line {
-            width: 100%;
-            height: 1px;
-            background: #e5e5e5;
-            transform-origin: left;
-            transform: scaleX(0);
-            transition: transform 1s var(--easing);
-        }
-
-        .active .feature-line {
-            transform: scaleX(1);
-        }
-
-        /* Specs */
-        .specs-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            border-top: 1px solid #e5e5e5;
-            border-bottom: 1px solid #e5e5e5;
-        }
-
-        .spec-box {
-            padding: 4rem;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            border-right: 1px solid #e5e5e5;
-        }
-
-        .spec-box:last-child {
-            border-right: none;
-        }
-
-        .spec-value {
-            font-size: clamp(3rem, 5vw, 5rem);
-            font-weight: 900;
-            color: #111;
             line-height: 1;
-            white-space: nowrap;
         }
 
-        .spec-label {
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        #urbanist-integration p {
+            width: clamp(5vw, 250px, 80vw);
+            font-size: clamp(1vw, 12px, 1.5vw);
+            font-weight: 600;
+            text-wrap: balance;
+            color: var(--theme-text);
+            line-height: 1.3;
         }
 
-        /* Marquee */
-        .marquee-section {
-            padding: 5rem 0;
-            border-bottom: 1px solid #e5e5e5;
+        #urbanist-integration .desc-1 {
+            margin-top: 2rem;
         }
 
-        .marquee-inner {
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .marquee-span {
-            font-size: clamp(4rem, 10vw, 8rem);
-            font-weight: 900;
-            -webkit-text-stroke: 1px #adadad;
-            color: transparent;
-            display: inline-block;
-            animation: scroll 25s linear infinite;
-            margin-right: 2rem;
-            will-change: transform;
-        }
-
-        @keyframes scroll {
-            from {
-                transform: translate3d(0, 0, 0);
-            }
-
-            to {
-                transform: translate3d(-50%, 0, 0);
-            }
-        }
-
-        /* Anatomy */
-        .anatomy-section {
-            padding: 10rem 3rem;
-            min-height: 100vh;
-            background: #f9f9f9;
-            position: relative;
-            overflow: hidden;
-            box-sizing: border-box;
-        }
-
-        .anatomy-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            width: 100%;
-            height: 100%;
-        }
-
-        .anatomy-visual-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            min-height: 50vh;
-            background: #fff;
-            border: 1px solid #e5e5e5;
-            overflow: hidden;
-        }
-
-        #anatomy-ballpit {
+        #urbanist-integration .desc-2 {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+            bottom: 5vh;
+            left: min(40vw, 300px);
+        }
+
+        #urbanist-integration .desc-3 {
+            position: absolute;
+            top: 50%;
+            right: 10vw;
+        }
+
+        #panes-container {
+            width: 300vw;
+            display: flex;
             height: 100%;
-            outline: none;
         }
 
-        .anatomy-info {
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .anatomy-info h2 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            margin-bottom: 3rem;
-            line-height: 1.1;
-        }
-
-        .anatomy-item {
-            border-bottom: 1px solid #ddd;
-            padding: 1.5rem 0;
-            display: flex;
-            align-items: center;
-            opacity: 0;
-            transform: translateX(50px);
-            transition: all 0.8s var(--easing);
-        }
-
-        .anatomy-item.active {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .anatomy-num {
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: var(--accent-color);
-            margin-right: 2rem;
-            border: 1px solid var(--accent-color);
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .anatomy-text {
-            font-size: 1.2rem;
-            color: #333;
-        }
-
-        .blur-char {
-            display: inline-block;
-            opacity: 0;
-            filter: blur(10px);
-            transform: translate3d(0, 15px, 0);
-            transition: opacity 0.6s var(--easing), filter 0.6s var(--easing), transform 0.6s var(--easing);
-        }
-
-        .anatomy-item.active .blur-char {
-            opacity: 1;
-            filter: blur(0px);
-            transform: translate3d(0, 0, 0);
-        }
-
-        /* Magnet */
-        .magnet-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .magnet-content {
-            padding-right: 0;
-        }
-
-        .magnetLines-container {
-            display: grid;
-            justify-items: center;
-            align-items: center;
+        .pane {
             position: relative;
+            height: 100%;
+            width: 100vw;
         }
 
-        .magnetLines-container span {
+        .urbanist-floating-img {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            width: max(20vw, 400px);
+            translate: -100% 0;
+            border-radius: 12px;
             display: block;
-            transform-origin: center;
-            will-change: transform;
-            transform: rotate(var(--rotate, 0deg)) translateZ(0);
-            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* Revolution */
-        .revolution-section {
-            height: 500vh;
+        .pane:nth-of-type(2) .urbanist-floating-img {
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            translate: -200% -70%;
+            width: max(15vw, 300px);
+        }
+
+        .pane:nth-of-type(3) .urbanist-floating-img {
+            translate: -150% -50%;
+        }
+
+        /* =========================================
+           SECTION 3: HISTORY STYLES
+           ========================================= */
+        #scroll-section {
+            container: inline-size;
+            display: grid;
             position: relative;
+            min-height: 1800px;
+            padding-block-start: 15vh;
+            font-family: 'Montserrat', sans-serif;
+            background: transparent;
             z-index: 10;
         }
 
-        .rev-sticky-container {
-            position: sticky;
-            top: 0;
+        #scroll-section img {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            display: block;
+            height: auto;
+            max-width: 100%;
+            animation: reveal linear both;
+            animation-timeline: view();
+            animation-range: 10% 60%;
+        }
+
+        #scroll-section .btn {
+            background-color: rgb(21, 21, 21);
+            border-radius: 99px;
+            color: white;
+            display: block;
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: .02em;
+            line-height: 42px;
+            height: 42px;
+            padding: 0 40px;
+            text-decoration: none;
+            transition: background-color .4s ease-out;
+            width: fit-content;
+        }
+
+        #scroll-section .btn:hover {
+            background-color: rgb(243, 87, 87);
+        }
+
+        .line-svg {
+            grid-row: 1;
+            grid-column: 1;
+            height: calc(100% - 10rem);
+            top: 25cqb;
+            min-width: 300px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .anim-overview-stroke {
+            stroke-dasharray: 5414.29;
+            stroke-dashoffset: 5414.29;
+            animation: stroke linear forwards;
+            animation-timeline: view();
+            animation-range: cover 0% cover 70%;
+        }
+
+        .container {
+            grid-column: 1;
+            grid-row: 1;
+            margin: 0 auto;
+            max-width: 1272px;
+            z-index: 2;
+        }
+
+        #scroll-section h2 {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            color: #333;
+            font-size: 62px;
+            font-weight: 900;
+            letter-spacing: .02em;
+            margin: 0;
+            padding-top: 72px;
+            position: relative;
+            width: 50%;
+            text-align: right;
+            animation: revealText linear both;
+            animation-timeline: view();
+            animation-range: 25% 60%;
+        }
+
+        .layout-container {
+            padding-top: 8rem;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 20px;
+        }
+
+        .box {
+            background-color: rgb(255, 239, 239);
+            color: #333;
+            padding: 4rem;
+            opacity: 1;
+            scale: 1;
+            animation: scaleIn linear both;
+            animation-timeline: view();
+            animation-range: 0% 40vh;
+        }
+
+        .box h3 {
+            font-size: 42px;
+            font-weight: 900;
+            line-height: 1.1;
+            margin: 0 0 18px;
+        }
+
+        .box p {
+            font-size: 18px;
+            line-height: 1.25;
+            margin: 0 0 2em;
+        }
+
+        .box-1 {
+            grid-column: 3 / span 3;
+            grid-row: span 2;
+        }
+
+        .image-1 {
+            grid-column: 1 / span 2;
+            grid-row: 2 / span 2;
+            margin-top: 100px;
+        }
+
+        .image-2 {
+            align-self: end;
+            grid-column: 6 / span 1;
+            grid-row: 5;
+        }
+
+        .image-3 {
+            grid-column: 1 / span 2;
+            justify-self: end;
+            margin-top: 3rem;
+        }
+
+        .box-2 {
+            grid-column: 2 / span 3;
+            margin-top: 3rem;
+            grid-row: span 2;
+        }
+
+        .box-3 {
+            grid-column: 3 / span 3;
+            margin-top: 8em;
+        }
+
+        .box-4 {
+            grid-column: 1 / span 3;
+            margin-top: 12rem;
+            margin-bottom: -5rem;
+        }
+
+        .bottom-spacer {
+            height: 10vh;
+        }
+
+
+        /* =========================================
+           SECTION 4: PERSPECTIVE ZOOM STYLES
+           ========================================= */
+        #perspective-wrap {
+            background-color: #1f1f1f;
+            color: #ffffff;
+            font-family: "Roboto", sans-serif;
+            position: relative;
+            z-index: 30;
+        }
+
+        .zoom-container {
             height: 100vh;
             width: 100%;
             overflow: hidden;
-            background: #fff;
-            display: flex;
-            align-items: center;
+            position: relative;
+            perspective: 100vh;
+            transform-style: preserve-3d;
+            background-color: #1f1f1f;
         }
 
-        .rev-title-fixed {
+        .heading-zoom {
+            font-size: clamp(3rem, 5vw, 6rem);
+            line-height: 1.1;
+            text-align: center;
+            opacity: 0;
             position: absolute;
-            top: 10%;
-            left: 3rem;
-            z-index: 20;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateZ(-2000px);
+            white-space: nowrap;
+            z-index: 10;
             pointer-events: none;
-        }
-
-        .rev-title-fixed h2 {
-            font-size: 1rem;
+            font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent-color);
+            color: white;
         }
 
-        .rev-track {
-            display: flex;
-            height: 100%;
-            align-items: center;
-            will-change: transform;
-            padding-left: 20vw;
-        }
-
-        .rev-card {
-            min-width: 80vw;
-            height: 80vh;
-            margin-right: 10vw;
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            align-items: center;
-            gap: 4rem;
-            position: relative;
-        }
-
-        .rev-visual-box {
-            width: 100%;
-            height: 100%;
-            background: #f0f0f0;
-            border: 1px solid #e5e5e5;
-            position: relative;
+        .zoom-item {
+            position: absolute;
+            transform-style: preserve-3d;
+            border-radius: 10px;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
-        .rev-img-wrap {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .rev-img-wrap img {
+        .zoom-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: grayscale(100%) contrast(1.1);
-            transition: transform 0.5s var(--easing);
-        }
-
-        .rev-card:hover .rev-img-wrap img {
-            transform: scale(1.05);
-        }
-
-        .rev-text-box h3 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            margin-bottom: 1.5rem;
-            color: #111;
-            line-height: 1.1;
-        }
-
-        .rev-text-box p {
-            color: #666;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            max-width: 400px;
-        }
-
-        .rev-info-sub {
             display: block;
-            font-size: 0.9rem;
-            color: var(--accent-color);
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .rev-number {
-            font-size: clamp(4rem, 8vw, 8rem);
-            color: #f0f0f0;
-            font-weight: 900;
-            position: absolute;
-            top: -2rem;
-            left: -2rem;
-            z-index: -1;
+        .zoom-item:nth-child(2) {
+            left: 15vw;
+            top: 21%;
+            width: 15vw;
         }
 
-        /* Footer */
-        .cta-section {
-            height: 80vh;
+        .zoom-item:nth-child(3) {
+            left: 29%;
+            top: 15%;
+            width: 12vw;
+        }
+
+        .zoom-item:nth-child(4) {
+            left: 36%;
+            top: 3%;
+            width: 15vw;
+        }
+
+        .zoom-item:nth-child(5) {
+            right: 30%;
+            top: 11%;
+            width: 10vw;
+        }
+
+        .zoom-item:nth-child(6) {
+            right: 7%;
+            top: 28%;
+            width: 18vw;
+        }
+
+        .zoom-item:nth-child(7) {
+            bottom: 32%;
+            right: 3.5%;
+            width: 8vw;
+        }
+
+        .zoom-item:nth-child(8) {
+            bottom: 13.5%;
+            left: 16%;
+            width: 14vw;
+        }
+
+        .zoom-item:nth-child(9) {
+            bottom: 24%;
+            left: 29%;
+            width: 9vw;
+        }
+
+        .zoom-item:nth-child(10) {
+            bottom: 46%;
+            left: 7.5%;
+            width: 8vw;
+        }
+
+        .zoom-item:nth-child(11) {
+            bottom: 5.5%;
+            right: 15%;
+            width: 18vw;
+        }
+
+        .zoom-item:nth-child(12) {
+            bottom: 10.5%;
+            right: 38%;
+            width: 12vw;
+        }
+
+        .zoom-item:nth-child(13) {
+            right: 4%;
+            top: 5%;
+            width: 9vw;
+        }
+
+        .section-stick {
+            height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            flex-direction: column;
+            align-items: center;
+            background-color: black;
+            color: white;
             position: relative;
+            z-index: 50;
+        }
+
+        .reveal-text-style {
+            font-size: 3rem;
             text-align: center;
+            width: 80%;
+            font-weight: 700;
+            line-height: 1.25;
+            color: white;
         }
 
-        .cta-bg-text {
-            position: absolute;
-            font-size: 20vw;
-            font-weight: 900;
-            color: #f5f5f5;
-            z-index: -1;
-            white-space: nowrap;
+        @media (min-width: 768px) {
+            .reveal-text-style {
+                font-size: 4.5rem;
+            }
         }
 
-        .cta-btn {
-            font-size: clamp(1.2rem, 2vw, 2rem);
-            border: 1px solid #111;
-            padding: 2rem 6rem;
-            border-radius: 100px;
-            transition: all 0.4s var(--easing);
+        .opacity-reveal {
+            opacity: 0.2;
+        }
+
+        .opacity-reveal span {
+            transition: opacity 0.1s;
+        }
+
+        .spacer-black {
+            height: 50vh;
+            background: #000;
+        }
+
+        /* =========================================
+           SECTION 5: ALICE INTEGRATION STYLES
+           ========================================= */
+        #alice-wrapper {
+            --font-open-sans: "Open Sans", serif;
+            --color-white: hsla(0, 0%, 100%, 1);
+            --color-black: hsla(0, 0%, 0%, 1);
+            font-family: var(--font-open-sans);
+            font-size: 1rem;
+            line-height: 1.75;
+            background-color: var(--color-white);
+            color: var(--color-black);
             position: relative;
-            overflow: hidden;
-            color: #111;
+            z-index: 60;
         }
 
-        .cta-btn::before {
-            content: '';
+        #alice-wrapper .intro {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        #alice-wrapper .intro__heading {
+            font-size: clamp(1.875rem, 8.083vw + -0.217rem, 6.25rem);
+            line-height: clamp(2.813rem, 9.815vw + 0.273rem, 8.125rem);
+            text-align: center;
+            margin: 0;
+        }
+
+        #alice-wrapper .content {
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            padding: 6.25rem 0;
+        }
+
+        #alice-wrapper .article {
+            max-width: 31.25rem;
+            padding: 0 1.5rem;
+        }
+
+        #alice-wrapper .hero-reveal {
+            background-color: var(--color-black);
+            position: relative;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #alice-wrapper .hero-reveal__header {
+            align-items: center;
+            background-color: var(--color-white);
+            color: var(--color-black);
+            display: flex;
+            font-size: clamp(3.125rem, 12.61vw + -0.138rem, 15.625rem);
+            line-height: clamp(4.688rem, 15.763vw + 0.609rem, 20.313rem);
+            font-weight: 900;
+            justify-content: center;
+            left: 0;
+            min-height: 100vh;
+            position: relative;
+            top: 0;
+            will-change: transform, clip-path;
+            z-index: 1;
+            width: 100%;
+        }
+
+        #alice-wrapper .hero-reveal_split {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #alice-wrapper .hero-reveal_split_item {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            margin: 0;
+        }
+
+        #alice-wrapper .hero-reveal_split_item p {
+            margin: 0;
+        }
+
+        #alice-wrapper .hero-reveal_split_item:nth-child(1) {
+            clip-path: inset(0 0 50% 0);
+        }
+
+        #alice-wrapper .hero-reveal_split_item:nth-child(2) {
+            clip-path: inset(50% 0 0 0);
+            left: 0;
             position: absolute;
             top: 0;
-            left: 0;
-            width: 0%;
-            height: 100%;
-            background: var(--accent-color);
-            transition: width 0.4s var(--easing);
-            z-index: -1;
         }
 
-        .cta-btn:hover::before {
-            width: 100%;
-        }
-
-        .cta-btn:hover {
-            border-color: var(--accent-color);
-            color: #fff;
-        }
-
-        footer {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border-top: 1px solid var(--line-color);
-            padding-top: 6rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr 1fr;
-            gap: 2rem;
-            padding: 0 3rem 6rem 3rem;
-            max-width: 1600px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .footer-col h4 {
-            font-size: 0.9rem;
-            color: var(--secondary-text);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 2rem;
-        }
-
-        .newsletter-input {
-            width: 100%;
-            border: none;
-            border-bottom: 1px solid var(--line-color);
-            padding: 1rem 0;
-            background: transparent;
-            font-size: 1.5rem;
-            color: var(--text-color);
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .newsletter-input:focus {
-            border-bottom-color: var(--accent-color);
-        }
-
-        .footer-links li {
-            margin-bottom: 1rem;
-        }
-
-        .footer-link {
-            font-size: 1.1rem;
-            color: var(--text-color);
-            position: relative;
-            transition: padding-left 0.3s var(--easing), color 0.3s;
-        }
-
-        .footer-link::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            width: 0;
-            height: 1px;
-            background: var(--accent-color);
-            transition: width 0.3s var(--easing);
-        }
-
-        .footer-link:hover {
-            padding-left: 20px;
-            color: var(--accent-color);
-        }
-
-        .footer-link:hover::before {
-            width: 15px;
-        }
-
-        .footer-bottom {
-            border-top: 1px solid var(--line-color);
-            padding: 2rem 3rem;
+        #alice-wrapper .hero-reveal__content {
+            color: var(--color-white);
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+            justify-content: center;
+            padding: 0;
             position: relative;
-            z-index: 1;
+            margin-top: -60vh;
             pointer-events: none;
         }
 
-        .footer-big-text {
-            font-size: 19vw;
-            line-height: 0.8;
-            font-weight: 900;
-            color: transparent;
-            -webkit-text-stroke: 1px #e0e0e0;
-            margin: 0;
-            padding: 0;
+        #alice-wrapper .hero-reveal__content-inner {
+            max-width: 31.25rem;
             position: relative;
-            transition: all 0.8s var(--easing);
-            cursor: default;
+            padding: 0 1.5rem;
         }
 
-        .footer-big-text::after {
-            content: 'MARKER';
+        #alice-wrapper .hero-reveal__content-p {
+            padding-bottom: 8rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        #alice-wrapper .hero-reveal__parallax {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #alice-wrapper .hero-reveal__parallax img {
+            position: absolute;
+            will-change: transform;
+        }
+
+        /* Alice Parallax Elements */
+        #alice-wrapper .hero-reveal__parallax-clock {
+            left: -6rem;
+            top: -25rem;
+        }
+
+        #alice-wrapper .hero-reveal__parallax-book {
+            left: -12.5rem;
+            top: -25rem;
+        }
+
+        #alice-wrapper .hero-reveal__parallax-alice {
+            left: 50%;
+            transform: translateX(-50%);
+            top: -31.25rem;
+            max-width: 200px;
+        }
+
+        #alice-wrapper .hero-reveal__parallax-kattle {
+            left: 31.25rem;
+            filter: blur(2px);
+            top: -18.75rem;
+        }
+
+        #alice-wrapper .hero-reveal__parallax-card {
+            left: 25rem;
+            filter: blur(2px);
+            z-index: 1;
+            top: -25rem;
+        }
+
+        /* =========================================
+           LOGO STYLES
+           ========================================= */
+        .header__menu h1.logo {
+            margin: 0;
+            line-height: 1;
+        }
+
+        .header__menu h1.logo a {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 900;
+            font-size: 2.25rem;
+            color: white;
+            text-decoration: none;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+            display: inline-block;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .header__menu h1.logo a:hover {
+            color: var(--theme-title, #e0e0e0);
+        }
+
+
+        /* =========================================
+           SECTION 6: CAROUSEL STYLES
+           ========================================= */
+        #carousel-section {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: rgb(211, 216, 203);
+            z-index: 70;
+        }
+
+        #carousel-section .slider {
             position: absolute;
             top: 0;
             left: 0;
-            color: var(--accent-color);
-            width: 0%;
-            overflow: hidden;
-            transition: width 1s var(--easing);
-            -webkit-text-stroke: 0;
-        }
-
-        footer:hover .footer-big-text::after {
             width: 100%;
+            height: 100%;
         }
 
-        .back-to-top {
-            width: 80px;
-            height: 80px;
-            border: 1px solid var(--line-color);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5rem;
-            color: var(--text-color);
-            cursor: pointer;
-            transition: all 0.3s;
-            background: var(--bg-color);
+        #carousel-section .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            /* Base z-index */
+            background: #dbdbdb;
+            overflow: hidden;
+            will-change: clip-path;
+            /* Optimizes animation performance */
+        }
+
+        /* Initial states for stacking */
+        /* Slide 1 is visible by default */
+        #slide-1 {
+            z-index: 1;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+        }
+
+        /* Slides 2, 3, 4 are hidden at the bottom */
+        #slide-2 {
+            z-index: 2;
+            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
+        }
+
+        #slide-3 {
+            z-index: 3;
+            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
+        }
+
+        #slide-4 {
+            z-index: 4;
+            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
+        }
+
+        #carousel-section .slide.dark {
+            background: #0c0c0c;
+        }
+
+        #carousel-section .slide.light {
+            background: #dbdbdb;
+        }
+
+        #carousel-section .slide-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #carousel-section .slide-content h1 {
+            font-family: 'Roboto', sans-serif;
+            font-size: 15vw;
+            text-transform: uppercase;
+            font-weight: 900;
+            color: #000;
+            margin: 0;
+            line-height: 0.9;
+        }
+
+        #carousel-section .slide.dark .slide-content h1 {
+            color: #dbdbdb;
+        }
+
+        #carousel-section .slide-img {
+            position: absolute;
+            width: 250px;
+            height: 150vh;
+            filter: saturate(0);
+        }
+
+        #carousel-section .slide-img img {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            height: 600px;
+            object-fit: cover;
+        }
+
+        #carousel-section .slide-img-1 {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-20deg);
+        }
+
+        #carousel-section .slide-img-2 {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(20deg);
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Urbanist', sans-serif;
+            color: #888;
+            font-size: 0.8rem;
+            z-index: 20;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* =========================================
+           SECTION 7: LIQUID BACKGROUND STYLES
+           ========================================= */
+        #liquid-section {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #000;
+            z-index: 80;
+            /* Above Carousel */
+        }
+
+        #liquid-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .liquid-overlay {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
             pointer-events: auto;
         }
 
-        .back-to-top:hover {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
+        .liquid-overlay a {
             color: #fff;
-            transform: scale(1.1);
+            text-decoration: none;
+            text-shadow: 1px 1px 2px black;
+            font-family: 'Montserrat', sans-serif;
         }
 
-        .footer-copy {
+        /* =========================================
+           SECTION 8: ADVANCED FOOTER STYLES
+           ========================================= */
+        #advanced-footer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-color: #050505;
+            color: white;
+            z-index: 90;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Neue Montreal', sans-serif;
+        }
+
+        #footer-canvas {
             position: absolute;
-            bottom: 2rem;
-            right: 3rem;
-            color: var(--secondary-text);
-            font-size: 0.8rem;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            /* Ensure it catches no pointer events so links work */
+            pointer-events: none;
         }
 
-        /* ANIMATIONS */
-        .char {
+        .footer-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1400px;
+            padding: 0 4vw;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            height: 100%;
+            align-content: center;
+        }
+
+        .footer-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 60vh;
+        }
+
+        .footer-big-text {
+            font-size: 12vw;
+            line-height: 0.8;
+            font-weight: 500;
+            margin: 0;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+            opacity: 0;
+            /* Animated in with GSAP */
+            transform: translateY(50px);
+        }
+
+        .footer-right {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-end;
+            text-align: right;
+            height: 60vh;
+            font-size: 1.25rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 4rem;
+        }
+
+        .footer-links ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+
+        .footer-links a {
+            color: #888;
+            text-decoration: none;
             display: inline-block;
+            transition: color 0.3s, transform 0.3s;
+            transform: translateY(100%);
+            /* Animated in */
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+            transform: translateX(-10px);
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+            margin-top: auto;
+            grid-column: span 2;
             opacity: 0;
-            transform: translateY(-40px);
-            transition: all 0.5s var(--easing);
-        }
-
-        body.hero-active .hero-title .char.revealed {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .char.revealed {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .reveal-text {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 1s var(--easing);
-        }
-
-        .active .reveal-text {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* --- RESPONSIVE STYLES (Mobile/Tablet) --- */
-        @media (max-width: 900px) {
-            nav {
-                padding: 1.5rem;
-            }
-
-            .section-padding {
-                padding: 6rem 1.5rem;
-            }
-
-            /* Hero Layout Shift */
-            .hero {
-                grid-template-columns: 1fr;
-                padding: 0 1.5rem;
-                align-content: center;
-                justify-items: center;
-            }
-
-            .hero-text-wrap {
-                position: absolute;
-                bottom: 10%;
-                /* Move Text Bottom */
-                left: 1.5rem;
-                right: 1.5rem;
-                text-align: center;
-                z-index: 3;
-            }
-
-            .hero-subtitle {
-                margin: 0 auto 1rem auto;
-                font-size: 1rem;
-            }
-
-            /* Move Marker Up so it doesn't overlap text */
-            #hero-marker {
-                top: 40%;
-                left: 50%;
-                transform: translate(-50%, -50%) rotateZ(45deg) scale(0.8);
-            }
-
-            body.hero-active #hero-marker {
-                transform: translate(-50%, -50%) rotateZ(45deg) scale(0.7);
-            }
-
-            /* Stack Philosophy */
-            .section-padding>div[style*="flex"] {
-                flex-direction: column;
-            }
-
-            /* Anatomy Vertical Stack */
-            .anatomy-section {
-                padding: 4rem 1.5rem;
-                height: auto;
-            }
-
-            .anatomy-grid {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto;
-                gap: 2rem;
-            }
-
-            .anatomy-visual-container {
-                height: 50vh;
-                order: -1;
-            }
-
-            /* Magnet Layout */
-            .magnet-layout {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-
-            .magnetLines-container {
-                width: 100% !important;
-                height: 300px !important;
-            }
-
-            /* Specs Grid */
-            .specs-container {
-                grid-template-columns: 1fr;
-            }
-
-            .spec-box {
-                padding: 3rem 1.5rem;
-                border-right: none;
-                border-bottom: 1px solid #e5e5e5;
-            }
-
-            .spec-box:last-child {
-                border-bottom: none;
-            }
-
-            /* Revolution Section: Vertical Stack Mode (No Scroll Jacking) */
-            .revolution-section {
-                height: auto;
-                /* Remove 500vh */
-                padding: 4rem 0;
-            }
-
-            .rev-sticky-container {
-                position: relative;
-                height: auto;
-                top: 0;
-                flex-direction: column;
-                display: block;
-                overflow: visible;
-            }
-
-            .rev-title-fixed {
-                position: relative;
-                top: 0;
-                left: 0;
-                padding: 0 1.5rem 3rem 1.5rem;
-            }
-
-            .rev-track {
-                display: flex;
-                flex-direction: column;
-                height: auto;
-                padding: 0 1.5rem;
-                transform: none !important;
-                /* Force reset JS transform */
-            }
-
-            .rev-card {
-                min-width: 100%;
-                height: auto;
-                margin: 0 0 4rem 0;
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto;
-                gap: 2rem;
-            }
-
-            .rev-visual-box {
-                height: 300px;
-                order: -1;
-            }
-
-            /* Footer */
-            .footer-grid {
-                grid-template-columns: 1fr;
-                gap: 3rem;
-                padding: 0 1.5rem 4rem 1.5rem;
-            }
-
-            .footer-bottom {
-                flex-direction: column;
-                align-items: center;
-                padding: 2rem 1.5rem;
-            }
-
-            .footer-copy {
-                position: static;
-                margin-top: 1rem;
-            }
-
-            .cta-btn {
-                padding: 1.5rem 3rem;
-                width: 100%;
-                max-width: 300px;
-            }
         }
     </style>
-
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/examples/jsm/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
 </head>
 
-<body>
+<body class="is-loading">
 
-    <canvas id="ink-trail"></canvas>
-
-    <div class="preloader">
-        <div class="marker-visual-container">
-            <svg class="svg-layer layer-back" viewBox="0 0 200 400">
-                <defs>
-                    <pattern id="grid-load" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="0.5" />
-                    </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#grid-load)" />
-            </svg>
-            <svg class="svg-layer layer-mid" viewBox="0 0 200 400">
-                <path d="M 70,50 L 130,50 L 130,300 L 100,350 L 70,300 Z" />
-                <rect x="65" y="40" width="70" height="80" rx="5" />
-            </svg>
-            <svg class="svg-layer layer-front" viewBox="0 0 200 400">
-                <line x1="100" y1="50" x2="100" y2="340" />
-                <path d="M 70,50 L 70,300 L 100,350 L 130,300 L 130,50" />
-                <rect x="65" y="40" width="70" height="20" rx="2" />
-                <line x1="65" y1="120" x2="135" y2="120" />
-            </svg>
+    <section class="loader-screen">
+        <div class="loader-content">
+            <div class="willem__h1">
+                <div class="willem__h1-start">
+                    <span class="willem__letter">M</span>
+                    <span class="willem__letter">A</span>
+                    <span class="willem__letter">R</span>
+                </div>
+                <div class="willem-loader__box">
+                    <div class="willem-loader__box-inner">
+                        <div class="willem__growing-image">
+                            <div class="willem__growing-image-wrap">
+                                <img class="willem__cover-image-extra is--1" src="marker1.jpg" loading="lazy" alt="">
+                                <img class="willem__cover-image-extra is--2" src="marker2.jpeg" loading="lazy" alt="">
+                                <img class="willem__cover-image-extra is--3" src="marker3.webp" loading="lazy" alt="">
+                                <img class="willem__cover-image" src='image.png' loading="lazy" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="willem__h1-end">
+                    <span class="willem__letter">K</span>
+                    <span class="willem__letter">E</span>
+                    <span class="willem__letter">R</span>
+                </div>
+            </div>
         </div>
+    </section>
+
+    <div class="wrapper">
+        <header class="header fade" data-fls-header="" data-fls-header-scroll="" data-fls-header-scroll-show="">
+            <div class="header__container">
+                <div class="header__menu menu">
+                    <h1 class="logo">
+                        <a href="#">MARKER</a>
+                    </h1>
+                </div>
+            </div>
+        </header>
+
+        <div class="custom-cursor" id="custom-cursor"></div>
+
+        <main class="page page--home">
+
+            <section class="hero">
+                <video class="hero__video" src="./files/banner-hero.mov" autoplay muted loop playsinline=""></video>
+                <canvas class="hero__canvas" id="hero-canvas"></canvas>
+                <h1 class="hero__title" data-fls-watcher="" data-fls-watcher-once="">
+                    <span>MARKER</span>
+                </h1>
+            </section>
+
+            <section id="scroll-section">
+                <svg class="line-svg" role="presentational" preserveAspectRatio="xMidYMin slice" width="100%"
+                    fill="none" viewBox="-480 0 2300 2241">
+                    <path class="anim-overview-stroke" stroke="#C7DBF4" stroke-width="160"
+                        d="M-841 100H584c124 0 225 101 225 225v0c0 124-101 225-225 225h-95a281 281 0 00-281 281v0c0 155 125 281 281 281h442c167 0 304 136 304 304v0c0 168-137 304-304 304H795a439 439 0 00-439 439v82"
+                        opacity=".45"></path>
+                </svg>
+                <div class="container">
+                    <h2>THE JOURNEY</h2>
+                    <div class="layout-container">
+
+                        <div class="box box-1">
+                            <h3>The Inception</h3>
+                            <p>It started with a simple observation: the digital world was becoming too clean. We craved
+                                the raw, unpolished energy of a fresh permanent marker stroke against a blank page.</p>
+                            <a href="#" class="btn">Read the story</a>
+                        </div>
+
+                        <img class="image-1"
+                            src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop"
+                            width="400" height="400" alt="Artist sketching with marker" />
+
+                        <div class="box box-2">
+                            <h3>Analog Roots</h3>
+                            <p>We spent months digitizing thousands of hand-drawn lines, preserving every bleed, rough
+                                edge, and imperfection. The goal was to capture the authentic friction of felt tip on
+                                cardboard.</p>
+                            <a href="#" class="btn">View process</a>
+                        </div>
+
+                        <img class="image-2"
+                            src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=800&auto=format&fit=crop"
+                            width="400" height="600" alt="Ink texture details" />
+
+                        <div class="box box-3">
+                            <h3>Breaking Grids</h3>
+                            <p>Marker serves as a tool for digital rebellion. It refuses to whisper, demanding attention
+                                by breaking rigid layout grids with organic flow and undeniable human presence.</p>
+                            <a href="#" class="btn">Our philosophy</a>
+                        </div>
+
+                        <img src="image3.jpg" class="image-3" width="400" height="400" alt="Urban creative space" />
+
+                        <div style="margin-bottom: 100px;" class="box box-4">
+                            <h3>A New Standard</h3>
+                            <p>Today, Marker isn't just a typeface; it is a movement. Used by creators worldwide to
+                                inject personality into the pixelated void, turning standard headings into visual
+                                statements.</p>
+                            <a href="#" class="btn">Join the movement</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="urbanist-integration">
+                <svg class="urbanist-bg" width="100%" viewBox="0 0 1920 1300" fill="none"
+                    xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                    <rect width="1920" height="1300" fill="url(#gradient)"></rect>
+                    <defs>
+                        <linearGradient id="gradient" x1="1300.54" y1="201.621" x2="959.727" y2="841.863"
+                            gradientUnits="userSpaceOnUse">
+                            <stop offset="0.15" stop-color="var(--theme-sub-bg)" stop-opacity="1"></stop>
+                            <stop offset="0.85" stop-color="var(--theme-main-bg)"></stop>
+                        </linearGradient>
+                    </defs>
+                </svg>
+
+                <div class="content-layer">
+                    <h1>Marker</h1>
+                    <p class="desc-1">
+                        The Marker font captures the spontaneous energy and look of a broad-tipped permanent
+                        marker, offering a bold and authentic hand-drawn aesthetic for digital interfaces.
+                    </p>
+                    <p class="desc-2">
+                        Characterized by its irregular edges, organic flow, and varying stroke weights, it
+                        breaks away from rigid digital grids to deliver a raw, human touch.
+                    </p>
+                    <p class="desc-3">
+                        Ideal for impactful headlines and creative overlays, this typeface transforms
+                        standard typography into expressive, attention-grabbing visual statements.
+                    </p>
+                </div>
+
+                <div id="panes-container">
+                    <div class="pane">
+                        <img class="urbanist-floating-img" src="blue.png" alt="Marker design inspiration 1">
+                    </div>
+                    <div class="pane">
+                        <img class="urbanist-floating-img" src="orange.png" alt="Marker design inspiration 2">
+                    </div>
+                    <div class="pane">
+                        <img class="urbanist-floating-img" src="green.png" alt="Marker design inspiration 3">
+                    </div>
+                </div>
+            </section>
+            <section class="bottom-spacer"></section>
+
+            <div id="perspective-wrap">
+                <div style="background-color: white; " class="zoom-container">
+                    <h1 class="heading-zoom" style="color: rgb(43, 43, 43);">Marker<br /></h1>
+
+                    <div class="zoom-item" data-layer="2">
+                        <img src="https://images.unsplash.com/photo-1620619767323-b95a89183081?q=80&w=600&auto=format&fit=crop"
+                            alt="Abstract colored markers">
+                    </div>
+                    <div class="zoom-item" data-layer="2">
+                        <img src="https://images.unsplash.com/photo-1543857778-c4a1a3e0b2eb?q=80&w=600&auto=format&fit=crop"
+                            alt="Black ink splatter">
+                    </div>
+                    <div class="zoom-item" data-layer="1">
+                        <img src="https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?q=80&w=600&auto=format&fit=crop"
+                            alt="Hand sketching with marker">
+                    </div>
+                    <div class="zoom-item" data-layer="2">
+                        <img src="https://images.unsplash.com/photo-1620619767323-b95a89183081?q=80&w=600&auto=format&fit=crop"
+                            alt="Vibrant marker strokes">
+                    </div>
+                    <div class="zoom-item" data-layer="3">
+                        <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop"
+                            alt="Neon marker texture">
+                    </div>
+                    <div class="zoom-item" data-layer="1">
+                        <img src="https://images.unsplash.com/photo-1620619767323-b95a89183081?q=80&w=600&auto=format&fit=crop"
+                            alt="Architectural sketch">
+                    </div>
+                    <div class="zoom-item" data-layer="3">
+                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=600&auto=format&fit=crop"
+                            alt="Tech sketch marker">
+                    </div>
+                    <div class="zoom-item" data-layer="3">
+                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop"
+                            alt="Abstract fluid ink">
+                    </div>
+                    <div class="zoom-item" data-layer="1">
+                        <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=600&auto=format&fit=crop"
+                            alt="Close up of marker tip">
+                    </div>
+                    <div class="zoom-item" data-layer="3">
+                        <img src="https://images.unsplash.com/photo-1574169208507-84376144848b?q=80&w=600&auto=format&fit=crop"
+                            alt="Graffiti style art">
+                    </div>
+                    <div class="zoom-item" data-layer="2">
+                        <img src="https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?q=80&w=600&auto=format&fit=crop"
+                            alt="Sketchbook flatlay">
+                    </div>
+                    <div class="zoom-item" data-layer="1">
+                        <img src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?q=80&w=600&auto=format&fit=crop"
+                            alt="Coffee and doodles">
+                    </div>
+                </div>
+
+                <section style="margin-bottom: -1100px;" class="section-stick">
+                    <p class="opacity-reveal reveal-text-style">
+                        If you’re bold, a single marker stroke will break the grid, steal the show, and change
+                        everything.
+                    </p>
+                </section>
+
+                <div class="spacer-black"></div>
+            </div>
+            <div id="alice-wrapper">
+                <section class="intro">
+                    <h1 class="intro__heading">The Permanent Marker's<br />Bold Revolution</h1>
+                </section>
+
+                <section class="content">
+                    <article class="article">
+                        <h4><b>Origins</b></h4>
+                        <p>THE ARTIST was beginning to get very tired of using thin pencils on the draft, and of having
+                            no impact: once or twice she had dipped the brush into the ink pot her mentor was using, but
+                            it had
+                            no control or portability in it, “and what is the use of a tool,” thought the artist,
+                            “without
+                            boldness or permanence?”</p>
+                        <p>She had dipped the brush into the ink pot her mentor was using, but it had
+                            no control or portability in it, “and what is the use of a tool,” thought the artist,
+                            “without
+                            boldness or permanence?”</p>
+                        <h4><b>Evolution</b></h4>
+                        <p>THE ARTIST was beginning to get very tired of using thin pencils on the draft, and of having
+                            no impact: once or twice she had dipped the brush into the ink pot her mentor was using, but
+                            it had
+                            no control or portability in it, “and what is the use of a tool,” thought the artist,
+                            “without
+                            boldness or permanence?”</p>
+                        <p>A brush into the ink pot her mentor was using, but it had
+                            no control or portability in it, “and what is the use of a tool,” thought the artist,
+                            “without
+                            boldness or permanence?”</p>
+                    </article>
+                </section>
+
+                <div class="hero-reveal-wrapper">
+                    <section class="hero-reveal">
+                        <article>
+                            <header class="hero-reveal__header">
+                                <div class="hero-reveal_split">
+                                    <div class="hero-reveal_split_item">
+                                        <p>LIFELONG INK</p>
+                                    </div>
+                                    <div class="hero-reveal_split_item" aria-hidden="true">
+                                        <p aria-hidden="true">LIFELONG INK</p>
+                                    </div>
+                                </div>
+                            </header>
+
+                            <div class="hero-reveal__content">
+                                <div class="hero-reveal__content-inner">
+                                    <div class="hero-reveal__parallax">
+                                        <img src="https://assets.codepen.io/204808/alice-falling-1.png" alt="Alice"
+                                            class="hero-reveal__parallax-alice" />
+                                        <img width="150" src="https://assets.codepen.io/204808/alice-falling-clock.png"
+                                            alt="Clock" class="hero-reveal__parallax-clock" />
+                                        <img width="100" src="https://assets.codepen.io/204808/alice-falling-book.png"
+                                            alt="Book" class="hero-reveal__parallax-book" />
+                                        <img width="50" src="https://assets.codepen.io/204808/alice-falling-kattle.png"
+                                            alt="Kattle" class="hero-reveal__parallax-kattle" />
+                                        <img width="330" src="https://assets.codepen.io/204808/alice-falling-card.png"
+                                            alt="Card" class="hero-reveal__parallax-card" />
+                                    </div>
+
+                                    <div class="hero-reveal__content-p">
+                                        <p>Either the stroke was very broad, or it dried very quickly, for she had
+                                            plenty of
+                                            time as she drew to look about her, and to wonder what was going to
+                                            be created next. First, she tried to look down and see where the line was
+                                            coming
+                                            to, but it was too dark to see underneath : then she looked at the tip of
+                                            the pen, and noticed that it was filled with fibers and solvents:
+                                            here and there she saw sketches and ideas hung upon walls.</p>
+                                        <p>“Well!” thought the designer to herself, “after such a line as this, I shall
+                                            think
+                                            nothing of using cheap ballpoints! How brave they'll all think me at the
+                                            studio!”
+                                        </p>
+                                        <p>Either the stroke was very broad, or it dried very quickly, for she had
+                                            plenty of
+                                            time as she drew to look about her, and to wonder what was going to
+                                            be created next. First, she tried to look down and see where the line was
+                                            coming
+                                            to, but it was too dark to see underneath : then she looked at the tip of
+                                            the pen, and noticed that it was filled with fibers and solvents:
+                                            here and there she saw sketches and ideas hung upon walls.</p>
+                                        <p>“Well!” thought the designer to herself, “after such a line as this, I shall
+                                            think
+                                            nothing of using cheap ballpoints! How brave they'll all think me at the
+                                            studio!”
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </section>
+                </div>
+
+                <section class="content">
+                    <article class="article">
+                        <h4><b>Impact</b></h4>
+                        <p>The ink was not a bit faded, and it stood out on the page in a moment : she looked down, but
+                            it was all dried instantly; before her was another blank canvas, and the creative concept
+                            was
+                            still in sight, hurrying to capture it.</p>
+                        <p>There were sketches all round the hall, but they were all rough, and when she had inked all
+                            the way down one side and up the other, defining every shape, she walked proudly down the
+                            middle,
+                            wondering how she was ever to erase it again.</p>
+                        <p>The ink was not a bit faded, and it stood out on the page in a moment : she looked down, but
+                            it was all dried instantly; before her was another blank canvas, and the creative concept
+                            was
+                            still in sight, hurrying to capture it.</p>
+                        <h4><b>Legacy</b></h4>
+
+                        <p>There were sketches all round the hall, but they were all rough, and when she had inked all
+                            the way down one side and up the other, defining every shape, she walked proudly down the
+                            middle,
+                            wondering how she was ever to erase it again.</p>
+                        <p>There were sketches all round the hall, but they were all rough, and when she had inked all
+                            the way down one side and up the other, defining every shape, she walked proudly down the
+                            middle,
+                            wondering how she was ever to erase it again.</p>
+                    </article>
+                </section>
+            </div>
+            <section id="carousel-section">
+                <div class="slider">
+                    <div class="slide dark" id="slide-1">
+                        <div class="slide-img slide-img-1">
+                            <img src="second.png" alt="Bold black marker stroke" />
+                        </div>
+                        <div class="slide-content">
+                            <h1>Bold Strokes</h1>
+                        </div>
+                        <div class="slide-img slide-img-2">
+                            <img src="firstt.png" alt="Abstract marker lines" />
+                        </div>
+                    </div>
+
+                    <div class="slide light" id="slide-2">
+                        <div class="slide-img slide-img-1">
+                            <img src="second.png" alt="Vibrant marker blending" />
+                        </div>
+                        <div class="slide-content">
+                            <h1 style="color: black;">Vibrant Flow</h1>
+                        </div>
+                        <div class="slide-img slide-img-2">
+                            <img src="first.png" alt="Colorful alcohol markers" />
+                        </div>
+                    </div>
+
+                    <div class="slide dark" id="slide-3">
+                        <div class="slide-img slide-img-1">
+                            <img src="second.png" alt="Paint marker drips" />
+                        </div>
+                        <div class="slide-content">
+                            <h1>Street Ink</h1>
+                        </div>
+                        <div class="slide-img slide-img-2">
+                            <img src="third.png" alt="Graffiti marker texture" />
+                        </div>
+                    </div>
+
+                    <div class="slide light" id="slide-4">
+                        <div class="slide-img slide-img-1">
+                            <img src="first.png" alt="Architectural marker sketch" />
+                        </div>
+                        <div class="slide-content">
+                            <h1 style="color: black;">Sketchbook</h1>
+                        </div>
+                        <div class="slide-img slide-img-2">
+                            <img src="second.png" alt="Product design sketch" />
+                        </div>
+                    </div>
+
+                </div>
+                <div class="scroll-hint">Scroll down to explore</div>
+            </section>
+            <footer id="advanced-footer">
+                <canvas id="footer-canvas"></canvas>
+                <div class="footer-content">
+                    <div class="footer-left">
+                        <h2 class="footer-big-text">Marker<br>Digital.</h2>
+                        <div style="font-size: 0.9rem; opacity: 0.6; margin-top: auto;">© 2025 All Rights Reserved.
+                        </div>
+                    </div>
+                    <div class="footer-right">
+                        <div class="footer-links">
+                            <ul>
+                                <li><a href="#">Work</a></li>
+                                <li><a href="#">Studio</a></li>
+                                <li><a href="#">News</a></li>
+                            </ul>
+                            <ul>
+                                <li><a href="#">Instagram</a></li>
+                                <li><a href="#">Twitter</a></li>
+                                <li><a href="#">LinkedIn</a></li>
+                            </ul>
+                        </div>
+                        <div class="footer-bottom">
+                            <span>Kochi, India</span>
+                            <span>Scroll to top ↑</span>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
+        </main>
     </div>
 
-    <div id="cursor-pen">
-        <svg class="pen-shape" viewBox="0 0 24 24">
-            <path d="M14.06,9.02l0.92,0.92L5.92,19H5v-0.92L14.06,9.02 M17.66,3c-0.25,0-0.51,0.1-0.7,0.29l-1.83,1.83
-                l3.75,3.75l1.83-1.83c0.39-0.39,0.39-1.02,0-1.41l-2.34-2.34C18.17,3.09,17.92,3,17.66,3L17.66,3z M14.06,6.19L3,17.25V21h3.75
-                L17.81,9.94L14.06,6.19z" />
-        </svg>
-    </div>
-
-    <nav>
-        <div class="logo">MARKER</div>
-        <div class="nav-right">
-            <a href="#features" class="nav-link hover-trigger">Index</a>
-            <a href="#buy" class="nav-link hover-trigger">Purchase</a>
-        </div>
-    </nav>
-
-    <header class="hero">
-        <div class="hero-text-wrap">
-            <p class="hero-subtitle" id="hero-sub">The separation between thought and reality.</p>
-            <h1 class="hero-title split-text" id="hero-text">MARKER</h1>
-        </div>
-
-        <div class="marker-visual-container" id="hero-marker">
-            <svg class="svg-layer layer-back" viewBox="0 0 200 400">
-                <defs>
-                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="0.5" />
-                    </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#grid)" />
-            </svg>
-            <svg class="svg-layer layer-mid" viewBox="0 0 200 400">
-                <path d="M 70,50 L 130,50 L 130,300 L 100,350 L 70,300 Z" />
-                <rect x="65" y="40" width="70" height="80" rx="5" />
-            </svg>
-            <svg class="svg-layer layer-front" viewBox="0 0 200 400">
-                <line x1="100" y1="50" x2="100" y2="340" />
-                <path d="M 70,50 L 70,300 L 100,350 L 130,300 L 130,50" />
-                <rect x="65" y="40" width="70" height="20" rx="2" />
-                <line x1="65" y1="120" x2="135" y2="120" />
-            </svg>
-        </div>
-    </header>
-
-    <section class="section-padding reveal-trigger">
-        <div class="line-h"></div>
-        <div style="display: flex; justify-content: space-between; margin-top: 4rem; gap: 2rem; flex-wrap: wrap;">
-            <div class="reveal-text" style="flex: 1; min-width: 300px;">
-                <span class="section-label">Philosophy</span>
-                <h2 class="section-heading split-text">Designed forspeed of thought.</h2>
-            </div>
-            <div class="reveal-text"
-                style="flex: 1; min-width: 300px; max-width: 500px; color: #666; line-height: 1.8;">
-                <p>Most styluses are passive. Marker is active. It predicts your stroke before you finish it, utilizing
-                    a neural engine embedded directly in the tip.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="features" class="section-padding">
-        <span class="section-label reveal-text">Capabilities</span>
-        <div class="feature-list">
-
-            <div class="reveal-trigger">
-                <div class="feature-line"></div>
-                <div class="feature-item hover-trigger">
-                    <div class="feature-header">
-                        <h3>01. Zero Latency</h3>
-                        <div class="feature-icon">+</div>
-                    </div>
-                    <div class="feature-desc-wrapper">
-                        <p class="feature-desc">
-                            Experience instant feedback. Our proprietary RF connection protocol
-                            eliminates the delay between hand and screen, achieving a 0.1ms response time.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="reveal-trigger">
-                <div class="feature-line"></div>
-                <div class="feature-item hover-trigger">
-                    <div class="feature-header">
-                        <h3>02. Haptic Grain</h3>
-                        <div class="feature-icon">+</div>
-                    </div>
-                    <div class="feature-desc-wrapper">
-                        <p class="feature-desc">
-                            Feel the texture of the canvas. An advanced vibration engine simulates
-                            the friction of 12 distinct paper types, from rough sketch to smooth vellum.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="reveal-trigger">
-                <div class="feature-line"></div>
-                <div class="feature-item hover-trigger">
-                    <div class="feature-header">
-                        <h3>03. Solar Weave</h3>
-                        <div class="feature-icon">+</div>
-                    </div>
-                    <div class="feature-desc-wrapper">
-                        <p class="feature-desc">
-                            Never plug it in. The casing is wrapped in a translucent solar-weave
-                            material that trickle-charges the capacitor from ambient room light.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="reveal-trigger">
-                <div class="feature-line"></div>
-                <div class="feature-item hover-trigger">
-                    <div class="feature-header">
-                        <h3>04. Pressure Intelligence</h3>
-                        <div class="feature-icon">+</div>
-                    </div>
-                    <div class="feature-desc-wrapper">
-                        <p class="feature-desc">
-                            Draw naturally. With 8192 levels of pressure sensitivity,
-                            every stroke responds precisely to your touch, from light shading
-                            to bold lines.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="reveal-trigger">
-                <div class="feature-line"></div>
-                <div class="feature-item hover-trigger">
-                    <div class="feature-header">
-                        <h3>05. Adaptive Grip</h3>
-                        <div class="feature-icon">+</div>
-                    </div>
-                    <div class="feature-desc-wrapper">
-                        <p class="feature-desc">
-                            Stays comfortable all day. The ergonomic grip automatically adjusts
-                            micro-texture based on hand moisture and temperature for maximum control.
-                        </p>
-                    </div>
-                </div>
-                <div class="feature-line"></div>
-            </div>
-
-        </div>
-    </section>
-
-    <div class="marquee-section">
-        <div class="marquee-inner">
-            <span class="marquee-span">PRECISION FLOW SPEED MARKER PRECISION FLOW SPEED MARKER</span>
-        </div>
-    </div>
-
-    <section class="anatomy-section">
-        <div class="anatomy-grid">
-            <div class="anatomy-visual-container" id="anatomy-visual-container">
-                <canvas id="anatomy-ballpit"></canvas>
-            </div>
-
-            <div class="anatomy-info">
-                <span class="section-label reveal-text" style="margin-bottom: 2rem;">Anatomy</span>
-                <h2 class="split-text">Internal Architecture</h2>
-
-                <div class="anatomy-item reveal-trigger hover-trigger">
-                    <div class="anatomy-num">A</div>
-                    <div class="anatomy-text blur-text-target">Titanium Core Shaft</div>
-                </div>
-                <div class="anatomy-item reveal-trigger hover-trigger" style="transition-delay: 0.1s;">
-                    <div class="anatomy-num">B</div>
-                    <div class="anatomy-text blur-text-target">Haptic Resonance Engine</div>
-                </div>
-                <div class="anatomy-item reveal-trigger hover-trigger" style="transition-delay: 0.2s;">
-                    <div class="anatomy-num">C</div>
-                    <div class="anatomy-text blur-text-target">Capacitive Nib Assembly</div>
-                </div>
-                <div class="anatomy-item reveal-trigger hover-trigger" style="transition-delay: 0.3s;">
-                    <div class="anatomy-num">D</div>
-                    <div class="anatomy-text blur-text-target">Solar Weave Skin</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section-padding reveal-trigger">
-        <div class="magnet-layout">
-            <div class="magnet-content">
-                <span class="section-label reveal-text" style="margin-bottom: 2rem; display:block;">Field
-                    Sensitivity</span>
-                <h2 class="section-heading split-text" style="margin-bottom: 1.5rem;">Magnetic Grid.</h2>
-                <p class="reveal-text" style="max-width: 400px; color: #666; font-size: 1.1rem; line-height: 1.6;">
-                    The nib detects magnetic field variances to orient your stroke with sub-pixel precision. It actively
-                    realigns your intent with the digital canvas.
-                </p>
-            </div>
-            <div id="magnet-container" class="magnetLines-container hover-trigger"></div>
-        </div>
-    </section>
-
-    <section id="specs" class="reveal-trigger">
-        <div class="specs-container">
-            <div class="spec-box hover-trigger">
-                <span class="spec-value">
-                    <span class="counter" data-target="4096">0</span>
-                </span>
-                <span class="spec-label reveal-text">Pressure Levels</span>
-            </div>
-            <div class="spec-box hover-trigger">
-                <span class="spec-value">
-                    <span class="counter" data-target="88">0</span>g
-                </span>
-                <span class="spec-label reveal-text">Total Weight</span>
-            </div>
-            <div class="spec-box hover-trigger">
-                <span class="spec-value split-text">Ti</span>
-                <span class="spec-label reveal-text">Titanium Core</span>
-            </div>
-        </div>
-    </section>
-
-    <section class="revolution-section" id="revolution">
-        <div class="rev-sticky-container">
-            <div class="rev-title-fixed">
-                <h2>Evolution</h2>
-            </div>
-
-            <div class="rev-track">
-                <div class="rev-card hover-trigger">
-                    <div class="rev-text-box">
-                        <div class="rev-number">01</div>
-                        <span class="rev-info-sub">1953 &mdash; Sidney Rosenthal</span>
-                        <h3>The Magic Marker.</h3>
-                        <p>A squat glass bottle filled with oil-based ink and capped with a wool felt wick. The first
-                            device capable of writing on any surface.</p>
-                    </div>
-                    <div class="rev-visual-box">
-                        <div class="rev-img-wrap">
-                            <img src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=800&auto=format&fit=crop"
-                                alt="Vintage Ink Bottle Concept">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rev-card hover-trigger">
-                    <div class="rev-text-box">
-                        <div class="rev-number">02</div>
-                        <span class="rev-info-sub">1962 &mdash; Yukio Horie</span>
-                        <h3>The Fiber Tip.</h3>
-                        <p>Developed by the Tokyo Stationery Company (Pentel). Replaced the crude felt wick with a
-                            precision bamboo (later acrylic) fiber tip, enabling fine writing.</p>
-                    </div>
-                    <div class="rev-visual-box">
-                        <div class="rev-img-wrap">
-                            <img src="https://images.unsplash.com/photo-1453728013993-6d66e9c9123a?q=80&w=800&auto=format&fit=crop"
-                                alt="Technical Pen Concept">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rev-card hover-trigger">
-                    <div class="rev-text-box">
-                        <div class="rev-number">03</div>
-                        <span class="rev-info-sub">1993 &mdash; The Digital Bridge</span>
-                        <h3>Pressure Sensing.</h3>
-                        <p>The dawn of the PDA and Wacom tablet. Ink became pixels. The first attempt to translate hand
-                            pressure into digital line width.</p>
-                    </div>
-                    <div class="rev-visual-box">
-                        <div class="rev-img-wrap">
-                            <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop"
-                                alt="Digital Circuitry">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rev-card hover-trigger">
-                    <div class="rev-text-box">
-                        <div class="rev-number">04</div>
-                        <span class="rev-info-sub">2025 &mdash; MARKER</span>
-                        <h3>Neural Synthesis.</h3>
-                        <p>The distinction between tool and thought disappears. Predictive algorithms and haptic
-                            feedback create the ultimate evolution of the stroke.</p>
-                    </div>
-                    <div class="rev-visual-box">
-                        <div class="rev-img-wrap">
-                            <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop"
-                                alt="Futuristic Design">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="buy" class="cta-section reveal-trigger">
-        <div class="cta-bg-text">MARKER</div>
-        <a href="#" class="cta-btn hover-trigger reveal-text">Initiate Order</a>
-        <div style="margin-top: 2rem; color: #666; font-size: 0.8rem;">Batch 004 Shipping in October</div>
-    </section>
-
-    <footer>
-        <div class="footer-grid">
-            <div class="footer-col">
-                <h4>Stay Updated</h4>
-                <input type="text" class="newsletter-input hover-trigger" placeholder="Email Address">
-            </div>
-            <div class="footer-col">
-                <h4>Sitemap</h4>
-                <ul class="footer-links">
-                    <li><a href="#features" class="footer-link hover-trigger">Capabilities</a></li>
-                    <li><a href="#specs" class="footer-link hover-trigger">Specifications</a></li>
-                    <li><a href="#buy" class="footer-link hover-trigger">Pre-Order</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>Legal</h4>
-                <ul class="footer-links">
-                    <li><a href="#" class="footer-link hover-trigger">Privacy Policy</a></li>
-                    <li><a href="#" class="footer-link hover-trigger">Terms of Use</a></li>
-                    <li><a href="#" class="footer-link hover-trigger">Warranty</a></li>
-                </ul>
-            </div>
-            <div class="footer-col" style="display: flex; justify-content: flex-end; align-items: flex-start;">
-                <div class="back-to-top hover-trigger" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <h1 class="footer-big-text">MARKER</h1>
-            <p class="footer-copy">&copy; 2025 Marker Industries.</p>
-        </div>
-    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@latest/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@latest/dist/ScrollTrigger.min.js"></script>
 
     <script>
-        // --- GLOBAL VARIABLES ---
-        let mouseX = 0;
-        let mouseY = 0;
-        window.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
+        gsap.registerPlugin(ScrollTrigger);
 
-        // --- INK TRAIL LOGIC ---
-        const canvas = document.getElementById('ink-trail');
-        const ctx = canvas.getContext('2d');
-        let points = [];
-        let width, height;
+        // --- 0. LOADER ANIMATION (OSMO/WILLEM) ---
+        function initLoader() {
+            const container = document.querySelector('.loader-screen');
+            const loadingLetter = container.querySelectorAll('.willem__letter');
+            const box = container.querySelectorAll('.willem-loader__box');
+            const growingImage = container.querySelectorAll('.willem__growing-image');
+            const headingStart = container.querySelectorAll('.willem__h1-start');
+            const headingEnd = container.querySelectorAll('.willem__h1-end');
+            const coverImageExtra = container.querySelectorAll('.willem__cover-image-extra');
 
-        function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
+            const tl = gsap.timeline({
+                defaults: { ease: 'expo.inOut' },
+                onComplete: () => {
+                    document.body.classList.remove('is-loading');
+                    gsap.to(container, {
+                        opacity: 0,
+                        display: 'none',
+                        duration: 0.5,
+                        onComplete: () => ScrollTrigger.refresh()
+                    });
+                }
+            });
+
+            if (loadingLetter) { tl.from(loadingLetter, { yPercent: 100, stagger: 0.025, duration: 1.25 }); }
+            if (box.length) { tl.fromTo(box, { width: '0em' }, { width: '1em', duration: 1.25 }, '< 1.25'); }
+            if (growingImage.length) { tl.fromTo(growingImage, { width: '0%' }, { width: '100%', duration: 1.25 }, '<'); }
+            if (headingStart.length) { tl.fromTo(headingStart, { x: '0em' }, { x: '-0.05em', duration: 1.25 }, '<'); }
+            if (headingEnd.length) { tl.fromTo(headingEnd, { x: '0em' }, { x: '0.05em', duration: 1.25 }, '<'); }
+            if (coverImageExtra.length) { tl.fromTo(coverImageExtra, { opacity: 1 }, { opacity: 0, duration: 0.05, ease: 'none', stagger: 0.5 }, '-=0.05'); }
+            if (growingImage.length) { tl.to(growingImage, { width: '100vw', height: '100vh', duration: 1.5 }, '< 1.25'); }
+            if (box.length) { tl.to(box, { width: '100vw', duration: 1.5 }, '<'); }
         }
-        window.addEventListener('resize', resize);
-        resize();
 
-        window.addEventListener('mousemove', (e) => {
-            points.push({ x: e.clientX, y: e.clientY, time: Date.now() });
+        document.addEventListener('DOMContentLoaded', () => {
+            initLoader();
+            initCarousel();
+            initFooterCursor();
+            initFooterAnimations();
         });
 
-        function renderTrail() {
-            ctx.clearRect(0, 0, width, height);
-            const now = Date.now();
-            points = points.filter(p => now - p.time < 1000);
+        // --- 1. URBANIST LOGIC ---
+        const integrationSection = document.getElementById("urbanist-integration");
+        const panes = gsap.utils.toArray(".pane");
+        gsap.set(panes, { width: window.innerWidth });
 
-            if (points.length > 1) {
+        const themes = [
+            { mainBg: "#b9dcff", subBg: "#f2fbfe", text: "#070f36", title: "#8dc9f4" },
+            { mainBg: "#fff58c", subBg: "#fbf1ed", text: "#9c4e23", title: "#9c4e23" },
+            { mainBg: "#c4ffb2", subBg: "#f1ffec", text: "#164c3b", title: "#164c3b" }
+        ];
+
+        const thresholds = new Array(panes.length).fill(0).map((_, i) => parseFloat(((1 / panes.length) * i).toFixed(2)));
+        let activeThemeIndex = 0;
+
+        gsap.to(panes, {
+            xPercent: -100 * (panes.length - 1),
+            ease: "none",
+            scrollTrigger: {
+                trigger: integrationSection,
+                pin: true,
+                scrub: 1,
+                start: "top top",
+                end: () => "+=" + (window.innerWidth * panes.length * 0.5),
+                onUpdate: (self) => {
+                    const progress = parseFloat(self.progress.toFixed(2));
+                    const themeIndex = thresholds.findLastIndex((threshold) => progress >= threshold);
+                    if (themeIndex !== activeThemeIndex && themeIndex >= 0) {
+                        activeThemeIndex = themeIndex;
+                        updateTheme(themeIndex);
+                    }
+                }
+            }
+        });
+
+        function updateTheme(themeIndex) {
+            const theme = themes[themeIndex];
+            gsap.to(document.documentElement, {
+                "--theme-main-bg": theme.mainBg,
+                "--theme-sub-bg": theme.subBg,
+                "--theme-title": theme.title,
+                "--theme-text": theme.text,
+                duration: 1,
+                ease: "power2.out"
+            });
+        }
+
+        // --- 2. PERSPECTIVE ZOOM LOGIC ---
+        const zoomTimeline = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".zoom-container",
+                start: "top top",
+                end: "+=200%",
+                scrub: 1,
+                pin: true
+            }
+        });
+        zoomTimeline.to(".zoom-item[data-layer='3']", { z: 1000, opacity: 0, ease: "power1.in" }, 0);
+        zoomTimeline.to(".zoom-item[data-layer='2']", { z: 600, opacity: 0, ease: "power1.in" }, 0.1);
+        zoomTimeline.to(".zoom-item[data-layer='1']", { z: 300, opacity: 0, ease: "power1.in" }, 0.2);
+        zoomTimeline.to(".heading-zoom", { z: 200, opacity: 1, scale: 1.5, ease: "power1.out" }, 0);
+
+        // --- 3. TEXT REVEAL LOGIC ---
+        const textElement = document.querySelector(".opacity-reveal");
+        const textContent = textElement.innerText;
+        textElement.innerHTML = '';
+        textContent.split('').forEach(char => {
+            const span = document.createElement('span');
+            span.innerText = char;
+            span.style.opacity = "0.1";
+            textElement.appendChild(span);
+        });
+        const chars = textElement.querySelectorAll('span');
+        const textTimeline = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".section-stick",
+                start: "center center",
+                end: "+=150%",
+                pin: true,
+                scrub: 0.5
+            }
+        });
+        textTimeline.to(chars, { opacity: 1, stagger: 0.02, duration: 1, ease: "none" })
+            .to(textElement, { scale: 1.1, duration: 1, ease: "power2.out" }, "<");
+
+        // --- 4. ALICE SECTION LOGIC ---
+        const heroReveal = document.querySelectorAll(".hero-reveal");
+        heroReveal.forEach((element) => {
+            const heroBox = element.querySelector(".hero-reveal__header");
+            const heroHeadings = element.querySelectorAll(".hero-reveal_split_item");
+            const contentEl = element.querySelector(".hero-reveal__content");
+            if (!heroBox || !contentEl) return;
+            const heroBoxHeight = heroBox.offsetHeight;
+            const contentHeight = contentEl.offsetHeight;
+            const pinDistance = heroBoxHeight > contentHeight ? heroBoxHeight : contentHeight;
+
+            gsap.fromTo(contentEl, { y: "50%" }, {
+                y: "0%", ease: "none",
+                scrollTrigger: { trigger: element, start: "top top", end: `+=${pinDistance}`, scrub: true }
+            });
+
+            const tl = gsap.timeline({ scrollTrigger: { trigger: element, start: "top top", end: `+=${pinDistance}`, scrub: true, pin: true } });
+            tl.fromTo(heroBox, { clipPath: "inset(0% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 100% 0%)", duration: 1, ease: "power1.inOut" });
+
+            if (heroHeadings.length >= 2) {
+                tl.fromTo(heroHeadings[0], { y: "0%" }, { y: "-30%", ease: "power1.inOut" }, 0);
+                tl.fromTo(heroHeadings[1], { y: "0%" }, { y: "30%", ease: "power1.inOut" }, 0);
+            }
+        });
+
+        function parallaxScrollBySpeed(selector, speed = 1, trigger = ".hero-reveal") {
+            const el = document.querySelector(selector);
+            const contentEl = document.querySelector(".hero-reveal__content");
+            if (!el || !contentEl) return;
+            const contentHeight = contentEl.offsetHeight;
+            gsap.to(el, {
+                yPercent: (speed - 1) * 100, ease: "none",
+                scrollTrigger: { trigger: trigger, start: "top top", end: `+=${contentHeight * 2}`, scrub: true }
+            });
+        }
+        parallaxScrollBySpeed(".hero-reveal__parallax-book", 15);
+        parallaxScrollBySpeed(".hero-reveal__parallax-clock", 13);
+        parallaxScrollBySpeed(".hero-reveal__parallax-alice", 6);
+        parallaxScrollBySpeed(".hero-reveal__parallax-kattle", 23);
+        parallaxScrollBySpeed(".hero-reveal__parallax-card", 5);
+
+        // --- 5. CAROUSEL SECTION LOGIC (FIXED & STABLE) ---
+        function initCarousel() {
+            // We pin the section for 4000px.
+            // We use a timeline that is scrubbed by the scroll.
+            // This allows smooth forward/backward scrubbing with no logic errors.
+
+            const carouselSection = document.querySelector("#carousel-section");
+            const slides = gsap.utils.toArray(".slide"); // Get all pre-rendered slides
+
+            // Create a timeline that spans the pinning duration
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: carouselSection,
+                    start: "top top",
+                    end: "+=4000",
+                    scrub: 1, // Smooth scrubbing, user can reverse easily
+                    pin: true
+                }
+            });
+
+            // The logic: Slide 1 is already visible.
+            // We want to wipe Slide 2 over Slide 1, then Slide 3 over Slide 2, etc.
+            // clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%) means FULLY VISIBLE.
+            // clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%) means HIDDEN AT BOTTOM.
+
+            // 1. Reveal Slide 2
+            tl.to("#slide-2", {
+                clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                duration: 1,
+                ease: "none" // Linear ease for direct mapping to scroll
+            });
+
+            // 2. Reveal Slide 3
+            tl.to("#slide-3", {
+                clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                duration: 1,
+                ease: "none"
+            });
+
+            // 3. Reveal Slide 4
+            tl.to("#slide-4", {
+                clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+                duration: 1,
+                ease: "none"
+            });
+
+            // Add a small buffer at the end so the user sees the last slide before unpinning
+            tl.to({}, { duration: 0.5 });
+        }
+
+        // --- 6. FOOTER CURSOR LOGIC ---
+        function initFooterCursor() {
+            const canvas = document.querySelector('#footer-canvas');
+            const footer = document.querySelector('#advanced-footer');
+            if (!canvas || !footer) return;
+
+            const ctx = canvas.getContext('2d');
+            let mouseMoved = false;
+
+            const pointer = { x: 0.5 * window.innerWidth, y: 0.5 * window.innerHeight };
+            const params = {
+                pointsNumber: 40,
+                widthFactor: 0.3,
+                mouseThreshold: 0.6,
+                spring: 0.4,
+                friction: 0.5,
+            };
+
+            const trail = new Array(params.pointsNumber);
+            for (let i = 0; i < params.pointsNumber; i++) {
+                trail[i] = { x: pointer.x, y: pointer.y, dx: 0, dy: 0 };
+            }
+
+            // Listen to movements on the FOOTER specifically to handle offsets correctly
+            footer.addEventListener('mousemove', e => {
+                mouseMoved = true;
+                const rect = footer.getBoundingClientRect();
+                // Calculate position relative to the footer canvas
+                pointer.x = e.clientX - rect.left;
+                pointer.y = e.clientY - rect.top;
+            });
+
+            // Also handle global window resizing
+            window.addEventListener('resize', setupCanvas);
+
+            function setupCanvas() {
+                const rect = footer.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+            }
+
+            function update(t) {
+                // If mouse hasn't moved yet, create a gentle idle animation
+                if (!mouseMoved) {
+                    pointer.x = (0.5 + 0.3 * Math.cos(0.002 * t) * Math.sin(0.005 * t)) * canvas.width;
+                    pointer.y = (0.5 + 0.2 * Math.cos(0.005 * t) + 0.1 * Math.cos(0.01 * t)) * canvas.height;
+                }
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                trail.forEach((p, pIdx) => {
+                    const prev = pIdx === 0 ? pointer : trail[pIdx - 1];
+                    const spring = pIdx === 0 ? 0.4 * params.spring : params.spring;
+                    p.dx += (prev.x - p.x) * spring;
+                    p.dy += (prev.y - p.y) * spring;
+                    p.dx *= params.friction;
+                    p.dy *= params.friction;
+                    p.x += p.dx;
+                    p.y += p.dy;
+                });
+
                 ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-                for (let i = 1; i < points.length; i++) {
-                    const p1 = points[i - 1];
-                    const p2 = points[i];
-                    const age = (now - p2.time) / 1000;
-                    const opacity = 1 - age;
-                    const lineWidth = 4 * opacity;
-                    ctx.beginPath();
-                    ctx.moveTo(p1.x, p1.y);
-                    ctx.lineTo(p2.x, p2.y);
-                    ctx.strokeStyle = `rgba(255, 42, 31, ${opacity})`;
-                    ctx.lineWidth = lineWidth;
+                ctx.strokeStyle = '#ffffff'; // White trail on black footer
+                ctx.beginPath();
+                ctx.moveTo(trail[0].x, trail[0].y);
+
+                for (let i = 1; i < trail.length - 1; i++) {
+                    const xc = 0.5 * (trail[i].x + trail[i + 1].x);
+                    const yc = 0.5 * (trail[i].y + trail[i + 1].y);
+                    ctx.quadraticCurveTo(trail[i].x, trail[i].y, xc, yc);
+                    ctx.lineWidth = params.widthFactor * (params.pointsNumber - i);
                     ctx.stroke();
                 }
+                ctx.lineTo(trail[trail.length - 1].x, trail[trail.length - 1].y);
+                ctx.stroke();
+
+                window.requestAnimationFrame(update);
             }
-            requestAnimationFrame(renderTrail);
-        }
-        renderTrail();
 
-        // --- CURSOR LOGIC ---
-        const cursor = document.getElementById("cursor-pen");
-        function updateCursor() {
-            cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
-            requestAnimationFrame(updateCursor);
-        }
-        updateCursor();
-
-        document.querySelectorAll('.hover-trigger').forEach(el => {
-            el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
-            el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
-        });
-
-        // --- MOBILE ACCORDION LOGIC ---
-        // Adds tap-to-open functionality for mobile where hover doesn't exist
-        document.querySelectorAll('.feature-item').forEach(el => {
-            el.addEventListener('click', () => {
-                if (window.innerWidth <= 900) {
-                    el.classList.toggle('mobile-active');
-                }
-            });
-        });
-
-        // --- 3D TRANSFORM ---
-        const hero = document.querySelector('.hero');
-        const visual = document.getElementById('hero-marker');
-        let heroFrame = 0;
-
-        hero.addEventListener('mousemove', (e) => {
-            if (!document.body.classList.contains('hero-active') || window.innerWidth < 900) return;
-
-            heroFrame++;
-            if (heroFrame % 2 === 0) {
-                const x = (window.innerWidth / 2 - e.clientX) / 25;
-                const y = (window.innerHeight / 2 - e.clientY) / 25;
-                visual.style.transform = `translate(-50%, -50%) rotateZ(45deg) rotateY(${x}deg) rotateX(${-y}deg)`;
-            }
-        });
-        hero.addEventListener('mouseleave', () => {
-            if (!document.body.classList.contains('hero-active')) return;
-            if (window.innerWidth >= 900) {
-                visual.style.transform = `translate(-50%, -50%) rotateZ(45deg) rotateY(0deg) rotateX(0deg)`;
-            }
-        });
-
-        // --- SPLIT TEXT LOGIC ---
-        function initSplitText() {
-            const targets = document.querySelectorAll('.split-text');
-            targets.forEach(target => {
-                const text = target.innerText;
-                let html = '';
-                for (let i = 0; i < text.length; i++) {
-                    let letter = text[i] === ' ' ? '&nbsp;' : text[i];
-                    html += `<span class="char" style="transition-delay: ${i * 0.05}s">${letter}</span>`;
-                }
-                target.innerHTML = html;
-            });
+            setupCanvas();
+            update(0);
         }
 
-        // --- BLUR TEXT LOGIC ---
-        function initBlurText() {
-            const targets = document.querySelectorAll('.blur-text-target');
-            targets.forEach(target => {
-                const text = target.innerText;
-                let html = '';
-                for (let i = 0; i < text.length; i++) {
-                    let letter = text[i] === ' ' ? '&nbsp;' : text[i];
-                    html += `<span class="blur-char" style="transition-delay: ${i * 0.03}s">${letter}</span>`;
+        // --- 7. FOOTER REVEAL ANIMATIONS ---
+        function initFooterAnimations() {
+            const footer = document.querySelector('#advanced-footer');
+            const bigText = footer.querySelector('.footer-big-text');
+            const links = footer.querySelectorAll('.footer-links a');
+            const bottom = footer.querySelector('.footer-bottom');
+
+            // Animate Big Text
+            gsap.to(bigText, {
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: footer,
+                    start: "top 75%",
                 }
-                target.innerHTML = html;
+            });
+
+            // Animate Links Stagger
+            gsap.to(links, {
+                y: 0,
+                duration: 1,
+                stagger: 0.1,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: footer,
+                    start: "top 75%",
+                }
+            });
+
+            // Animate Bottom Bar
+            gsap.to(bottom, {
+                opacity: 1,
+                duration: 1,
+                delay: 0.5,
+                scrollTrigger: {
+                    trigger: footer,
+                    start: "top 80%",
+                }
             });
         }
-
-        // --- COUNTER LOGIC ---
-        const runCounter = (el) => {
-            const target = +el.getAttribute('data-target');
-            const duration = 2000;
-            const start = performance.now();
-
-            const step = (currentTime) => {
-                const elapsed = currentTime - start;
-                const progress = Math.min(elapsed / duration, 1);
-                const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-                const currentVal = Math.floor(ease * target);
-                el.innerText = currentVal;
-
-                if (progress < 1) {
-                    requestAnimationFrame(step);
-                } else {
-                    el.innerText = target;
-                }
-            };
-            requestAnimationFrame(step);
-        };
-
-        // --- OBSERVERS ---
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) entry.target.classList.add('active');
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.reveal-trigger').forEach(el => observer.observe(el));
-        document.querySelectorAll('.reveal-text').forEach(el => observer.observe(el));
-
-        const featureObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) entry.target.classList.add('active');
-            });
-        }, { threshold: 0.2 });
-        document.querySelectorAll('.feature-item').forEach(el => featureObserver.observe(el));
-
-        const anatomyObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) entry.target.classList.add('active');
-            });
-        }, { threshold: 0.2 });
-        document.querySelectorAll('.anatomy-item').forEach(el => anatomyObserver.observe(el));
-
-        const charObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const chars = entry.target.querySelectorAll('.char');
-                    chars.forEach(c => c.classList.add('revealed'));
-                }
-            });
-        }, { threshold: 0.1 });
-
-        const counterObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const counters = entry.target.querySelectorAll('.counter');
-                    counters.forEach(c => runCounter(c));
-                    counterObserver.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.5 });
-
-        // --- MAGNET LINES (Responsive) ---
-        function initMagnetLines() {
-            const container = document.getElementById('magnet-container');
-            if (!container) return;
-
-            // Responsive Configuration
-            const isMobile = window.innerWidth < 900;
-            const config = {
-                rows: isMobile ? 6 : 10,
-                columns: isMobile ? 8 : 14,
-                containerSizeW: "100%",
-                containerSizeH: isMobile ? "300px" : "50vmin",
-                lineColor: "#111",
-                lineWidth: "2px",
-                lineHeight: "20px",
-                baseAngle: 0
-            };
-
-            // Clear previous if resizing
-            container.innerHTML = '';
-
-            container.style.width = config.containerSizeW;
-            container.style.height = config.containerSizeH;
-            container.style.gridTemplateColumns = `repeat(${config.columns}, 1fr)`;
-            container.style.gridTemplateRows = `repeat(${config.rows}, 1fr)`;
-
-            const total = config.rows * config.columns;
-            const fragment = document.createDocumentFragment();
-
-            for (let i = 0; i < total; i++) {
-                const span = document.createElement('span');
-                span.style.backgroundColor = config.lineColor;
-                span.style.width = config.lineWidth;
-                span.style.height = config.lineHeight;
-                span.style.setProperty('--rotate', `${config.baseAngle}deg`);
-                fragment.appendChild(span);
-            }
-            container.appendChild(fragment);
-
-            let magnetItems = [];
-            const spans = container.querySelectorAll('span');
-
-            function calculatePositions() {
-                magnetItems = Array.from(spans).map(span => {
-                    const rect = span.getBoundingClientRect();
-                    return { element: span, centerX: rect.left + rect.width / 2 + window.scrollX, centerY: rect.top + rect.height / 2 + window.scrollY };
-                });
-            }
-
-            // Debounce resize
-            let resizeTimer;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(() => {
-                    // Re-init if breakpoint crosses significantly
-                    if ((window.innerWidth < 900 && !isMobile) || (window.innerWidth >= 900 && isMobile)) {
-                        initMagnetLines(); // Re-run for new grid size
-                    } else {
-                        calculatePositions();
-                    }
-                }, 200);
-            });
-            setTimeout(calculatePositions, 500);
-
-            let isVisible = false;
-            let rafId = null;
-            const magnetObserver = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting) {
-                    isVisible = true; calculatePositions(); loop();
-                } else {
-                    isVisible = false; cancelAnimationFrame(rafId);
-                }
-            }, { threshold: 0 });
-            magnetObserver.observe(container);
-
-            function loop() {
-                if (!isVisible) return;
-                const pageMouseX = mouseX + window.scrollX;
-                const pageMouseY = mouseY + window.scrollY;
-                magnetItems.forEach(item => {
-                    const dx = pageMouseX - item.centerX;
-                    const dy = pageMouseY - item.centerY;
-                    const distSq = dx * dx + dy * dy;
-                    if (distSq < 160000) {
-                        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-                        item.element.style.setProperty('--rotate', `${angle}deg`);
-                    }
-                });
-                rafId = requestAnimationFrame(loop);
-            }
-        }
-
-        // --- REVOLUTION SCROLL ---
-        function initRevolution() {
-            const section = document.querySelector('.revolution-section');
-            const track = document.querySelector('.rev-track');
-
-            function handleScroll() {
-                // Disable horizontal scroll transform on mobile
-                if (window.innerWidth < 900) return;
-
-                const rect = section.getBoundingClientRect();
-                const totalHeight = section.offsetHeight - window.innerHeight;
-
-                if (rect.top <= 0 && rect.bottom >= 0) {
-                    const progress = Math.abs(rect.top) / totalHeight;
-                    const clampedProgress = Math.max(0, Math.min(1, progress));
-                    const moveAmount = clampedProgress * (track.scrollWidth - window.innerWidth + 200);
-
-                    track.style.transform = `translate3d(-${moveAmount}px, 0, 0)`;
-                }
-            }
-
-            let lastScrollY = window.scrollY;
-            function loop() {
-                if (Math.abs(window.scrollY - lastScrollY) < 0.1) {
-                    // optimization
-                } else {
-                    handleScroll();
-                    lastScrollY = window.scrollY;
-                }
-                requestAnimationFrame(loop);
-            }
-            loop();
-        }
-
-        // --- LOAD SEQUENCE ---
-        window.addEventListener('load', () => {
-            initSplitText();
-            initBlurText();
-            document.querySelectorAll('.split-text:not(.hero-title)').forEach(el => charObserver.observe(el));
-
-            const specsSection = document.getElementById('specs');
-            if (specsSection) counterObserver.observe(specsSection);
-
-            initMagnetLines();
-            initRevolution();
-
-            const preloader = document.querySelector('.preloader');
-            const heroTitle = document.querySelector('.hero-title');
-
-            setTimeout(() => {
-                // 1. Trigger Sink/Fade Out
-                preloader.classList.add('fade-out');
-
-                // 2. Allow Scroll
-                document.body.style.overflowY = "auto";
-
-                // 3. Trigger Hero Drop In
-                setTimeout(() => {
-                    document.body.classList.add('hero-active');
-
-                    const chars = heroTitle.querySelectorAll('.char');
-                    chars.forEach(c => c.classList.add('revealed'));
-
-                }, 200);
-
-            }, 2500);
-        });
     </script>
 
     <script type="module">
-        import * as THREE from 'three';
-        import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+        import LiquidBackground from 'https://cdn.jsdelivr.net/npm/threejs-components@0.0.27/build/backgrounds/liquid1.min.js'
 
-        // --- CLASSES ---
-        class x {
-            constructor(e) {
-                this._e = { ...e };
-                this._m(); this._d(); this._p(); this.resize(); this._g();
-            }
-            _m() { this.camera = new THREE.PerspectiveCamera(); this.cameraFov = this.camera.fov; }
-            _d() { this.scene = new THREE.Scene(); }
-            _p() {
-                this.canvas = this._e.canvas;
-                const e = { canvas: this.canvas, powerPreference: 'high-performance', ...(this._e.rendererOptions ?? {}) };
-                this.renderer = new THREE.WebGLRenderer(e);
-                this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            }
-            _g() {
-                window.addEventListener('resize', this._f.bind(this));
-                this._o = new IntersectionObserver(this._u.bind(this), { root: null, rootMargin: '0px', threshold: 0 });
-                this._o.observe(this.canvas);
-            }
-            _u(e) { this._s = e[0].isIntersecting; this._s ? this._w() : this._z(); }
-            _f() { clearTimeout(this._a); this._a = setTimeout(this.resize.bind(this), 100); }
-            resize() {
-                const e = this.canvas.parentNode.offsetWidth;
-                const t = this.canvas.parentNode.offsetHeight;
-                this.renderer.setSize(e, t);
-                this.camera.aspect = e / t;
-                this.camera.updateProjectionMatrix();
+        const canvasElement = document.getElementById('liquid-canvas');
+        if (canvasElement) {
+            const app = LiquidBackground(canvasElement)
 
-                if (this.onAfterResize) this.onAfterResize();
-            }
-            _w() {
-                if (this._n) return;
-                const animate = () => {
-                    this._l = requestAnimationFrame(animate);
-                    this.renderer.render(this.scene, this.camera);
-                    this.onBeforeRender();
-                };
-                this._n = true; animate();
-            }
-            _z() { cancelAnimationFrame(this._l); this._n = false; }
+            // Load the image and set parameters
+            app.loadImage('https://assets.codepen.io/33787/liquid.webp')
+            app.liquidPlane.material.metalness = 0.75
+            app.liquidPlane.material.roughness = 0.25
+            app.liquidPlane.uniforms.displacementScale.value = 5
+            app.setRain(false)
         }
-
-        class Physics {
-            constructor(config) {
-                this.config = config;
-                this.count = config.count;
-                this.position = new Float32Array(3 * this.count);
-                this.velocity = new Float32Array(3 * this.count);
-                this.radius = new Float32Array(this.count);
-                this.v1 = new THREE.Vector3();
-                this.v2 = new THREE.Vector3();
-                this.diff = new THREE.Vector3();
-                this.normal = new THREE.Vector3();
-                this.mousePos = new THREE.Vector3(0, -1000, 0);
-                this.mouseEnabled = false;
-                this.init();
-            }
-            init() {
-                const { maxX, maxY, maxZ, minSize, maxSize } = this.config;
-                for (let i = 0; i < this.count; i++) {
-                    const idx = i * 3;
-                    this.position[idx] = (Math.random() - 0.5) * maxX * 2;
-                    this.position[idx + 1] = (Math.random() - 0.5) * maxY * 2;
-                    this.position[idx + 2] = (Math.random() - 0.5) * maxZ * 2;
-                    this.radius[i] = Math.random() * (maxSize - minSize) + minSize;
-                }
-            }
-            setMouse(x, y, z) {
-                this.mousePos.set(x, y, z);
-                this.mouseEnabled = true;
-            }
-            setBounds(x, y) {
-                this.config.maxX = x;
-                this.config.maxY = y;
-            }
-            update() {
-                const { gravity, friction, wallBounce, maxX, maxY, maxZ, maxVelocity } = this.config;
-                const count = this.count;
-                for (let i = 0; i < count; i++) {
-                    const idx = i * 3;
-                    this.v1.set(this.position[idx], this.position[idx + 1], this.position[idx + 2]);
-                    this.v2.set(this.velocity[idx], this.velocity[idx + 1], this.velocity[idx + 2]);
-                    this.v2.y -= 0.01 * gravity * this.radius[i];
-                    if (this.mouseEnabled) {
-                        this.diff.copy(this.mousePos).sub(this.v1);
-                        const dist = this.diff.length();
-                        if (dist < 4) {
-                            this.diff.normalize().multiplyScalar(4 - dist).multiplyScalar(0.1);
-                            this.v2.sub(this.diff);
-                        }
-                    }
-                    const distToCenter = Math.sqrt(this.v1.x * this.v1.x + this.v1.z * this.v1.z);
-                    const markerRadius = 2.5;
-                    if (distToCenter < markerRadius + this.radius[i]) {
-                        const angle = Math.atan2(this.v1.z, this.v1.x);
-                        const pushDist = markerRadius + this.radius[i];
-                        this.v1.x = Math.cos(angle) * pushDist;
-                        this.v1.z = Math.sin(angle) * pushDist;
-                        this.v2.x *= -wallBounce;
-                        this.v2.z *= -wallBounce;
-                    }
-                    this.v2.multiplyScalar(friction);
-                    this.v2.clampLength(0, maxVelocity);
-                    this.v1.add(this.v2);
-                    this.position[idx] = this.v1.x;
-                    this.position[idx + 1] = this.v1.y;
-                    this.position[idx + 2] = this.v1.z;
-                    this.velocity[idx] = this.v2.x;
-                    this.velocity[idx + 1] = this.v2.y;
-                    this.velocity[idx + 2] = this.v2.z;
-                }
-                for (let i = 0; i < count; i++) {
-                    const idx = i * 3;
-                    const r1 = this.radius[i];
-                    let px = this.position[idx];
-                    let py = this.position[idx + 1];
-                    let pz = this.position[idx + 2];
-                    let vx = this.velocity[idx];
-                    let vy = this.velocity[idx + 1];
-                    let vz = this.velocity[idx + 2];
-                    for (let j = i + 1; j < count; j++) {
-                        const jdx = j * 3;
-                        const r2 = this.radius[j];
-                        const dx = this.position[jdx] - px;
-                        const dy = this.position[jdx + 1] - py;
-                        const dz = this.position[jdx + 2] - pz;
-                        const distSq = dx * dx + dy * dy + dz * dz;
-                        const minDist = r1 + r2;
-                        if (distSq < minDist * minDist) {
-                            const dist = Math.sqrt(distSq);
-                            const overlap = minDist - dist;
-                            const nx = dx / dist;
-                            const ny = dy / dist;
-                            const nz = dz / dist;
-                            const sepX = nx * overlap * 0.5;
-                            const sepY = ny * overlap * 0.5;
-                            const sepZ = nz * overlap * 0.5;
-                            px -= sepX; py -= sepY; pz -= sepZ;
-                            this.position[jdx] += sepX;
-                            this.position[jdx + 1] += sepY;
-                            this.position[jdx + 2] += sepZ;
-                            const v1Dot = vx * nx + vy * ny + vz * nz;
-                            const v2Dot = this.velocity[jdx] * nx + this.velocity[jdx + 1] * ny + this.velocity[jdx + 2] * nz;
-                            const impulse = (v1Dot - v2Dot) * 0.5;
-                            vx -= impulse * nx;
-                            vy -= impulse * ny;
-                            vz -= impulse * nz;
-                            this.velocity[jdx] += impulse * nx;
-                            this.velocity[jdx + 1] += impulse * ny;
-                            this.velocity[jdx + 2] += impulse * nz;
-                        }
-                    }
-                    if (px + r1 > maxX) { px = maxX - r1; vx *= -wallBounce; }
-                    else if (px - r1 < -maxX) { px = -maxX + r1; vx *= -wallBounce; }
-                    if (py + r1 > maxY) { py = maxY - r1; vy *= -wallBounce; }
-                    else if (py - r1 < -maxY) { py = -maxY + r1; vy *= -wallBounce; }
-                    if (pz + r1 > maxZ) { pz = maxZ - r1; vz *= -wallBounce; }
-                    else if (pz - r1 < -maxZ) { pz = -maxZ + r1; vz *= -wallBounce; }
-                    this.position[idx] = px; this.position[idx + 1] = py; this.position[idx + 2] = pz;
-                    this.velocity[idx] = vx; this.velocity[idx + 1] = vy; this.velocity[idx + 2] = vz;
-                }
-            }
-        }
-
-        class CustomMaterial extends THREE.MeshPhysicalMaterial {
-            constructor(params) {
-                super(params);
-                this.uniforms = {
-                    thicknessDistortion: { value: 0.1 },
-                    thicknessAmbient: { value: 0 },
-                    thicknessAttenuation: { value: 0.1 },
-                    thicknessPower: { value: 2 },
-                    thicknessScale: { value: 10 }
-                };
-                this.onBeforeCompile = (shader) => {
-                    Object.assign(shader.uniforms, this.uniforms);
-                    shader.fragmentShader = `
-                        uniform float thicknessPower;
-                        uniform float thicknessScale;
-                        uniform float thicknessDistortion;
-                        uniform float thicknessAmbient;
-                        uniform float thicknessAttenuation;
-                    ` + shader.fragmentShader;
-                    shader.fragmentShader = shader.fragmentShader.replace(
-                        'void main() {',
-                        `
-                        void RE_Direct_Scattering(const in IncidentLight directLight, const in vec2 uv, const in vec3 geometryPosition, const in vec3 geometryNormal, const in vec3 geometryViewDir, const in vec3 geometryClearcoatNormal, inout ReflectedLight reflectedLight) {
-                            vec3 scatteringHalf = normalize(directLight.direction + (geometryNormal * thicknessDistortion));
-                            float scatteringDot = pow(saturate(dot(geometryViewDir, -scatteringHalf)), thicknessPower) * thicknessScale;
-                            vec3 scatteringIllu = (scatteringDot + thicknessAmbient) * diffuse;
-                            reflectedLight.directDiffuse += scatteringIllu * thicknessAttenuation * directLight.color;
-                        }
-                        void main() {
-                        `
-                    );
-                    shader.fragmentShader = shader.fragmentShader.replace(
-                        'RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );',
-                        `
-                        RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );
-                        RE_Direct_Scattering(directLight, vUv, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, reflectedLight);
-                        `
-                    );
-                };
-            }
-        }
-
-        function createBallpit(canvas) {
-            const app = new x({ canvas });
-            app.camera.position.set(0, 0, 20);
-            app.renderer.setClearColor(0x000000, 0);
-            const pmremGenerator = new THREE.PMREMGenerator(app.renderer);
-            const sceneEnv = new RoomEnvironment();
-            app.scene.environment = pmremGenerator.fromScene(sceneEnv).texture;
-
-            const markerGroup = new THREE.Group();
-            const bodyGeo = new THREE.CylinderGeometry(0.8, 0.8, 12, 32);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3, metalness: 0.2 });
-            const body = new THREE.Mesh(bodyGeo, bodyMat);
-            markerGroup.add(body);
-            const capGeo = new THREE.CylinderGeometry(0.9, 0.9, 4, 32);
-            const cap = new THREE.Mesh(capGeo, bodyMat);
-            cap.position.y = 5;
-            markerGroup.add(cap);
-            const tipGeo = new THREE.ConeGeometry(0.4, 1.5, 32);
-            const tipMat = new THREE.MeshStandardMaterial({ color: 0xFF2A1F, emissive: 0xFF2A1F, emissiveIntensity: 0.2 });
-            const tip = new THREE.Mesh(tipGeo, tipMat);
-            tip.position.y = -6.5;
-            tip.rotation.x = Math.PI;
-            markerGroup.add(tip);
-            markerGroup.rotation.z = Math.PI / 8;
-            markerGroup.rotation.y = Math.PI / 4;
-            app.scene.add(markerGroup);
-
-            const geometry = new THREE.SphereGeometry(1, 16, 16); // Reduced polys for mobile perf
-            const material = new CustomMaterial({
-                color: 0xffffff,
-                metalness: 0.1,
-                roughness: 0.2,
-                transmission: 0,
-                thickness: 1,
-                roughness: 0.1
-            });
-
-            // Adjust count based on device
-            const isMobile = window.innerWidth < 900;
-            const config = {
-                count: isMobile ? 40 : 80,
-                gravity: 0.2,
-                friction: 0.995,
-                wallBounce: 0.95,
-                maxVelocity: 0.6,
-                minSize: 0.6, maxSize: 1.4,
-                maxX: 8, maxY: 10, maxZ: 5
-            };
-
-            const physics = new Physics(config);
-
-            const updateBounds = () => {
-                const vFOV = THREE.MathUtils.degToRad(app.camera.fov);
-                const height = 2 * Math.tan(vFOV / 2) * app.camera.position.z;
-                const width = height * app.camera.aspect;
-                physics.setBounds(width / 2, height / 2);
-            };
-            updateBounds();
-            app.onAfterResize = updateBounds;
-
-            const mesh = new THREE.InstancedMesh(geometry, material, config.count);
-            app.scene.add(mesh);
-
-            const colors = [new THREE.Color(0x111111), new THREE.Color(0xe5e5e5), new THREE.Color(0xFF2A1F)];
-            for (let i = 0; i < config.count; i++) {
-                const col = colors[Math.floor(Math.random() * colors.length)];
-                mesh.setColorAt(i, col);
-            }
-            mesh.instanceColor.needsUpdate = true;
-
-            const raycaster = new THREE.Raycaster();
-            const mouse = new THREE.Vector2();
-            const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-            const target = new THREE.Vector3();
-
-            window.addEventListener('mousemove', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-                mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-                raycaster.setFromCamera(mouse, app.camera);
-                raycaster.ray.intersectPlane(plane, target);
-                physics.setMouse(target.x, target.y, target.z);
-            });
-            // Basic Touch support for ballpit
-            window.addEventListener('touchmove', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-                mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
-                raycaster.setFromCamera(mouse, app.camera);
-                raycaster.ray.intersectPlane(plane, target);
-                physics.setMouse(target.x, target.y, target.z);
-            }, { passive: true });
-
-            const dummy = new THREE.Object3D();
-            let time = 0;
-
-            app.onBeforeRender = () => {
-                physics.update();
-                time += 0.01;
-                markerGroup.position.y = Math.sin(time) * 0.5;
-                markerGroup.rotation.y += 0.005;
-                for (let i = 0; i < config.count; i++) {
-                    dummy.position.set(
-                        physics.position[i * 3],
-                        physics.position[i * 3 + 1],
-                        physics.position[i * 3 + 2]
-                    );
-                    dummy.scale.setScalar(physics.radius[i]);
-                    dummy.updateMatrix();
-                    mesh.setMatrixAt(i, dummy.matrix);
-                }
-                mesh.instanceMatrix.needsUpdate = true;
-            };
-        }
-
-        window.addEventListener('load', () => {
-            const canvas = document.getElementById('anatomy-ballpit');
-            if (canvas) createBallpit(canvas);
-        });
     </script>
 </body>
 
