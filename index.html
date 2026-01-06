@@ -1152,6 +1152,17 @@
         /* Mobile Devices */
         @media (max-width: 768px) {
 
+            /* NEW: FIX TITLE SIZES ON MOBILE */
+            .hero__title, 
+            .hero__title span {
+                font-size: 15vw !important; /* Forces the main video title to be smaller */
+            }
+
+            .header__menu h1.logo a {
+                font-size: 1.5rem; /* Forces the top-left logo to be smaller */
+            }
+
+
             /* 1. Journey / Grid Section Fixes */
             #scroll-section {
                 padding-block-start: 5vh;
@@ -1236,12 +1247,17 @@
             
             .pane:nth-of-type(2) .urbanist-floating-img,
             .pane:nth-of-type(3) .urbanist-floating-img {
-                 translate: -50% -50% !important;
+                  translate: -50% -50% !important;
             }
 
             /* 3. Perspective Zoom Fixes */
             .heading-zoom {
                 font-size: 3rem;
+            }
+
+            /* MOVED FROM INLINE STYLE */
+            .zoom-container {
+                background-color: white;
             }
             
             /* Make floating images larger on mobile */
@@ -1260,6 +1276,11 @@
             .reveal-text-style {
                 font-size: 1.8rem;
                 width: 90%;
+            }
+
+            /* MOVED FROM INLINE STYLE - Fixes gap on mobile only */
+            .section-stick {
+                margin-bottom: -1100px;
             }
 
             /* 4. Carousel Fixes */
@@ -1422,7 +1443,7 @@
 
                         <img src="image3.jpg" class="image-3" width="400" height="400" alt="Urban creative space" />
 
-                        <div style="margin-bottom: 100px;" class="box box-4">
+                        <div class="box box-4">
                             <h3>A New Standard</h3>
                             <p>Today, Marker isn't just a typeface; it is a movement. Used by creators worldwide to
                                 inject personality into the pixelated void, turning standard headings into visual
@@ -1476,7 +1497,7 @@
             <section class="bottom-spacer"></section>
 
             <div id="perspective-wrap">
-                <div style="background-color: white; " class="zoom-container">
+                <div class="zoom-container">
                     <h1 class="heading-zoom" style="color: rgb(43, 43, 43);">MARKER ARTS<br /></h1>
 
                     <div class="zoom-item" data-layer="2">
@@ -1529,7 +1550,7 @@
                     </div>
                 </div>
 
-                <section style="margin-bottom: -1100px;" class="section-stick">
+                <section class="section-stick">
                     <p class="opacity-reveal reveal-text-style">
                         If you’re bold, a single marker stroke will break the grid, steal the show, and change
                         everything.
