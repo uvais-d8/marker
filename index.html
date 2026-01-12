@@ -6,14 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MARKER</title>
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.159.0/build/three.module.js"
-            }
-        }
-    </script>
-
     <link rel="preload" href="./assets/fonts/Presicav.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     <link rel="preload" href="./assets/fonts/Calibre-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     <link rel="preload" href="./assets/fonts/Arial.woff2" as="font" type="font/woff2" crossorigin="anonymous">
@@ -26,6 +18,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.ui.min.js"></script>
+    
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <script type="module" crossorigin="" src="./js/index.min.js?v=1754734869502"></script>
     <link rel="stylesheet" crossorigin="" href="./css/index.min.css?v=1754734869502">
@@ -34,52 +28,14 @@
         /* =========================================
            GLOBAL & ANIMATIONS
            ========================================= */
-        @keyframes stroke {
-            from {
-                stroke-dashoffset: 5414.29;
-            }
+        @keyframes stroke { from { stroke-dashoffset: 5414.29; } to { stroke-dashoffset: 0; } }
+        @keyframes reveal { from { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0% 100%); opacity: 0; } }
+        @keyframes scaleIn { from { opacity: 0; scale: .2; } }
+        @keyframes revealText { from { clip-path: polygon(0 0, 0% 0, 0% 100%, 0 100%); } }
 
-            to {
-                stroke-dashoffset: 0;
-            }
-        }
-
-        @keyframes reveal {
-            from {
-                clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0% 100%);
-                opacity: 0;
-            }
-        }
-
-        @keyframes scaleIn {
-            from {
-                opacity: 0;
-                scale: .2;
-            }
-        }
-
-        @keyframes revealText {
-            from {
-                clip-path: polygon(0 0, 0% 0, 0% 100%, 0 100%);
-            }
-        }
-
-        html {
-            background-color: rgb(255, 255, 255);
-        }
-
-        body {
-            margin: 0;
-            overflow-x: hidden;
-            /* Prevent native scroll bounce to keep cursor smooth */
-            overscroll-behavior: none; 
-        }
-
-        /* Lock scroll during loading */
-        body.is-loading {
-            overflow: hidden;
-            height: 100vh;
-        }
+        html { background-color: rgb(255, 255, 255); }
+        body { margin: 0; overflow-x: hidden; overscroll-behavior: none; }
+        body.is-loading { overflow: hidden; height: 100vh; }
 
         /* =========================================
            GLOBAL CURSOR STYLES
@@ -90,9 +46,25 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 10000; /* Ensures it sits on top of everything */
-            pointer-events: none; /* CRITICAL: Allows you to click through the canvas */
-            mix-blend-mode: difference; /* Makes cursor visible on both black and white */
+            z-index: 10000;
+            pointer-events: none;
+            mix-blend-mode: difference;
+        }
+
+        /* =========================================
+           3D MARKER CANVAS STYLES
+           ========================================= */
+        #marker-3d-canvas {
+            position: fixed;
+            top: 50%;
+            right: 0vw; 
+            transform: translateY(-50%);
+            width: 80vh;
+            height: 80vh;
+            z-index: 5; /* Below text (10), Above video (0) */
+            pointer-events: none;
+            background: transparent;
+            transition: opacity 0.1s linear; /* Smooth fade helper */
         }
 
         .page-header {
@@ -103,10 +75,7 @@
             background: transparent;
         }
 
-        .page-header h1 {
-            color: white;
-            font-size: 3rem;
-        }
+        .page-header h1 { color: white; font-size: 3rem; }
 
         /* =========================================
            LOADER STYLES
@@ -146,26 +115,10 @@
             color: #201d1d;
         }
 
-        .willem__h1-start,
-        .willem__h1-end {
-            display: flex;
-            overflow: hidden;
-        }
-
-        .willem__h1-start {
-            justify-content: flex-end;
-            width: auto;
-        }
-
-        .willem__h1-end {
-            justify-content: flex-start;
-            width: auto;
-        }
-
-        .willem__letter {
-            display: block;
-            position: relative;
-        }
+        .willem__h1-start, .willem__h1-end { display: flex; overflow: hidden; }
+        .willem__h1-start { justify-content: flex-end; width: auto; }
+        .willem__h1-end { justify-content: flex-start; width: auto; }
+        .willem__letter { display: block; position: relative; }
 
         .willem-loader__box {
             flex-flow: column;
@@ -203,8 +156,7 @@
             position: absolute;
         }
 
-        .willem__cover-image,
-        .willem__cover-image-extra {
+        .willem__cover-image, .willem__cover-image-extra {
             pointer-events: none;
             object-fit: cover;
             width: 100%;
@@ -214,17 +166,9 @@
             left: 0;
         }
 
-        .willem__cover-image-extra.is--1 {
-            z-index: 3;
-        }
-
-        .willem__cover-image-extra.is--2 {
-            z-index: 2;
-        }
-
-        .willem__cover-image-extra.is--3 {
-            z-index: 1;
-        }
+        .willem__cover-image-extra.is--1 { z-index: 3; }
+        .willem__cover-image-extra.is--2 { z-index: 2; }
+        .willem__cover-image-extra.is--3 { z-index: 1; }
 
         /* =========================================
            SECTION 2: URBANIST STYLES
@@ -283,33 +227,12 @@
             line-height: 1.3;
         }
 
-        #urbanist-integration .desc-1 {
-            margin-top: 2rem;
-        }
+        #urbanist-integration .desc-1 { margin-top: 2rem; }
+        #urbanist-integration .desc-2 { position: absolute; bottom: 5vh; left: min(40vw, 300px); }
+        #urbanist-integration .desc-3 { position: absolute; top: 50%; right: 10vw; }
 
-        #urbanist-integration .desc-2 {
-            position: absolute;
-            bottom: 5vh;
-            left: min(40vw, 300px);
-        }
-
-        #urbanist-integration .desc-3 {
-            position: absolute;
-            top: 50%;
-            right: 10vw;
-        }
-
-        #panes-container {
-            width: 300vw;
-            display: flex;
-            height: 100%;
-        }
-
-        .pane {
-            position: relative;
-            height: 100%;
-            width: 100vw;
-        }
+        #panes-container { width: 300vw; display: flex; height: 100%; }
+        .pane { position: relative; height: 100%; width: 100vw; }
 
         .urbanist-floating-img {
             position: absolute;
@@ -328,9 +251,7 @@
             width: max(15vw, 300px);
         }
 
-        .pane:nth-of-type(3) .urbanist-floating-img {
-            translate: -150% -50%;
-        }
+        .pane:nth-of-type(3) .urbanist-floating-img { translate: -150% -50%; }
 
         /* =========================================
            SECTION 3: HISTORY STYLES
@@ -372,9 +293,7 @@
             width: fit-content;
         }
 
-        #scroll-section .btn:hover {
-            background-color: rgb(243, 87, 87);
-        }
+        #scroll-section .btn:hover { background-color: rgb(243, 87, 87); }
 
         .line-svg {
             grid-row: 1;
@@ -449,50 +368,15 @@
             margin: 0 0 2em;
         }
 
-        .box-1 {
-            grid-column: 3 / span 3;
-            grid-row: span 2;
-        }
+        .box-1 { grid-column: 3 / span 3; grid-row: span 2; }
+        .image-1 { grid-column: 1 / span 2; grid-row: 2 / span 2; margin-top: 100px; }
+        .image-2 { align-self: end; grid-column: 6 / span 1; grid-row: 5; }
+        .image-3 { grid-column: 1 / span 2; justify-self: end; margin-top: 3rem; }
+        .box-2 { grid-column: 2 / span 3; margin-top: 3rem; grid-row: span 2; }
+        .box-3 { grid-column: 3 / span 3; margin-top: 8em; }
+        .box-4 { grid-column: 1 / span 3; margin-top: 12rem; margin-bottom: -5rem; }
 
-        .image-1 {
-            grid-column: 1 / span 2;
-            grid-row: 2 / span 2;
-            margin-top: 100px;
-        }
-
-        .image-2 {
-            align-self: end;
-            grid-column: 6 / span 1;
-            grid-row: 5;
-        }
-
-        .image-3 {
-            grid-column: 1 / span 2;
-            justify-self: end;
-            margin-top: 3rem;
-        }
-
-        .box-2 {
-            grid-column: 2 / span 3;
-            margin-top: 3rem;
-            grid-row: span 2;
-        }
-
-        .box-3 {
-            grid-column: 3 / span 3;
-            margin-top: 8em;
-        }
-
-        .box-4 {
-            grid-column: 1 / span 3;
-            margin-top: 12rem;
-            margin-bottom: -5rem;
-        }
-
-        .bottom-spacer {
-            height: 10vh;
-        }
-
+        .bottom-spacer { height: 10vh; }
 
         /* =========================================
            SECTION 4: PERSPECTIVE ZOOM STYLES
@@ -547,77 +431,18 @@
             display: block;
         }
 
-        .zoom-item:nth-child(2) {
-            left: 15vw;
-            top: 21%;
-            width: 15vw;
-        }
-
-        .zoom-item:nth-child(3) {
-            left: 29%;
-            top: 15%;
-            width: 12vw;
-        }
-
-        .zoom-item:nth-child(4) {
-            left: 36%;
-            top: 3%;
-            width: 15vw;
-        }
-
-        .zoom-item:nth-child(5) {
-            right: 30%;
-            top: 11%;
-            width: 10vw;
-        }
-
-        .zoom-item:nth-child(6) {
-            right: 7%;
-            top: 28%;
-            width: 18vw;
-        }
-
-        .zoom-item:nth-child(7) {
-            bottom: 32%;
-            right: 3.5%;
-            width: 8vw;
-        }
-
-        .zoom-item:nth-child(8) {
-            bottom: 13.5%;
-            left: 16%;
-            width: 14vw;
-        }
-
-        .zoom-item:nth-child(9) {
-            bottom: 24%;
-            left: 29%;
-            width: 9vw;
-        }
-
-        .zoom-item:nth-child(10) {
-            bottom: 46%;
-            left: 7.5%;
-            width: 8vw;
-        }
-
-        .zoom-item:nth-child(11) {
-            bottom: 5.5%;
-            right: 15%;
-            width: 18vw;
-        }
-
-        .zoom-item:nth-child(12) {
-            bottom: 10.5%;
-            right: 38%;
-            width: 12vw;
-        }
-
-        .zoom-item:nth-child(13) {
-            right: 4%;
-            top: 5%;
-            width: 9vw;
-        }
+        .zoom-item:nth-child(2) { left: 15vw; top: 21%; width: 15vw; }
+        .zoom-item:nth-child(3) { left: 29%; top: 15%; width: 12vw; }
+        .zoom-item:nth-child(4) { left: 36%; top: 3%; width: 15vw; }
+        .zoom-item:nth-child(5) { right: 30%; top: 11%; width: 10vw; }
+        .zoom-item:nth-child(6) { right: 7%; top: 28%; width: 18vw; }
+        .zoom-item:nth-child(7) { bottom: 32%; right: 3.5%; width: 8vw; }
+        .zoom-item:nth-child(8) { bottom: 13.5%; left: 16%; width: 14vw; }
+        .zoom-item:nth-child(9) { bottom: 24%; left: 29%; width: 9vw; }
+        .zoom-item:nth-child(10) { bottom: 46%; left: 7.5%; width: 8vw; }
+        .zoom-item:nth-child(11) { bottom: 5.5%; right: 15%; width: 18vw; }
+        .zoom-item:nth-child(12) { bottom: 10.5%; right: 38%; width: 12vw; }
+        .zoom-item:nth-child(13) { right: 4%; top: 5%; width: 9vw; }
 
         .section-stick {
             height: 100vh;
@@ -640,24 +465,12 @@
         }
 
         @media (min-width: 768px) {
-            .reveal-text-style {
-                font-size: 4.5rem;
-            }
-
+            .reveal-text-style { font-size: 4.5rem; }
         }
 
-        .opacity-reveal {
-            opacity: 0.2;
-        }
-
-        .opacity-reveal span {
-            transition: opacity 0.1s;
-        }
-
-        .spacer-black {
-            height: 50vh;
-            background: #000;
-        }
+        .opacity-reveal { opacity: 0.2; }
+        .opacity-reveal span { transition: opacity 0.1s; }
+        .spacer-black { height: 50vh; background: #000; }
 
         /* =========================================
            SECTION 5: ALICE INTEGRATION STYLES
@@ -698,10 +511,7 @@
             padding: 6.25rem 0;
         }
 
-        #alice-wrapper .article {
-            max-width: 31.25rem;
-            padding: 0 1.5rem;
-        }
+        #alice-wrapper .article { max-width: 31.25rem; padding: 0 1.5rem; }
 
         #alice-wrapper .hero-reveal {
             background-color: var(--color-black);
@@ -748,20 +558,9 @@
             margin: 0;
         }
 
-        #alice-wrapper .hero-reveal_split_item p {
-            margin: 0;
-        }
-
-        #alice-wrapper .hero-reveal_split_item:nth-child(1) {
-            clip-path: inset(0 0 50% 0);
-        }
-
-        #alice-wrapper .hero-reveal_split_item:nth-child(2) {
-            clip-path: inset(50% 0 0 0);
-            left: 0;
-            position: absolute;
-            top: 0;
-        }
+        #alice-wrapper .hero-reveal_split_item p { margin: 0; }
+        #alice-wrapper .hero-reveal_split_item:nth-child(1) { clip-path: inset(0 0 50% 0); }
+        #alice-wrapper .hero-reveal_split_item:nth-child(2) { clip-path: inset(50% 0 0 0); left: 0; position: absolute; top: 0; }
 
         #alice-wrapper .hero-reveal__content {
             color: var(--color-white);
@@ -801,45 +600,16 @@
             will-change: transform;
         }
 
-        /* Alice Parallax Elements */
-        #alice-wrapper .hero-reveal__parallax-clock {
-            left: -6rem;
-            top: -25rem;
-        }
-
-        #alice-wrapper .hero-reveal__parallax-book {
-            left: -12.5rem;
-            top: -25rem;
-        }
-
-        #alice-wrapper .hero-reveal__parallax-alice {
-            left: 50%;
-            transform: translateX(-50%);
-            top: -31.25rem;
-            max-width: 200px;
-        }
-
-        #alice-wrapper .hero-reveal__parallax-kattle {
-            left: 31.25rem;
-            filter: blur(2px);
-            top: -18.75rem;
-        }
-
-        #alice-wrapper .hero-reveal__parallax-card {
-            left: 25rem;
-            filter: blur(2px);
-            z-index: 1;
-            top: -25rem;
-        }
+        #alice-wrapper .hero-reveal__parallax-clock { left: -6rem; top: -25rem; }
+        #alice-wrapper .hero-reveal__parallax-book { left: -12.5rem; top: -25rem; }
+        #alice-wrapper .hero-reveal__parallax-alice { left: 50%; transform: translateX(-50%); top: -31.25rem; max-width: 200px; }
+        #alice-wrapper .hero-reveal__parallax-kattle { left: 31.25rem; filter: blur(2px); top: -18.75rem; }
+        #alice-wrapper .hero-reveal__parallax-card { left: 25rem; filter: blur(2px); z-index: 1; top: -25rem; }
 
         /* =========================================
            LOGO STYLES
            ========================================= */
-        .header__menu h1.logo {
-            margin: 0;
-            line-height: 1;
-        }
-
+        .header__menu h1.logo { margin: 0; line-height: 1; }
         .header__menu h1.logo a {
             font-family: 'Roboto', sans-serif;
             font-weight: 900;
@@ -851,11 +621,7 @@
             display: inline-block;
             transition: color 0.3s ease, transform 0.3s ease;
         }
-
-        .header__menu h1.logo a:hover {
-            color: var(--theme-title, #e0e0e0);
-        }
-
+        .header__menu h1.logo a:hover { color: var(--theme-title, #e0e0e0); }
 
         /* =========================================
            SECTION 6: CAROUSEL STYLES
@@ -884,43 +650,18 @@
             width: 100vw;
             height: 100vh;
             z-index: 1;
-            /* Base z-index */
             background: #dbdbdb;
             overflow: hidden;
             will-change: clip-path;
-            /* Optimizes animation performance */
         }
 
-        /* Initial states for stacking */
-        /* Slide 1 is visible by default */
-        #slide-1 {
-            z-index: 1;
-            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-        }
+        #slide-1 { z-index: 1; clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }
+        #slide-2 { z-index: 2; clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%); }
+        #slide-3 { z-index: 3; clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%); }
+        #slide-4 { z-index: 4; clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%); }
 
-        /* Slides 2, 3, 4 are hidden at the bottom */
-        #slide-2 {
-            z-index: 2;
-            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
-        }
-
-        #slide-3 {
-            z-index: 3;
-            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
-        }
-
-        #slide-4 {
-            z-index: 4;
-            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
-        }
-
-        #carousel-section .slide.dark {
-            background: #0c0c0c;
-        }
-
-        #carousel-section .slide.light {
-            background: #dbdbdb;
-        }
+        #carousel-section .slide.dark { background: #0c0c0c; }
+        #carousel-section .slide.light { background: #dbdbdb; }
 
         #carousel-section .slide-content {
             position: absolute;
@@ -942,9 +683,7 @@
             line-height: 0.9;
         }
 
-        #carousel-section .slide.dark .slide-content h1 {
-            color: #dbdbdb;
-        }
+        #carousel-section .slide.dark .slide-content h1 { color: #dbdbdb; }
 
         #carousel-section .slide-img {
             position: absolute;
@@ -962,17 +701,8 @@
             object-fit: cover;
         }
 
-        #carousel-section .slide-img-1 {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-20deg);
-        }
-
-        #carousel-section .slide-img-2 {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(20deg);
-        }
+        #carousel-section .slide-img-1 { top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-20deg); }
+        #carousel-section .slide-img-2 { top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(20deg); }
 
         .scroll-hint {
             position: absolute;
@@ -998,14 +728,9 @@
             overflow: hidden;
             background-color: #000;
             z-index: 80;
-            /* Above Carousel */
         }
 
-        #liquid-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
+        #liquid-canvas { width: 100%; height: 100%; display: block; }
 
         .liquid-overlay {
             position: absolute;
@@ -1047,7 +772,6 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-            /* Ensure it catches no pointer events so links work */
             pointer-events: none;
         }
 
@@ -1078,7 +802,6 @@
             letter-spacing: -0.04em;
             text-transform: uppercase;
             opacity: 0;
-            /* Animated in with GSAP */
             transform: translateY(50px);
         }
 
@@ -1092,35 +815,17 @@
             font-size: 1.25rem;
         }
 
-        .footer-links {
-            display: flex;
-            gap: 4rem;
-        }
-
-        .footer-links ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.5rem;
-            overflow: hidden;
-        }
-
+        .footer-links { display: flex; gap: 4rem; }
+        .footer-links ul { list-style: none; padding: 0; margin: 0; }
+        .footer-links li { margin-bottom: 0.5rem; overflow: hidden; }
         .footer-links a {
             color: #888;
             text-decoration: none;
             display: inline-block;
             transition: color 0.3s, transform 0.3s;
             transform: translateY(100%);
-            /* Animated in */
         }
-
-        .footer-links a:hover {
-            color: #fff;
-            transform: translateX(-10px);
-        }
+        .footer-links a:hover { color: #fff; transform: translateX(-10px); }
 
         .footer-bottom {
             display: flex;
@@ -1137,210 +842,64 @@
            RESPONSIVE MEDIA QUERIES (NEW ADDITION)
            ========================================= */
 
-        /* Tablet and smaller */
         @media (max-width: 1024px) {
-            #scroll-section h2 {
-                width: 80%;
-                font-size: 48px;
-            }
-
-            .container {
-                padding: 0 2rem;
-            }
+            #scroll-section h2 { width: 80%; font-size: 48px; }
+            .container { padding: 0 2rem; }
         }
 
-        /* Mobile Devices */
         @media (max-width: 768px) {
-
-            /* NEW: FIX TITLE SIZES ON MOBILE */
-            .hero__title, 
-            .hero__title span {
-                font-size: 15vw !important; /* Forces the main video title to be smaller */
+            .hero__title, .hero__title span { font-size: 15vw !important; }
+            .header__menu h1.logo a { font-size: 1.5rem; }
+            #scroll-section { padding-block-start: 5vh; }
+            .line-svg { display: none; }
+            .layout-container { display: flex; flex-direction: column; gap: 40px; padding-top: 4rem; }
+            .box-1, .box-2, .box-3, .box-4, .image-1, .image-2, .image-3 {
+                grid-column: auto; grid-row: auto; margin: 0 !important; width: 100%; box-sizing: border-box;
             }
-
-            .header__menu h1.logo a {
-                font-size: 1.5rem; /* Forces the top-left logo to be smaller */
+            .image-2, .image-3 { justify-self: center; align-self: center; }
+            #scroll-section h2 { width: 100%; text-align: center; font-size: 36px; padding-top: 20px; }
+            .box { padding: 2rem; }
+            .box h3 { font-size: 32px; }
+            #urbanist-integration .content-layer { padding-inline: 5vw; display: flex; flex-direction: column; justify-content: center; }
+            #urbanist-integration h1 { font-size: 18vw; }
+            #urbanist-integration p { width: 90vw; font-size: 16px; }
+            #urbanist-integration .desc-2, #urbanist-integration .desc-3 {
+                position: relative; bottom: auto; left: auto; right: auto; top: auto; margin-top: 1.5rem;
             }
-
-
-            /* 1. Journey / Grid Section Fixes */
-            #scroll-section {
-                padding-block-start: 5vh;
-            }
-
-            .line-svg {
-                display: none; /* Hide the complex line on mobile as the grid breaks */
-            }
-
-            .layout-container {
-                display: flex;
-                flex-direction: column;
-                gap: 40px;
-                padding-top: 4rem;
-            }
-
-            /* Reset Grid Placements for Stacked Layout */
-            .box-1, .box-2, .box-3, .box-4, 
-            .image-1, .image-2, .image-3 {
-                grid-column: auto;
-                grid-row: auto;
-                margin: 0 !important; /* Reset margins */
-                width: 100%;
-                box-sizing: border-box;
-            }
-
-            .image-2, .image-3 {
-                justify-self: center;
-                align-self: center;
-            }
-
-            #scroll-section h2 {
-                width: 100%;
-                text-align: center;
-                font-size: 36px;
-                padding-top: 20px;
-            }
-
-            .box {
-                padding: 2rem;
-            }
-
-            .box h3 {
-                font-size: 32px;
-            }
-
-            /* 2. Urbanist Section Fixes */
-            #urbanist-integration .content-layer {
-                padding-inline: 5vw;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-            }
-
-            #urbanist-integration h1 {
-                font-size: 18vw;
-            }
-
-            #urbanist-integration p {
-                width: 90vw;
-                font-size: 16px;
-            }
-
-            /* Stack descriptions naturally instead of absolute positioning */
-            #urbanist-integration .desc-2,
-            #urbanist-integration .desc-3 {
-                position: relative;
-                bottom: auto;
-                left: auto;
-                right: auto;
-                top: auto;
-                margin-top: 1.5rem;
-            }
-
             .urbanist-floating-img {
-                width: 50vw;
-                top: 75%;
-                left: 50%;
-                right: auto;
-                translate: -50% -50% !important; /* Force center */
+                width: 50vw; top: 75%; left: 50%; right: auto; translate: -50% -50% !important;
             }
-            
-            .pane:nth-of-type(2) .urbanist-floating-img,
-            .pane:nth-of-type(3) .urbanist-floating-img {
-                  translate: -50% -50% !important;
+            .pane:nth-of-type(2) .urbanist-floating-img, .pane:nth-of-type(3) .urbanist-floating-img {
+                translate: -50% -50% !important;
             }
-
-            /* 3. Perspective Zoom Fixes */
-            .heading-zoom {
-                font-size: 3rem;
-            }
-
-            /* MOVED FROM INLINE STYLE */
-            .zoom-container {
-                background-color: white;
-            }
-            
-            /* Make floating images larger on mobile */
-            .zoom-item {
-                width: 40vw !important; /* Override individual widths */
-                max-height: 30vh;
-            }
-
-            /* Reposition slightly to avoid clustering too much */
+            .heading-zoom { font-size: 3rem; }
+            .zoom-container { background-color: white; }
+            .zoom-item { width: 40vw !important; max-height: 30vh; }
             .zoom-item:nth-child(2) { left: 5%; top: 15%; }
             .zoom-item:nth-child(3) { left: 55%; top: 10%; }
             .zoom-item:nth-child(4) { left: 10%; top: 60%; }
             .zoom-item:nth-child(5) { right: 5%; top: 40%; }
             .zoom-item:nth-child(6) { right: 50%; top: 80%; }
+            .reveal-text-style { font-size: 1.8rem; width: 90%; }
+            .section-stick { margin-bottom: -1100px; }
+            #carousel-section .slide-content h1 { font-size: 20vw; }
+            #carousel-section .slide-img { width: 200px; height: 100vh; }
+            #carousel-section .slide-img img { width: 200px; height: 400px; }
+            .footer-content { grid-template-columns: 1fr; gap: 2rem; padding-top: 2rem; }
+            .footer-left { height: auto; text-align: center; align-items: center; }
+            .footer-right { height: auto; align-items: center; text-align: center; }
+            .footer-big-text { font-size: 18vw; }
+            .footer-links { flex-direction: column; gap: 2rem; margin-top: 2rem; }
+            .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; padding-bottom: 2rem; }
+            #alice-wrapper .intro__heading { font-size: 3rem; }
+            #alice-wrapper .hero-reveal__header { font-size: 4rem; }
             
-            .reveal-text-style {
-                font-size: 1.8rem;
-                width: 90%;
-            }
-
-            /* MOVED FROM INLINE STYLE - Fixes gap on mobile only */
-            .section-stick {
-                margin-bottom: -1100px;
-            }
-
-            /* 4. Carousel Fixes */
-            #carousel-section .slide-content h1 {
-                font-size: 20vw;
-            }
-
-            #carousel-section .slide-img {
-                width: 200px;
-                height: 100vh;
-            }
-
-            #carousel-section .slide-img img {
-                width: 200px;
-                height: 400px;
-            }
-
-            /* 5. Footer Fixes */
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-                padding-top: 2rem;
-            }
-
-            .footer-left {
-                height: auto;
-                text-align: center;
-                align-items: center;
-            }
-
-            .footer-right {
-                height: auto;
-                align-items: center;
-                text-align: center;
-            }
-
-            .footer-big-text {
-                font-size: 18vw;
-            }
-
-            .footer-links {
-                flex-direction: column;
-                gap: 2rem;
-                margin-top: 2rem;
-            }
-            
-            .footer-bottom {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-                padding-bottom: 2rem;
-            }
-            
-            /* Alice Section Text Size */
-            #alice-wrapper .intro__heading {
-                font-size: 3rem;
-            }
-            
-            #alice-wrapper .hero-reveal__header {
-                font-size: 4rem;
+            /* Responsive Marker Adjustment */
+            #marker-3d-canvas {
+                width: 60vh;
+                height: 60vh;
+                right: -10vw; /* Push slightly off screen for mobile */
+                top: 60%; /* Lower it slightly */
             }
         }
     </style>
@@ -1349,6 +908,17 @@
 <body class="is-loading">
 
     <canvas id="global-cursor-canvas"></canvas>
+    
+    <model-viewer 
+        id="marker-3d-canvas" 
+        src="office-decor-organiser-pen/source/office_decor_organiser_pen (1).glb" 
+        alt="3D Marker Pen" 
+        auto-rotate 
+        camera-controls 
+        disable-zoom
+        shadow-intensity="1"
+        style="width: 80vh; height: 80vh;">
+    </model-viewer>
 
     <section class="loader-screen">
         <div class="loader-content">
@@ -1443,7 +1013,7 @@
 
                         <img src="image3.jpg" class="image-3" width="400" height="400" alt="Urban creative space" />
 
-                        <div class="box box-4">
+                        <div style="margin-bottom: 20px;" class="box box-4">
                             <h3>A New Standard</h3>
                             <p>Today, Marker isn't just a typeface; it is a movement. Used by creators worldwide to
                                 inject personality into the pixelated void, turning standard headings into visual
@@ -1496,8 +1066,8 @@
             </section>
             <section class="bottom-spacer"></section>
 
-            <div id="perspective-wrap">
-                <div class="zoom-container">
+            <div style="background-color: white;" id="perspective-wrap">
+                <div style="background-color: white;" class="zoom-container">
                     <h1 class="heading-zoom" style="color: rgb(43, 43, 43);">MARKER ARTS<br /></h1>
 
                     <div class="zoom-item" data-layer="2">
@@ -1550,14 +1120,14 @@
                     </div>
                 </div>
 
-                <section class="section-stick">
+                <section style="margin-bottom: -400px;" class="section-stick">
                     <p class="opacity-reveal reveal-text-style">
                         If you’re bold, a single marker stroke will break the grid, steal the show, and change
                         everything.
                     </p>
                 </section>
 
-                <div class="spacer-black"></div>
+                <!-- <div class="spacer-black"></div> -->
             </div>
             <div id="alice-wrapper">
                 <section class="intro">
@@ -2230,6 +1800,23 @@
             app.liquidPlane.material.roughness = 0.25
             app.liquidPlane.uniforms.displacementScale.value = 5
             app.setRain(false)
+        }
+    </script>
+
+    <script>
+        const modelViewer = document.querySelector('#marker-3d-canvas');
+
+        if(modelViewer) {
+            gsap.to(modelViewer, {
+                opacity: 0,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: "#urbanist-integration", // Trigger when Section 3 hits viewport
+                    start: "top bottom", // Start fading when section 3 top hits bottom of screen
+                    end: "top center",   // Finish fading when section 3 top hits center
+                    scrub: true
+                }
+            });
         }
     </script>
 </body>
