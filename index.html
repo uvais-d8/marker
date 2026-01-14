@@ -105,16 +105,16 @@
    ========================================= */
         #marker-3d-canvas {
             position: fixed;
-            top: 50%;
+            top: 40%;
             /* Vertically center */
-            right: -5vw;
+            right: 0vw;
             /* Position on right (slightly off-screen for style) */
             transform: translateY(-50%);
             /* Center alignment adjustment */
 
             /* Desktop Size */
-            width: 80vh;
-            height: 80vh;
+            width: 60vh;
+            height: 60vh;
 
             /* Layering */
             z-index: 5;
@@ -1403,7 +1403,8 @@
                 height: 60vh;
                 right: -10vw;
                 /* Push slightly off screen for mobile */
-                top: 60%;
+                top: 50%;
+                
                 /* Lower it slightly */
             }
         }
@@ -1873,113 +1874,25 @@
             z-index: 10;
             text-transform: uppercase;
         }
-        /* --- MOBILE ERASER FIXES --- */
-#hero-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%; 
-    height: 100%;
-    z-index: 5; 
-    touch-action: none; /* VITAL: Stops mobile scrolling */
-    user-select: none;  /* Prevents highlighting */
-    -webkit-user-select: none;
-}
- 
-.hero__video {
-    z-index: 1;
+        @media (max-width: 768px) {
+    .mobile-hidden {
+        display: none !important;
+    }
 }
     </style>
 
 
 </head>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const canvas = document.getElementById('hero-canvas');
-        if (!canvas) return;
 
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
-
-        // --- 1. SETUP CANVAS WITH HIGH-DPI SUPPORT ---
-        const initCanvas = () => {
-            const dpr = window.devicePixelRatio || 1;
-            const rect = canvas.getBoundingClientRect();
-
-            // Set actual size in memory (scaled to account for extra pixels)
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-
-            // Normalize coordinate system to use css pixels
-            ctx.scale(dpr, dpr);
-
-            // Fill with White
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, rect.width, rect.height);
-
-            // Switch to Eraser Mode
-            ctx.globalCompositeOperation = 'destination-out';
-            
-            console.log("Canvas Initialized. DPR:", dpr);
-        };
-
-        // --- 2. THE DRAWING FUNCTION ---
-        const draw = (e) => {
-            // Prevent default behavior (scrolling)
-            if (e.cancelable) e.preventDefault();
-
-            // Get correct coordinates
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            ctx.beginPath();
-            // Brush size: 60px for mobile, 100px for desktop
-            const radius = window.innerWidth < 768 ? 50 : 100;
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fill();
-        };
-
-        // --- 3. UNIFIED POINTER EVENTS (Works for Mouse & Touch) ---
-        
-        // Start drawing
-        canvas.addEventListener('pointerdown', (e) => {
-            isDrawing = true;
-            canvas.setPointerCapture(e.pointerId); // Keeps tracking even if finger leaves element bounds
-            draw(e);
-        });
-
-        // Draw while moving
-        canvas.addEventListener('pointermove', (e) => {
-            if (isDrawing) draw(e);
-        });
-
-        // Stop drawing
-        canvas.addEventListener('pointerup', (e) => {
-            isDrawing = false;
-            canvas.releasePointerCapture(e.pointerId);
-        });
-
-        // Run initialization
-        initCanvas();
-
-        // Handle resize (Wait 200ms after resize stops to prevent lag)
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(initCanvas, 200);
-        });
-    });
-</script>
 <body class="is-loading">
 
     <canvas id="global-cursor-canvas"></canvas>
 
-    <model-viewer id="marker-3d-canvas" src="office-decor-organiser-pen/source/office_decor_organiser_pen (1).glb"
+    <!-- <model-viewer id="marker-3d-canvas" src="office-decor-organiser-pen/source/office_decor_organiser_pen (1).glb"
         alt="3D Marker Pen" auto-rotate camera-controls disable-zoom shadow-intensity="1"
         style="width: 80vh; height: 80vh;">
-    </model-viewer>
+    </model-viewer> -->
+    <img id="marker-3d-canvas"  src="./assets/—Pngtree—sharp tip marker pen_15425294.png" alt="">
     <section class="loader-screen">
         <div class="loader-content">
             <div class="willem__h1">
@@ -1992,10 +1905,10 @@
                     <div class="willem-loader__box-inner">
                         <div class="willem__growing-image">
                             <div class="willem__growing-image-wrap">
-                                <img class="willem__cover-image-extra is--1" src="marker1.jpg" loading="lazy" alt="">
-                                <img class="willem__cover-image-extra is--2" src="marker2.jpeg" loading="lazy" alt="">
-                                <img class="willem__cover-image-extra is--3" src="marker3.webp" loading="lazy" alt="">
-                                <img class="willem__cover-image" src='whitee.png' loading="lazy" alt="">
+                                <img class="willem__cover-image-extra is--1" src="./assets/marker1.jpg" loading="lazy" alt="">
+                                <img class="willem__cover-image-extra is--2" src="./assets/marker2.jpeg" loading="lazy" alt="">
+                                <img class="willem__cover-image-extra is--3" src="./assets/marker3.webp" loading="lazy" alt="">
+                                <img class="willem__cover-image" src='./assets/whitee.png' loading="lazy" alt="">
                             </div>
                         </div>
                     </div>
@@ -2060,13 +1973,13 @@
 
                 <div id="panes-container">
                     <div class="pane">
-                        <img class="urbanist-floating-img" src="blue.png" alt="Marker design inspiration 1">
+                        <img class="urbanist-floating-img" src="./assets/blue.png" alt="Marker design inspiration 1">
                     </div>
                     <div class="pane">
-                        <img class="urbanist-floating-img" src="orange.png" alt="Marker design inspiration 2">
+                        <img class="urbanist-floating-img" src="./assets/orange.png" alt="Marker design inspiration 2">
                     </div>
                     <div class="pane">
-                        <img class="urbanist-floating-img" src="green.png" alt="Marker design inspiration 3">
+                        <img class="urbanist-floating-img" src="./assets/green.png" alt="Marker design inspiration 3">
                     </div>
                 </div>
             </section>
@@ -2090,7 +2003,7 @@
                             importance,
                             making it ideal for warnings and critical highlights.
                         </p>
-                        <p>
+                        <p class="mobile-hidden">
                             Its strong visual impact ensures immediate focus, so it is used carefully and with clear
                             intention.
                         </p>
@@ -2100,7 +2013,7 @@
                             BLACK symbolizes clarity and authority. It is widely used for writing, outlining, and clear
                             communication due to its high readability.
                         </p>
-                        <p>
+                        <p class="mobile-hidden">
                             Because of its professional appearance, black is preferred for formal and final work.
                         </p>
 
@@ -2109,7 +2022,7 @@
                             BLUE represents trust and calmness. It is commonly used for general writing and explanations
                             without creating visual stress.
                         </p>
-                        <p>
+                        <p class="mobile-hidden">
                             This colour is suitable for notes and planning where balance and clarity are needed.
                         </p>
 
@@ -2117,7 +2030,7 @@
                         <p>
                             GREEN stands for positivity and approval. It is often used to show correctness or progress.
                         </p>
-                        <p>
+                        <p class="mobile-hidden">
                             With lower urgency, green works best for supportive and secondary highlights.
                         </p>
                     </article>
@@ -2161,7 +2074,7 @@
                                             settled deep into the material, giving the line its strong and lasting
                                             presence.
                                         </p>
-                                        <p>
+                        <p class="mobile-hidden">
                                             As the marker moved, the ink revealed its character — rich in color,
                                             balanced in density, and smooth
                                             in motion. Each stroke carried clarity, allowing ideas to take shape without
@@ -2175,7 +2088,7 @@
                                             across different
                                             surfaces and textures.
                                         </p>
-                                        <p>
+                        <p class="mobile-hidden">
                                             <B>“This is not just ink,”</B> the creator realized, <B>“it is expression
                                                 itself.”</B>
                                             With every line drawn, the
@@ -2199,14 +2112,14 @@
                             quickly
                             without interruption, especially in professional and creative environments.
                         </p>
-                        <p>
+                        <p class="mobile-hidden">
                             The consistent flow of marker ink helps define shapes and outlines with precision. Once
                             applied,
                             the ink penetrates the surface fibers, making corrections difficult and encouraging
                             confident,
                             deliberate strokes.
                         </p>
-                        <p>
+                        <p class="mobile-hidden">
                             Due to its high pigment concentration, marker ink resists fading over time. This makes it
                             suitable
                             for signage, illustrations, and notes that require long-lasting visibility.
@@ -2219,7 +2132,7 @@
                             ease of use have made them a standard choice for communication, planning, and visual
                             expression.
                         </p>
-                        <p>
+                        <p class="mobile-hidden">
                             Over time, advancements in ink formulation—such as alcohol-based and water-based inks—have
                             improved
                             durability, color richness, and environmental safety, ensuring markers remain relevant and
@@ -3010,323 +2923,7 @@
             });
         }
     </script>
-    <script>
-        class Slider {
-            constructor() {
-                this.bindAll()
-
-                // Shader code
-                this.vert = `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-    `
-
-                this.frag = `
-    varying vec2 vUv;
-    uniform sampler2D texture1;
-    uniform sampler2D texture2;
-    uniform sampler2D disp;
-    uniform float dispPower;
-    uniform float intensity;
-    void main() {
-      vec2 uv = vUv;
-      vec4 disp = texture2D(disp, uv);
-      vec2 dispVec = vec2(disp.x, disp.y);
-      vec2 distPos1 = uv + (dispVec * intensity * dispPower);
-      vec2 distPos2 = uv + (dispVec * -(intensity * (1.0 - dispPower)));
-      vec4 _texture1 = texture2D(texture1, distPos1);
-      vec4 _texture2 = texture2D(texture2, distPos2);
-      gl_FragColor = mix(_texture1, _texture2, dispPower);
-    }
-    `
-
-                this.el = document.querySelector('.js-slider')
-                this.inner = this.el.querySelector('.js-slider__inner')
-                this.slides = [...this.el.querySelectorAll('.js-slide')]
-                this.bullets = [...this.el.querySelectorAll('.js-slider-bullet')]
-
-                this.renderer = null
-                this.scene = null
-                this.clock = null
-                this.camera = null
-
-                // YOUR OLD IMAGES MAPPED HERE FOR THE WEBGL TRANSITION
-                this.images = [
-                    'two.jpg',
-                    'image2.webp',
-                    'image3.jpg' // Ensure this path is correct relative to your HTML
-                ]
-
-                this.data = {
-                    current: 0,
-                    next: 1,
-                    total: this.images.length - 1,
-                    delta: 0
-                }
-
-                this.state = {
-                    animating: false,
-                    text: false,
-                    initial: true
-                }
-
-                this.textures = null
-
-                this.init()
-            }
-
-            bindAll() {
-                ['render', 'nextSlide']
-                    .forEach(fn => this[fn] = this[fn].bind(this))
-            }
-
-            setStyles() {
-                this.slides.forEach((slide, index) => {
-                    if (index === 0) return
-                    gsap.set(slide, { autoAlpha: 0 })
-                })
-
-                this.bullets.forEach((bullet, index) => {
-                    if (index === 0) return
-
-                    const txt = bullet.querySelector('.js-slider-bullet__text')
-                    const line = bullet.querySelector('.js-slider-bullet__line')
-
-                    gsap.set(txt, { alpha: 0.25 })
-                    gsap.set(line, { scaleX: 0, transformOrigin: 'left' })
-                })
-            }
-
-            cameraSetup() {
-                this.camera = new THREE.OrthographicCamera(
-                    this.el.offsetWidth / -2,
-                    this.el.offsetWidth / 2,
-                    this.el.offsetHeight / 2,
-                    this.el.offsetHeight / -2,
-                    1,
-                    1000
-                )
-                this.camera.lookAt(this.scene.position)
-                this.camera.position.z = 1
-            }
-
-            setup() {
-                this.scene = new THREE.Scene()
-                this.clock = new THREE.Clock(true)
-
-                this.renderer = new THREE.WebGLRenderer({ alpha: true })
-                this.renderer.setPixelRatio(window.devicePixelRatio)
-                this.renderer.setSize(this.el.offsetWidth, this.el.offsetHeight)
-
-                this.inner.appendChild(this.renderer.domElement)
-            }
-
-            loadTextures() {
-                const loader = new THREE.TextureLoader()
-                loader.crossOrigin = ''
-
-                this.textures = []
-                this.images.forEach((image, index) => {
-                    const texture = loader.load(image + '?v=' + Date.now(), this.render)
-                    texture.minFilter = THREE.LinearFilter
-                    texture.generateMipmaps = false
-
-                    if (index === 0 && this.mat) {
-                        this.mat.uniforms.size.value = [
-                            texture.image.naturalWidth,
-                            texture.image.naturalHeight
-                        ]
-                    }
-                    this.textures.push(texture)
-                })
-
-                this.disp = loader.load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/58281/rock-_disp.png', this.render)
-                this.disp.magFilter = this.disp.minFilter = THREE.LinearFilter
-                this.disp.wrapS = this.disp.wrapT = THREE.RepeatWrapping
-            }
-
-            createMesh() {
-                this.mat = new THREE.ShaderMaterial({
-                    uniforms: {
-                        dispPower: { type: 'f', value: 0.0 },
-                        intensity: { type: 'f', value: 0.5 },
-                        res: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-                        size: { value: new THREE.Vector2(1, 1) },
-                        texture1: { type: 't', value: this.textures[0] },
-                        texture2: { type: 't', value: this.textures[1] },
-                        disp: { type: 't', value: this.disp }
-                    },
-                    transparent: true,
-                    vertexShader: this.vert,
-                    fragmentShader: this.frag
-                })
-
-                const geometry = new THREE.PlaneBufferGeometry(
-                    this.el.offsetWidth,
-                    this.el.offsetHeight,
-                    1
-                )
-
-                const mesh = new THREE.Mesh(geometry, this.mat)
-                this.scene.add(mesh)
-            }
-
-            transitionNext() {
-                gsap.to(this.mat.uniforms.dispPower, {
-                    duration: 2.5,
-                    value: 1,
-                    ease: "expo.inOut",
-                    onUpdate: this.render,
-                    onComplete: () => {
-                        this.mat.uniforms.dispPower.value = 0.0
-                        this.changeTexture()
-                        this.render.bind(this)
-                        this.state.animating = false
-                    }
-                })
-
-                const current = this.slides[this.data.current]
-                const next = this.slides[this.data.next]
-
-                const currentImages = current.querySelectorAll('.js-slide__img')
-                const nextImages = next.querySelectorAll('.js-slide__img')
-
-                const currentText = current.querySelectorAll('.js-slider__text-line div')
-                const nextText = next.querySelectorAll('.js-slider__text-line div')
-
-                const currentBullet = this.bullets[this.data.current]
-                const nextBullet = this.bullets[this.data.next]
-
-                const currentBulletTxt = currentBullet.querySelectorAll('.js-slider-bullet__text')
-                const nextBulletTxt = nextBullet.querySelectorAll('.js-slider-bullet__text')
-
-                const currentBulletLine = currentBullet.querySelectorAll('.js-slider-bullet__line')
-                const nextBulletLine = nextBullet.querySelectorAll('.js-slider-bullet__line')
-
-                const tl = gsap.timeline({ paused: true })
-
-                if (this.state.initial) {
-                    gsap.to('.js-scroll', {
-                        duration: 1.5,
-                        yPercent: 100,
-                        autoAlpha: 0,
-                        ease: "power4.inOut"
-                    })
-                    this.state.initial = false
-                }
-
-                tl
-                    .fromTo(currentImages, { yPercent: 0, scale: 1 }, {
-                        duration: 1.5,
-                        yPercent: -185,
-                        scaleY: 1.5,
-                        ease: "expo.inOut",
-                        stagger: 0.075
-                    })
-                    .to(currentBulletTxt, {
-                        duration: 1.5,
-                        alpha: 0.25,
-                        ease: "none"
-                    }, 0)
-                    .set(currentBulletLine, { transformOrigin: 'right' }, 0)
-                    .to(currentBulletLine, {
-                        duration: 1.5,
-                        scaleX: 0,
-                        ease: "expo.inOut"
-                    }, 0)
-
-                if (currentText) {
-                    tl.fromTo(currentText, { yPercent: 0 }, {
-                        duration: 2,
-                        yPercent: -100,
-                        ease: "power4.inOut"
-                    }, 0)
-                }
-
-                tl
-                    .set(current, { autoAlpha: 0 })
-                    .set(next, { autoAlpha: 1 }, 1)
-
-                if (nextText) {
-                    tl.fromTo(nextText, { yPercent: 100 }, {
-                        duration: 2,
-                        yPercent: 0,
-                        ease: "power4.out"
-                    }, 1.5)
-                }
-
-                tl
-                    .fromTo(nextImages, { yPercent: 150, scaleY: 1.5 }, {
-                        duration: 1.5,
-                        yPercent: 0,
-                        scaleY: 1,
-                        ease: "expo.inOut",
-                        stagger: 0.075
-                    }, 1)
-                    .to(nextBulletTxt, {
-                        duration: 1.5,
-                        alpha: 1,
-                        ease: "none"
-                    }, 1)
-                    .set(nextBulletLine, { transformOrigin: 'left' }, 1)
-                    .to(nextBulletLine, {
-                        duration: 1.5,
-                        scaleX: 1,
-                        ease: "expo.inOut"
-                    }, 1)
-
-                tl.play()
-            }
-
-            nextSlide() {
-                if (this.state.animating) return
-                this.state.animating = true
-                this.transitionNext()
-                this.data.current = this.data.current === this.data.total ? 0 : this.data.current + 1
-                this.data.next = this.data.current === this.data.total ? 0 : this.data.current + 1
-            }
-
-            changeTexture() {
-                this.mat.uniforms.texture1.value = this.textures[this.data.current]
-                this.mat.uniforms.texture2.value = this.textures[this.data.next]
-            }
-
-            listeners() {
-                // Only scroll when hovering inside the slider to avoid blocking page scroll
-                this.el.addEventListener('wheel', (e) => {
-                    // Simple throttle
-                    if (!this.state.animating) {
-                        this.nextSlide();
-                    }
-                }, { passive: true })
-
-                this.el.addEventListener('click', this.nextSlide)
-            }
-
-            render() {
-                this.renderer.render(this.scene, this.camera)
-            }
-
-            init() {
-                this.setup()
-                this.cameraSetup()
-                this.loadTextures()
-                this.createMesh()
-                this.setStyles()
-                this.render()
-                this.listeners()
-            }
-        }
-
-        // Init classes
-        window.addEventListener('load', () => {
-            const slider = new Slider()
-        });
-    </script>
-    
+   
 </body>
 
 </html>
