@@ -1,12 +1,57 @@
+/* --- MOBILE STYLES FOR CONTENT SECTIONS --- */
+@media screen and (max-width: 768px) {
+    
+    /* 1. Base Paragraph Style (Default Red #e71d25) */
+    .content .article p {
+        font-size: 18px !important;
+        line-height: 1.6 !important;
+        color: #333333;
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        border-left: 3px solid #e71d25; /* Default: Red Marker */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
 
-       #threejs-marker-container {
+    /* 2. Black Marker (The 2nd Heading group) */
+    /* Target the 2 paragraphs following the 2nd H4 */
+    .content .article h4:nth-of-type(2) + p,
+    .content .article h4:nth-of-type(2) + p + p {
+        border-left-color: #000000 !important;
+    }
+
+    /* 3. Blue Marker (The 3rd Heading group) */
+    /* Target the 2 paragraphs following the 3rd H4 */
+    .content .article h4:nth-of-type(3) + p,
+    .content .article h4:nth-of-type(3) + p + p {
+        border-left-color: #0056b3 !important; /* Standard Blue */
+    }
+
+    /* 4. Green Marker (The 4th Heading group) */
+    /* Target the 2 paragraphs following the 4th H4 */
+    .content .article h4:nth-of-type(4) + p,
+    .content .article h4:nth-of-type(4) + p + p {
+        border-left-color: #28a745 !important; /* Standard Green */
+    }
+
+    /* Heading Styles */
+    .content .article h4 {
+        font-size: 22px !important;
+        margin-top: 40px;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+}
+#threejs-marker-container {
     position: fixed;
     top: 0;
-    left: 15%;
+    left: 10%;
     width: 100%;
     height: 100vh;
-    z-index: 15; /* High enough to be seen, check against your loader z-index */
-    pointer-events: none; /* Lets you click through the marker */
+    pointer-events: none;
+    z-index: 999; /* Higher than your .urbanist-bg and .content-layer */
 }
  /* =========================================
            GLOBAL & ANIMATIONS

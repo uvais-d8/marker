@@ -143,58 +143,58 @@
             </section>
             <div id="alice-wrapper">
                 <section class="intro">
-                    <h1 class="intro__heading">The Permanent Marker's<br />Bold Revolution</h1>
+                    <h1 class="intro__heading">Marker Colour Priority and Visual Hierarchy</h1>
                 </section>
-                <section class="content">
-                    <article class="article">
-                        <h4><b>Red Marker (Highest Priority)</b></h4>
-                        <p>
-                            RED is the most attention-grabbing marker colour. It represents urgency, danger, and high
-                            importance,
-                            making it ideal for warnings and critical highlights.
-                        </p>
-                        <p class="mobile-hidden">
-                            Its strong visual impact ensures immediate focus, so it is used carefully and with clear
-                            intention.
-                        </p>
+                    <section class="content">
+                        <article class="article">
+                            <h4><b>Red Marker (Highest Priority)</b></h4>
+                            <p>
+                                <b>RED</b> is the most attention-grabbing marker colour. It represents urgency, <b>danger</b>, and high
+                                <b>importance</b>,
+                                making it ideal for warnings and critical highlights.
+                            </p>
+                            <p class="mobile-hidden">
+                                Its strong visual impact ensures immediate focus, so it is used carefully and with clear
+                                intention.
+                            </p>
 
-                        <h4><b>Black Marker</b></h4>
-                        <p>
-                            BLACK symbolizes clarity and authority. It is widely used for writing, outlining, and clear
-                            communication due to its high readability.
-                        </p>
-                        <p class="mobile-hidden">
-                            Because of its professional appearance, black is preferred for formal and final work.
-                        </p>
+                            <h4><b>Black Marker</b></h4>
+                            <p>
+                                <b>BLACK</b> symbolizes clarity and authority. It is widely used for writing, outlining, and clear
+                                <b>communication</b> due to its high <b>readability</b>.
+                            </p>
+                            <p class="mobile-hidden">
+                                Because of its professional appearance, black is preferred for formal and final work.
+                            </p>
 
-                        <h4><b>Blue Marker</b></h4>
-                        <p>
-                            BLUE represents trust and calmness. It is commonly used for general writing and explanations
-                            without creating visual stress.
-                        </p>
-                        <p class="mobile-hidden">
-                            This colour is suitable for notes and planning where balance and clarity are needed.
-                        </p>
+                            <h4><b>Blue Marker</b></h4>
+                            <p>
+                                <b>BLUE</b> represents trust and <b>calmness</b>. It is commonly used for general writing and explanations
+                                without creating visual stress.
+                            </p>
+                            <p class="mobile-hidden">
+                                This colour is suitable for notes and planning where balance and clarity are needed.
+                            </p>
 
-                        <h4><b>Green Marker (Lowest Priority)</b></h4>
-                        <p>
-                            GREEN stands for positivity and approval. It is often used to show correctness or progress.
-                        </p>
-                        <p class="mobile-hidden">
-                            With lower urgency, green works best for supportive and secondary highlights.
-                        </p>
-                    </article>
-                </section>
+                            <h4><b>Green Marker (Lowest Priority)</b></h4>
+                            <p>
+                                <b>GREEN</b> stands for positivity and <b>approval</b>. It is often used to show <b>correctness</b> or progress.
+                            </p>
+                            <p class="mobile-hidden">
+                                With lower urgency, green works best for supportive and secondary highlights.
+                            </p>
+                        </article>
+                    </section>
                 <div class="hero-reveal-wrapper">
                     <section class="hero-reveal">
                         <article>
                             <header class="hero-reveal__header">
                                 <div class="hero-reveal_split">
                                     <div class="hero-reveal_split_item">
-                                        <p>PERFECT INK</p>
+                                        <p>PRIME INK</p>
                                     </div>
                                     <div class="hero-reveal_split_item" aria-hidden="true">
-                                        <p aria-hidden="true">PERFECT INK</p>
+                                        <p aria-hidden="true">PRIME INK</p>
                                     </div>
                                 </div>
                             </header>
@@ -256,11 +256,11 @@
                     <article class="article">
                         <h4><b>Impact</b></h4>
                         <p>
-                            Marker ink is designed to produce strong, high-contrast lines that remain clearly visible on
+                            <b>Marker ink</b> is designed to produce strong, high-contrast lines that remain clearly visible on
                             a
                             variety of surfaces. Its fast-drying nature reduces smudging and allows users to work
                             quickly
-                            without interruption, especially in professional and creative environments.
+                            without interruption, especially in professional and <b>creative environments</b>.
                         </p>
                         <p class="mobile-hidden">
                             The consistent flow of marker ink helps define shapes and outlines with precision. Once
@@ -277,9 +277,9 @@
 
                         <h4><b>Legacy</b></h4>
                         <p>
-                            Markers have become essential tools across education, design, and industry. Their
+                            <b>Markers</b> have become essential tools across <b>education</b>, design, and industry. Their
                             reliability and
-                            ease of use have made them a standard choice for communication, planning, and visual
+                            ease of use have made them a standard choice for communication, <b>planning</b>, and visual
                             expression.
                         </p>
                         <p class="mobile-hidden">
@@ -352,11 +352,7 @@
                     </div>
                     <div class="footer-right">
                         <div class="footer-links">
-                            <ul>
-                                <li><a href="#">Work</a></li>
-                                <li><a href="#">Studio</a></li>
-                                <li><a href="#">News</a></li>
-                            </ul>
+                           
                             <ul>
                                 <li><a href="#">Instagram</a></li>
                                 <li><a href="#">Twitter</a></li>
@@ -364,7 +360,7 @@
                             </ul>
                         </div>
                         <div class="footer-bottom">
-                            <span>Kochi, India</span>
+                            <span>kerala, India</span>
                             <span>Scroll to top ↑</span>
                         </div>
                     </div>
@@ -645,6 +641,8 @@
             initFooterCursor();
             initFooterAnimations();
             init3DMarker();
+            initGlobalTextAnimations();
+            initMobileHeadingEffect();
         });
 
         // --- GLOBAL PAGE CURSOR ANIMATION (NEW FUNCTION) ---
@@ -1061,17 +1059,21 @@
     <script>
      // Target the NEW container ID
 const modelViewer = document.querySelector('#threejs-marker-container');
-
 if (modelViewer) {
     gsap.to(modelViewer, {
         opacity: 0,
         ease: "none",
         scrollTrigger: {
-            trigger: "#urbanist-integration", 
+            // CHANGE TRIGGER: Target the THIRD section (The grid wrapper)
+            trigger: "#grid-scroll-wrapper", 
+            
+            // START: Begin fading when the 3rd section enters from the bottom of the screen
             start: "top bottom", 
-            end: "top center",   
+            
+            // END: Fully invisible when the 3rd section reaches the center of the screen
+            end: "center center",   
+            
             scrub: true,
-            // Optimization: hide it completely when invisible so it doesn't render
             onLeave: () => { modelViewer.style.display = 'none'; },
             onEnterBack: () => { modelViewer.style.display = 'block'; }
         }
@@ -1081,6 +1083,9 @@ if (modelViewer) {
 <script>function init3DMarker() {
     const container = document.getElementById('threejs-marker-container');
     if (!container) return;
+
+    // 0. FIX Z-INDEX
+    container.style.zIndex = "999"; 
 
     // 1. SCENE & CAMERA
     const scene = new THREE.Scene();
@@ -1107,7 +1112,7 @@ if (modelViewer) {
     spotLight.position.set(-10, 0, 10);
     scene.add(spotLight);
 
-    // 3. MATERIALS & TEXTURE
+    // 3. MATERIALS
     function createLabelTexture() {
         const canvas = document.createElement('canvas');
         canvas.width = 1024; canvas.height = 512;
@@ -1143,14 +1148,12 @@ if (modelViewer) {
     // 4. MESHES
     const markerSystem = new THREE.Group();
     scene.add(markerSystem);
+    const r = 0.8; const len = 8.0; 
 
-    // --- BODY GROUP ---
+    // --- BODY (White Part) ---
     const bodyGroup = new THREE.Group();
     markerSystem.add(bodyGroup);
     
-    const r = 0.8; 
-    const len = 8.0; 
-
     const cyl = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 64), matBody);
     cyl.rotation.y = Math.PI; 
     cyl.castShadow = true;
@@ -1169,32 +1172,45 @@ if (modelViewer) {
     nib.rotation.z = Math.PI; 
     bodyGroup.add(nib);
 
-    // --- CAP GROUP ---
+    // --- CAP (Red Part) ---
+    // FIX: Constructing cap to point DOWN relative to pivot
     const capGroup = new THREE.Group();
     markerSystem.add(capGroup);
     const capLen = 3.8; const capR = r + 0.12;
 
     const capShell = new THREE.Mesh(new THREE.CylinderGeometry(capR-0.05, capR, capLen, 64), matRed);
-    capShell.geometry.translate(0, capLen/2, 0); 
+    // CHANGED: Translate NEGATIVE so it extends downwards from the pivot (0)
+    capShell.geometry.translate(0, -capLen/2, 0); 
     capShell.castShadow = true;
     capGroup.add(capShell);
 
     const ring = new THREE.Mesh(new THREE.CylinderGeometry(capR+0.1, capR+0.1, 0.6, 64), matRed);
-    ring.position.y = 0.5;
+    // CHANGED: Ring position relative to new downward orientation
+    ring.position.y = -0.5; 
     capGroup.add(ring);
 
     const clip = new THREE.Mesh(new THREE.BoxGeometry(0.3, 2.8, 0.5), matRed);
-    clip.position.set(capR + 0.05, 2.0, 0);
+    // CHANGED: Clip position relative to new downward orientation
+    clip.position.set(capR + 0.05, -2.0, 0); 
     capGroup.add(clip);
 
-    // 5. INITIAL POSITIONING (Will be overridden by responsive logic below)
+
+    // 5. ROTATION & STARTING POSITIONS
     markerSystem.rotation.z = -Math.PI / 4; 
 
-    // 6. ANIMATION
-    const closedY = -5.0; 
-    const openY = -14.0; 
-    capGroup.position.y = openY;
+    // The body ends at -4.0. The cap pivot is now at the top opening.
+    // Placing cap at -4.0 makes it extend from -4.0 to -7.8 (Covering the nib).
+    const bodyClosedY = 0; 
+    const capClosedY = -3.9; // Slight overlap with white body
 
+    // Starting positions (Flying in)
+    const bodyStartY = 12.0; 
+    const capStartY = -14.0; 
+
+    bodyGroup.position.y = bodyStartY;
+    capGroup.position.y = capStartY;
+
+    // 6. ANIMATION TIMELINE
     const tl = gsap.timeline({
         scrollTrigger: {
             trigger: ".hero",
@@ -1204,10 +1220,8 @@ if (modelViewer) {
         }
     });
 
-    tl.to(capGroup.position, {
-        y: closedY,
-        ease: "power2.out"
-    });
+    tl.to(bodyGroup.position, { y: bodyClosedY, ease: "power2.out" }, 0);
+    tl.to(capGroup.position, { y: capClosedY, ease: "power2.out" }, 0);
 
     // 7. RENDER LOOP
     function animate() {
@@ -1217,38 +1231,111 @@ if (modelViewer) {
     }
     animate();
 
-
-    // --- 8. RESPONSIVE LOGIC (NEW) ---
+    // 8. RESPONSIVE
     function updateLayout() {
-        // Update camera and renderer first
         const width = window.innerWidth;
         const height = window.innerHeight;
-        
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
         renderer.setSize(width, height);
 
-        // CHECK SCREEN WIDTH
         if (width < 768) {
-            // === MOBILE SETTINGS ===
-            // 1. Scale it down to 55%
             markerSystem.scale.set(0.55, 0.55, 0.55);
-            // 2. Move it closer to center (X=2) because screen is narrow
             markerSystem.position.set(2.0, 1.5, 0); 
         } else {
-            // === DESKTOP SETTINGS ===
-            // 1. Full Size
             markerSystem.scale.set(1, 1, 1);
-            // 2. Original Position (Right side)
             markerSystem.position.set(6.5, 2, 0);
         }
     }
-
-    // Run once on load
     updateLayout();
-
-    // Run whenever window resizes
     window.addEventListener('resize', updateLayout);
+// 9. FLY OUT LOGIC (Corrected: Starts moving ONLY inside the 2nd section)
+    gsap.to(markerSystem.position, {
+        x: 25,                 // Move UP off-screen
+        ease: "power1.in",
+        scrollTrigger: {
+            // TRIGGER: The Second Section
+            trigger: "#urbanist-integration", 
+            
+            // START: Wait until the top of Section 2 hits the top of the viewport
+            // (This ensures the marker stays sticky while Section 2 is entering)
+            start: "top top", 
+            
+            // END: Finish flying out when the user has scrolled halfway through Section 2
+            end: "center top",                  
+            
+            scrub: 1,
+            
+            onLeave: () => { container.style.display = 'none'; },
+            onEnterBack: () => { container.style.display = 'block'; }
+        }
+    });
+}</script>
+<script>// --- 10. GLOBAL TEXT REVEAL ANIMATION ---
+function initGlobalTextAnimations() {
+    // Select all common text elements
+    // We use a comma to select multiple types of tags
+    const textElements = document.querySelectorAll("h1, h2, h3, h4, p, li, span.footer-big-text");
+
+    textElements.forEach((element) => {
+        // --- EXCLUSION LOGIC ---
+        // We must skip elements that already have specific animations to avoid conflicts.
+        
+        // Skip the Loader
+        if (element.closest('.loader-screen')) return;
+        
+        // Skip the main Hero Title (MARKER) as it sits behind the 3D model
+        if (element.closest('.hero__title')) return;
+        
+        // Skip the Kinetic Typography sections (the ones that highlight words on scroll)
+        if (element.closest('.kinetic-typography-block')) return;
+
+        // Skip the "Urbanist" panes (the images/text inside the horizontal scroll)
+        // because they need to be visible for the horizontal scroll to make sense
+        if (element.closest('#panes-container')) return;
+
+        // --- ANIMATION ---
+        gsap.fromTo(element, 
+            {
+                y: 50,          // Start 50px lower
+                opacity: 0,     // Start invisible
+                clipPath: "polygon(0 0, 100% 0, 100% 0, 0 0)" // Optional: Cool "wipe" effect
+            },
+            {
+                y: 0,           // Move to original position
+                opacity: 1,     // Become visible
+                clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)", // Reveal fully
+                duration: 1,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: element,
+                    start: "top 90%", // Trigger when top of text hits 90% of viewport height
+                    toggleActions: "play none none reverse" // Re-plays if you scroll back up
+                }
+            }
+        );
+    });
+}</script><script>// --- 11. MOBILE HEADING PARALLAX (Moves down on scroll) ---
+function initMobileHeadingEffect() {
+    ScrollTrigger.matchMedia({
+        
+        // Target Mobile Screens (max-width 768px)
+        "(max-width: 768px)": function() {
+            
+            gsap.to(".intro__heading", {
+                y: 420,        
+                opacity: 1, 
+                ease: "none", 
+                scrollTrigger: {
+                    trigger: ".intro",    
+                    start: "top 40%",     
+                    end: "bottom top",    
+                    scrub: 1              
+                }
+            });
+            
+        }
+    });
 }</script>
 </body>
 
