@@ -5,1882 +5,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MARKER</title>
-<!-- Fonts -->
-<link rel="preload" href="./assets/fonts/Presicav.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-<link rel="preload" href="./assets/fonts/Calibre-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-<link rel="preload" href="./assets/fonts/Arial.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-<link href="https://api.fontshare.com/v2/css?f[]=neue-montreal@500&display=swap" rel="stylesheet">
-
-<!-- Libraries -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.ui.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-<script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
-
-<!-- App -->
-<script type="module" crossorigin src="./js/index.min.js?v=1754734869502"></script>
-<link rel="stylesheet" crossorigin href="./css/index.min.css?v=1754734869502">
-
-    <style>
-        /* =========================================
-           GLOBAL & ANIMATIONS
-           ========================================= */
-        @keyframes stroke {
-            from {
-                stroke-dashoffset: 5414.29;
-            }
-
-            to {
-                stroke-dashoffset: 0;
-            }
-        }
-
-        @keyframes reveal {
-            from {
-                clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0% 100%);
-                opacity: 0;
-            }
-        }
-
-        @keyframes scaleIn {
-            from {
-                opacity: 0;
-                scale: .2;
-            }
-        }
-
-        @keyframes revealText {
-            from {
-                clip-path: polygon(0 0, 0% 0, 0% 100%, 0 100%);
-            }
-        }
-
-        html {
-            background-color: rgb(255, 255, 255);
-        }
-
-        body {
-            margin: 0;
-            overflow-x: hidden;
-            overscroll-behavior: none;
-        }
-
-        body.is-loading {
-            overflow: hidden;
-            height: 100vh;
-        }
-
-        /* =========================================
-           GLOBAL CURSOR STYLES
-           ========================================= */
-        #global-cursor-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 10000;
-            pointer-events: none;
-            mix-blend-mode: difference;
-        }
-
-        /* =========================================
-           3D MARKER CANVAS STYLES
-           ========================================= */
-        /* =========================================
-   3D MARKER CANVAS STYLES (DESKTOP DEFAULT)
-   ========================================= */
-        #marker-3d-canvas {
-            position: fixed;
-            top: 40%;
-            /* Vertically center */
-            right: 0vw;
-            /* Position on right (slightly off-screen for style) */
-            transform: translateY(-50%);
-            /* Center alignment adjustment */
-
-            /* Desktop Size */
-            width: 60vh;
-            height: 60vh;
-
-            /* Layering */
-            z-index: 5;
-            /* Behind text, above video */
-            pointer-events: none;
-            background: transparent;
-            transition: opacity 0.1s linear;
-        }
-
-        @media (max-width: 768px) {
-            /* ... existing mobile styles ... */
-
-            /* 3D Model: Move to bottom right and shrink for mobile */
-            #marker-3d-canvas {
-                width: 50vh !important;
-                /* Smaller size for phone */
-                height: 50vh !important;
-
-                top: auto;
-                /* Unset vertical centering */
-                bottom: 5vh;
-                /* Align to bottom */
-                /* Push further right to not block text */
-                transform: none;
-                /* Remove the desktop centering transform */
-            }
-        }
-
-        .page-header {
-            align-items: center;
-            display: flex;
-            height: 100vh;
-            justify-content: center;
-            background: transparent;
-        }
-
-        .page-header h1 {
-            color: white;
-            font-size: 3rem;
-        }
-
-        /* =========================================
-           LOADER STYLES
-           ========================================= */
-        .loader-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #f4f4f4;
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            font-family: 'Neue Montreal', sans-serif;
-        }
-
-        .loader-content {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        .willem__h1 {
-            white-space: nowrap;
-            justify-content: center;
-            font-size: clamp(3rem, 12vw, 12.5em);
-            font-weight: 500;
-            line-height: .75;
-            display: flex;
-            position: relative;
-            color: #201d1d;
-        }
-
-        .willem__h1-start,
-        .willem__h1-end {
-            display: flex;
-            overflow: hidden;
-        }
-
-        .willem__h1-start {
-            justify-content: flex-end;
-            width: auto;
-        }
-
-        .willem__h1-end {
-            justify-content: flex-start;
-            width: auto;
-        }
-
-        .willem__letter {
-            display: block;
-            position: relative;
-        }
-
-        .willem-loader__box {
-            flex-flow: column;
-            justify-content: center;
-            align-items: center;
-            width: 0;
-            display: flex;
-            position: relative;
-            margin: 0 0.1em;
-        }
-
-        .willem-loader__box-inner {
-            justify-content: center;
-            align-items: center;
-            min-width: 1em;
-            height: 95%;
-            display: flex;
-            position: relative;
-        }
-
-        .willem__growing-image {
-            justify-content: center;
-            align-items: center;
-            width: 0%;
-            height: 100%;
-            display: flex;
-            position: absolute;
-            overflow: hidden;
-        }
-
-        .willem__growing-image-wrap {
-            width: 100%;
-            min-width: 1em;
-            height: 100%;
-            position: absolute;
-        }
-
-        .willem__cover-image,
-        .willem__cover-image-extra {
-            pointer-events: none;
-            object-fit: cover;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .willem__cover-image-extra.is--1 {
-            z-index: 3;
-        }
-
-        .willem__cover-image-extra.is--2 {
-            z-index: 2;
-        }
-
-        .willem__cover-image-extra.is--3 {
-            z-index: 1;
-        }
-
-        /* =========================================
-           SECTION 2: URBANIST STYLES
-           ========================================= */
-        :root {
-            --theme-main-bg: #b9dcff;
-            --theme-sub-bg: #f2fbfe;
-            --theme-text: #070f36;
-            --theme-title: #8dc9f4;
-            --font-sans: "Urbanist", sans-serif;
-        }
-
-        #urbanist-integration {
-            position: relative;
-            width: 100%;
-            height: 100vh;
-            overflow: hidden;
-            font-family: var(--font-sans);
-            color: var(--theme-text);
-            isolation: isolate;
-            z-index: 20;
-            background: white;
-        }
-
-        #urbanist-integration .urbanist-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            object-fit: cover;
-        }
-
-        #urbanist-integration .content-layer {
-            position: absolute;
-            inset: 0;
-            padding-inline: min(10vw, 100px);
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        #urbanist-integration h1 {
-            font-size: clamp(10vw, 250px, 20vw);
-            color: var(--theme-title);
-            margin: 0;
-            line-height: 1;
-        }
-
-        #urbanist-integration p {
-            width: clamp(5vw, 250px, 80vw);
-            font-size: clamp(1vw, 12px, 1.5vw);
-            font-weight: 600;
-            text-wrap: balance;
-            color: var(--theme-text);
-            line-height: 1.3;
-        }
-
-        #urbanist-integration .desc-1 {
-            margin-top: 2rem;
-        }
-
-        #urbanist-integration .desc-2 {
-            position: absolute;
-            bottom: 5vh;
-            left: min(40vw, 300px);
-        }
-
-        #urbanist-integration .desc-3 {
-            position: absolute;
-            top: 50%;
-            right: 10vw;
-        }
-
-        #panes-container {
-            width: 300vw;
-            display: flex;
-            height: 100%;
-        }
-
-        .pane {
-            position: relative;
-            height: 100%;
-            width: 100vw;
-        }
-
-        .urbanist-floating-img {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            width: max(20vw, 400px);
-            translate: -100% 0;
-            border-radius: 12px;
-            display: block;
-        }
-
-        .pane:nth-of-type(2) .urbanist-floating-img {
-            aspect-ratio: 1/1;
-            object-fit: cover;
-            translate: -200% -70%;
-            width: max(15vw, 300px);
-        }
-
-        .pane:nth-of-type(3) .urbanist-floating-img {
-            translate: -150% -50%;
-        }
-
-        /* =========================================
-           SECTION 3: HISTORY STYLES
-           ========================================= */
-        #scroll-section {
-            container: inline-size;
-            display: grid;
-            position: relative;
-            min-height: 1800px;
-            padding-block-start: 15vh;
-            font-family: 'Montserrat', sans-serif;
-            background: transparent;
-            z-index: 10;
-        }
-
-        #scroll-section img {
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-            display: block;
-            height: auto;
-            max-width: 100%;
-            animation: reveal linear both;
-            animation-timeline: view();
-            animation-range: 10% 60%;
-        }
-
-        #scroll-section .btn {
-            background-color: rgb(21, 21, 21);
-            border-radius: 99px;
-            color: white;
-            display: block;
-            font-size: 18px;
-            font-weight: 900;
-            letter-spacing: .02em;
-            line-height: 42px;
-            height: 42px;
-            padding: 0 40px;
-            text-decoration: none;
-            transition: background-color .4s ease-out;
-            width: fit-content;
-        }
-
-        #scroll-section .btn:hover {
-            background-color: rgb(243, 87, 87);
-        }
-
-        .line-svg {
-            grid-row: 1;
-            grid-column: 1;
-            height: calc(100% - 10rem);
-            top: 25cqb;
-            min-width: 300px;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .anim-overview-stroke {
-            stroke-dasharray: 5414.29;
-            stroke-dashoffset: 5414.29;
-            animation: stroke linear forwards;
-            animation-timeline: view();
-            animation-range: cover 0% cover 75%;
-        }
-
-        .container {
-            grid-column: 1;
-            grid-row: 1;
-            margin: 0 auto;
-            max-width: 1272px;
-            z-index: 2;
-        }
-
-        #scroll-section h2 {
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-            color: #333;
-            font-size: 62px;
-            font-weight: 900;
-            letter-spacing: .02em;
-            margin: 0;
-            padding-top: 72px;
-            position: relative;
-            width: 50%;
-            text-align: right;
-            animation: revealText linear both;
-            animation-timeline: view();
-            animation-range: 25% 60%;
-        }
-
-        .layout-container {
-            padding-top: 8rem;
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 20px;
-        }
-
-        .box {
-            background-color: rgb(255, 239, 239);
-            color: #333;
-            padding: 4rem;
-            opacity: 1;
-            scale: 1;
-            animation: scaleIn linear both;
-            animation-timeline: view();
-            animation-range: 0% 40vh;
-        }
-
-        .box h3 {
-            font-size: 42px;
-            font-weight: 900;
-            line-height: 1.1;
-            margin: 0 0 18px;
-        }
-
-        .box p {
-            font-size: 18px;
-            line-height: 1.25;
-            margin: 0 0 2em;
-        }
-
-        .box-1 {
-            grid-column: 3 / span 3;
-            grid-row: span 2;
-        }
-
-        .image-1 {
-            grid-column: 1 / span 2;
-            grid-row: 2 / span 2;
-            margin-top: 100px;
-        }
-
-        .image-2 {
-            align-self: end;
-            grid-column: 6 / span 1;
-            grid-row: 5;
-        }
-
-        .image-3 {
-            grid-column: 1 / span 2;
-            justify-self: end;
-            margin-top: 3rem;
-        }
-
-        .box-2 {
-            grid-column: 2 / span 3;
-            margin-top: 3rem;
-            grid-row: span 2;
-        }
-
-        .box-3 {
-            grid-column: 3 / span 3;
-            margin-top: 8em;
-        }
-
-        .box-4 {
-            grid-column: 1 / span 3;
-            margin-top: 12rem;
-            margin-bottom: -5rem;
-        }
-
-        .bottom-spacer {
-            height: 10vh;
-        }
-
-        /* =========================================
-           SECTION 4: PERSPECTIVE ZOOM STYLES
-           ========================================= */
-        #perspective-wrap {
-            background-color: #1f1f1f;
-            color: #ffffff;
-            font-family: "Roboto", sans-serif;
-            position: relative;
-            z-index: 30;
-        }
-
-        .zoom-container {
-            height: 100vh;
-            width: 100%;
-            overflow: hidden;
-            position: relative;
-            perspective: 100vh;
-            transform-style: preserve-3d;
-            background-color: #1f1f1f;
-        }
-
-        .heading-zoom {
-            font-size: clamp(3rem, 5vw, 6rem);
-            line-height: 1.1;
-            text-align: center;
-            opacity: 0;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) translateZ(-2000px);
-            white-space: nowrap;
-            z-index: 10;
-            pointer-events: none;
-            font-weight: 900;
-            text-transform: uppercase;
-            color: white;
-        }
-
-        .zoom-item {
-            position: absolute;
-            transform-style: preserve-3d;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .zoom-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .zoom-item:nth-child(2) {
-            left: 15vw;
-            top: 21%;
-            width: 15vw;
-        }
-
-        .zoom-item:nth-child(3) {
-            left: 29%;
-            top: 15%;
-            width: 12vw;
-        }
-
-        .zoom-item:nth-child(4) {
-            left: 36%;
-            top: 3%;
-            width: 15vw;
-        }
-
-        .zoom-item:nth-child(5) {
-            right: 30%;
-            top: 11%;
-            width: 10vw;
-        }
-
-        .zoom-item:nth-child(6) {
-            right: 7%;
-            top: 28%;
-            width: 18vw;
-        }
-
-        .zoom-item:nth-child(7) {
-            bottom: 32%;
-            right: 3.5%;
-            width: 8vw;
-        }
-
-        .zoom-item:nth-child(8) {
-            bottom: 13.5%;
-            left: 16%;
-            width: 14vw;
-        }
-
-        .zoom-item:nth-child(9) {
-            bottom: 24%;
-            left: 29%;
-            width: 9vw;
-        }
-
-        .zoom-item:nth-child(10) {
-            bottom: 46%;
-            left: 7.5%;
-            width: 8vw;
-        }
-
-        .zoom-item:nth-child(11) {
-            bottom: 5.5%;
-            right: 15%;
-            width: 18vw;
-        }
-
-        .zoom-item:nth-child(12) {
-            bottom: 10.5%;
-            right: 38%;
-            width: 12vw;
-        }
-
-        .zoom-item:nth-child(13) {
-            right: 4%;
-            top: 5%;
-            width: 9vw;
-        }
-
-        .section-stick {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: black;
-            color: white;
-            position: relative;
-            z-index: 50;
-        }
-
-        .reveal-text-style {
-            font-size: 3rem;
-            text-align: center;
-            width: 80%;
-            font-weight: 700;
-            line-height: 1.25;
-            color: white;
-        }
-
-        @media (min-width: 768px) {
-            .reveal-text-style {
-                font-size: 4.5rem;
-            }
-        }
-
-        .opacity-reveal {
-            opacity: 0.2;
-        }
-
-        .opacity-reveal span {
-            transition: opacity 0.1s;
-        }
-
-        .spacer-black {
-            height: 50vh;
-            background: #000;
-        }
-
-        /* =========================================
-           SECTION 5: ALICE INTEGRATION STYLES
-           ========================================= */
-        #alice-wrapper {
-            --font-open-sans: "Open Sans", serif;
-            --color-white: hsla(0, 0%, 100%, 1);
-            --color-black: hsla(0, 0%, 0%, 1);
-            font-family: var(--font-open-sans);
-            font-size: 1rem;
-            line-height: 1.75;
-            background-color: var(--color-white);
-            color: var(--color-black);
-            position: relative;
-            z-index: 60;
-        }
-
-        #alice-wrapper .intro {
-            align-items: center;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        #alice-wrapper .intro__heading {
-            font-size: clamp(1.875rem, 8.083vw + -0.217rem, 6.25rem);
-            line-height: clamp(2.813rem, 9.815vw + 0.273rem, 8.125rem);
-            text-align: center;
-            margin: 0;
-        }
-
-        #alice-wrapper .content {
-            background-color: white;
-            display: flex;
-            justify-content: center;
-            position: relative;
-            z-index: 1;
-            padding: 6.25rem 0;
-        }
-
-        #alice-wrapper .article {
-            max-width: 31.25rem;
-            padding: 0 1.5rem;
-        }
-
-        #alice-wrapper .hero-reveal {
-            background-color: var(--color-black);
-            position: relative;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        #alice-wrapper .hero-reveal__header {
-            align-items: center;
-            background-color: var(--color-white);
-            color: var(--color-black);
-            display: flex;
-            font-size: clamp(3.125rem, 12.61vw + -0.138rem, 15.625rem);
-            line-height: clamp(4.688rem, 15.763vw + 0.609rem, 20.313rem);
-            font-weight: 900;
-            justify-content: center;
-            left: 0;
-            min-height: 100vh;
-            position: relative;
-            top: 0;
-            will-change: transform, clip-path;
-            z-index: 1;
-            width: 100%;
-        }
-
-        #alice-wrapper .hero-reveal_split {
-            align-items: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-
-        #alice-wrapper .hero-reveal_split_item {
-            align-items: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-height: 100vh;
-            width: 100%;
-            margin: 0;
-        }
-
-        #alice-wrapper .hero-reveal_split_item p {
-            margin: 0;
-        }
-
-        #alice-wrapper .hero-reveal_split_item:nth-child(1) {
-            clip-path: inset(0 0 50% 0);
-        }
-
-        #alice-wrapper .hero-reveal_split_item:nth-child(2) {
-            clip-path: inset(50% 0 0 0);
-            left: 0;
-            position: absolute;
-            top: 0;
-        }
-
-        #alice-wrapper .hero-reveal__content {
-            color: var(--color-white);
-            display: flex;
-            justify-content: center;
-            padding: 0;
-            position: relative;
-            margin-top: -60vh;
-            pointer-events: none;
-        }
-
-        #alice-wrapper .hero-reveal__content-inner {
-            max-width: 31.25rem;
-            position: relative;
-            padding: 0 1.5rem;
-        }
-
-        #alice-wrapper .hero-reveal__content-p {
-            padding-bottom: 8rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        #alice-wrapper .hero-reveal__parallax {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        #alice-wrapper .hero-reveal__parallax img {
-            position: absolute;
-            will-change: transform;
-        }
-
-        #alice-wrapper .hero-reveal__parallax-clock {
-            left: -6rem;
-            top: -25rem;
-        }
-
-        #alice-wrapper .hero-reveal__parallax-book {
-            left: -12.5rem;
-            top: -25rem;
-        }
-
-        #alice-wrapper .hero-reveal__parallax-alice {
-            left: 50%;
-            transform: translateX(-50%);
-            top: -31.25rem;
-            max-width: 200px;
-        }
-
-        #alice-wrapper .hero-reveal__parallax-kattle {
-            left: 31.25rem;
-            filter: blur(2px);
-            top: -18.75rem;
-        }
-
-        #alice-wrapper .hero-reveal__parallax-card {
-            left: 25rem;
-            filter: blur(2px);
-            z-index: 1;
-            top: -25rem;
-        }
-
-        /* =========================================
-           LOGO STYLES
-           ========================================= */
-        .header__menu h1.logo {
-            margin: 0;
-            line-height: 1;
-        }
-
-        .header__menu h1.logo a {
-            font-family: 'Roboto', sans-serif;
-            font-weight: 900;
-            font-size: 2.25rem;
-            color: white;
-            text-decoration: none;
-            letter-spacing: -0.04em;
-            text-transform: uppercase;
-            display: inline-block;
-            transition: color 0.3s ease, transform 0.3s ease;
-        }
-
-        .header__menu h1.logo a:hover {
-            color: var(--theme-title, #e0e0e0);
-        }
-
-        /* =========================================
-           SECTION 6: CAROUSEL STYLES
-           ========================================= */
-        #carousel-section {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background: rgb(211, 216, 203);
-            z-index: 70;
-        }
-
-        #carousel-section .slider {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        #carousel-section .slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1;
-            background: #dbdbdb;
-            overflow: hidden;
-            will-change: clip-path;
-        }
-
-        #slide-1 {
-            z-index: 1;
-            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-        }
-
-        #slide-2 {
-            z-index: 2;
-            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
-        }
-
-        #slide-3 {
-            z-index: 3;
-            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
-        }
-
-        #slide-4 {
-            z-index: 4;
-            clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
-        }
-
-        #carousel-section .slide.dark {
-            background: #0c0c0c;
-        }
-
-        #carousel-section .slide.light {
-            background: #dbdbdb;
-        }
-
-        #carousel-section .slide-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        #carousel-section .slide-content h1 {
-            font-family: 'Roboto', sans-serif;
-            font-size: 15vw;
-            text-transform: uppercase;
-            font-weight: 900;
-            color: #000;
-            margin: 0;
-            line-height: 0.9;
-        }
-
-        #carousel-section .slide.dark .slide-content h1 {
-            color: #dbdbdb;
-        }
-
-        #carousel-section .slide-img {
-            position: absolute;
-            width: 250px;
-            height: 150vh;
-            filter: saturate(0);
-        }
-
-        #carousel-section .slide-img img {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 250px;
-            height: 600px;
-            object-fit: cover;
-        }
-
-        #carousel-section .slide-img-1 {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-20deg);
-        }
-
-        #carousel-section .slide-img-2 {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(20deg);
-        }
-
-        .scroll-hint {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: 'Urbanist', sans-serif;
-            color: #888;
-            font-size: 0.8rem;
-            z-index: 20;
-            pointer-events: none;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        /* =========================================
-           SECTION 7: LIQUID BACKGROUND STYLES
-           ========================================= */
-        #liquid-section {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background-color: #000;
-            z-index: 80;
-        }
-
-        #liquid-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        .liquid-overlay {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            pointer-events: auto;
-        }
-
-        .liquid-overlay a {
-            color: #fff;
-            text-decoration: none;
-            text-shadow: 1px 1px 2px black;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        /* =========================================
-           SECTION 8: ADVANCED FOOTER STYLES
-           ========================================= */
-        #advanced-footer {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            background-color: #050505;
-            color: white;
-            z-index: 90;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Neue Montreal', sans-serif;
-        }
-
-        #footer-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .footer-content {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 1400px;
-            padding: 0 4vw;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            height: 100%;
-            align-content: center;
-        }
-
-        .footer-left {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 60vh;
-        }
-
-        .footer-big-text {
-            font-size: 12vw;
-            line-height: 0.8;
-            font-weight: 500;
-            margin: 0;
-            letter-spacing: -0.04em;
-            text-transform: uppercase;
-            opacity: 0;
-            transform: translateY(50px);
-        }
-
-        .footer-right {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: flex-end;
-            text-align: right;
-            height: 60vh;
-            font-size: 1.25rem;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 4rem;
-        }
-
-        .footer-links ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.5rem;
-            overflow: hidden;
-        }
-
-        .footer-links a {
-            color: #888;
-            text-decoration: none;
-            display: inline-block;
-            transition: color 0.3s, transform 0.3s;
-            transform: translateY(100%);
-        }
-
-        .footer-links a:hover {
-            color: #fff;
-            transform: translateX(-10px);
-        }
-
-        .footer-bottom {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 2rem;
-            margin-top: auto;
-            grid-column: span 2;
-            opacity: 0;
-        }
-
-        .hero__title {
-            /* font-family: 'Roboto', sans-serif; */
-            font-family: 'Urbanist', sans-serif;
-            font-size: 5vh;
-            margin-bottom: 70px;
-            width: 50%;
-
-
-        }
-
-        /* =========================================
-           RESPONSIVE MEDIA QUERIES (NEW ADDITION)
-           ========================================= */
-
-        @media (max-width: 1024px) {
-            #scroll-section h2 {
-                width: 80%;
-                font-size: 48px;
-            }
-
-            .container {
-                padding: 0 2rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-
-            .hero__title,
-            .hero__title span {
-                font-size: 14vw !important;
-            }
-
-            .header__menu h1.logo a {
-                font-size: 1.5rem;
-            }
-
-            #scroll-section {
-                padding-block-start: 5vh;
-            }
-
-            .line-svg {
-                display: none;
-            }
-
-            .layout-container {
-                display: flex;
-                flex-direction: column;
-                gap: 40px;
-                padding-top: 4rem;
-            }
-
-            .box-1,
-            .box-2,
-            .box-3,
-            .box-4,
-            .image-1,
-            .image-2,
-            .image-3 {
-                grid-column: auto;
-                grid-row: auto;
-                margin: 0 !important;
-                width: 100%;
-                box-sizing: border-box;
-            }
-
-            .image-2,
-            .image-3 {
-                justify-self: center;
-                align-self: center;
-            }
-
-            #scroll-section h2 {
-                width: 100%;
-                text-align: center;
-                font-size: 36px;
-                padding-top: 20px;
-            }
-
-            .box {
-                padding: 2rem;
-            }
-
-            .box h3 {
-                font-size: 32px;
-            }
-
-            #urbanist-integration .content-layer {
-                padding-inline: 5vw;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-            }
-
-            #urbanist-integration h1 {
-                font-size: 18vw;
-            }
-
-            #urbanist-integration p {
-                width: 90vw;
-                font-size: 16px;
-            }
-
-            #urbanist-integration .desc-2,
-            #urbanist-integration .desc-3 {
-                position: relative;
-                bottom: auto;
-                left: auto;
-                right: auto;
-                top: auto;
-                margin-top: 1.5rem;
-            }
-
-            .urbanist-floating-img {
-                width: 50vw;
-                top: 75%;
-                left: 50%;
-                right: auto;
-                translate: -50% -50% !important;
-            }
-
-            .pane:nth-of-type(2) .urbanist-floating-img,
-            .pane:nth-of-type(3) .urbanist-floating-img {
-                translate: -50% -50% !important;
-            }
-
-            .heading-zoom {
-                font-size: 3rem;
-            }
-
-            .zoom-container {
-                background-color: white;
-            }
-
-            .zoom-item {
-                width: 40vw !important;
-                max-height: 30vh;
-            }
-
-            .zoom-item:nth-child(2) {
-                left: 5%;
-                top: 15%;
-            }
-
-            .zoom-item:nth-child(3) {
-                left: 55%;
-                top: 10%;
-            }
-
-            .zoom-item:nth-child(4) {
-                left: 10%;
-                top: 60%;
-            }
-
-            .zoom-item:nth-child(5) {
-                right: 5%;
-                top: 40%;
-            }
-
-            .zoom-item:nth-child(6) {
-                right: 50%;
-                top: 80%;
-            }
-
-            .reveal-text-style {
-                font-size: 1.8rem;
-                width: 90%;
-            }
-
-            .section-stick {
-                margin-bottom: -1100px;
-            }
-
-            #carousel-section .slide-content h1 {
-                font-size: 20vw;
-            }
-
-            #carousel-section .slide-img {
-                width: 200px;
-                height: 100vh;
-            }
-
-            #carousel-section .slide-img img {
-                width: 200px;
-                height: 400px;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-                padding-top: 2rem;
-            }
-
-            .footer-left {
-                height: auto;
-                text-align: center;
-                align-items: center;
-            }
-
-            .footer-right {
-                height: auto;
-                align-items: center;
-                text-align: center;
-            }
-
-            .footer-big-text {
-                font-size: 18vw;
-            }
-
-            .footer-links {
-                flex-direction: column;
-                gap: 2rem;
-                margin-top: 2rem;
-            }
-
-            .footer-bottom {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-                padding-bottom: 2rem;
-            }
-
-            #alice-wrapper .intro__heading {
-                font-size: 3rem;
-            }
-
-            #alice-wrapper .hero-reveal__header {
-                font-size: 4rem;
-            }
-
-            /* Responsive Marker Adjustment */
-            #marker-3d-canvas {
-                width: 60vh;
-                height: 60vh;
-                right: -10vw;
-                /* Push slightly off screen for mobile */
-                top: 50%;
-                
-                /* Lower it slightly */
-            }
-        }
-
-        @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Host+Grotesk:ital,wght@0,300..800;1,300..800&display=swap");
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        .viewport-section {
-            position: relative;
-            width: 100vw;
-            height: 100svh;
-            padding: 2em;
-            overflow: hidden;
-        }
-
-        .content-wrapper {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            border-radius: 2rem;
-        }
-
-        .content-wrapper h1 {
-            width: 70%;
-            color: #121212;
-            font-size: 5rem;
-            font-weight: 900;
-            line-height: 1;
-        }
-
-        /* --- Section Specific Colors --- */
-
-        /* Intro (Previously Hero) - New Color: Electric Violet */
-        .intro-viewport .content-wrapper {
-            background: #fe6d38;
-        }
-
-        /* Action Zone (Previously CTA) - New Color: Neon Cyan */
-        .action-trigger-zone .content-wrapper {
-            background: #c6fe69;
-            color: #050511;
-            /* Dark text for contrast */
-        }
-
-        .action-trigger-zone .content-wrapper h1 {
-            color: #050511;
-        }
-
-        /* Conclusion (Previously Outro) - New Color: Hot Pink */
-        .conclusion-viewport .content-wrapper {
-            background: #7a78ff;
-        }
-
-        /* Narrative & Capabilities Borders */
-        .narrative-segment .content-wrapper,
-        .capabilities-segment .content-wrapper {
-            border: 0.15rem dashed rgba(100, 100, 120, 0.5);
-        }
-
-        /* --- Typography & Animation Styles --- */
-
-        .kinetic-typography-block {
-            width: 60%;
-        }
-
-        .kinetic-typography-block p {
-            color: #121212;
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 2rem;
-            font-weight: 900;
-            line-height: 1;
-        }
-
-        .kinetic-typography-block .token-unit {
-            display: inline-block;
-            position: relative;
-            margin-right: 0.2rem;
-            margin-bottom: 0.2rem;
-            padding: 0.1rem 0.2rem;
-            border-radius: 2rem;
-            will-change: background-color, opacity;
-        }
-
-        .kinetic-typography-block .token-unit.highlight-anchor {
-            margin: 0 0.4rem 0.2rem 0.2rem;
-        }
-
-        .kinetic-typography-block .token-unit span {
-            position: relative;
-        }
-
-        /* Highlighters */
-        .kinetic-typography-block .token-unit span.emphasis-pill {
-            border-radius: 2rem;
-            display: inline-block;
-            width: 100%;
-            height: 100%;
-            padding: 0.1rem 0;
-            color: #ffffff;
-        }
-
-        .kinetic-typography-block .token-unit span.emphasis-pill::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: calc(100% + 1rem);
-            height: calc(100% + 0.4rem);
-            background-color: #fff;
-            border-radius: 2rem;
-            z-index: -1;
-        }
-
-        /* Group 1: Electric Violet Fill */
-        .kinetic-typography-block .token-unit span.emphasis-pill.designed::before,
-        .kinetic-typography-block .token-unit span.emphasis-pill.smooth::before,
-        .kinetic-typography-block .token-unit span.emphasis-pill.control::before {
-            background-color: #7a78ff;
-        }
-
-        /* Group 2: Hot Pink Fill */
-        .kinetic-typography-block .token-unit span.emphasis-pill.ideas::before,
-        .kinetic-typography-block .token-unit span.emphasis-pill.natural::before,
-        .kinetic-typography-block .token-unit span.emphasis-pill.performance::before {
-            background-color: #fe6d38;
-        }
-
-        /* Group 3: Neon Cyan Fill */
-        .kinetic-typography-block .token-unit span.emphasis-pill.creation::before,
-        .kinetic-typography-block .token-unit span.emphasis-pill.attention::before,
-        .kinetic-typography-block .token-unit span.emphasis-pill.value::before {
-            background-color: #c6fe69;
-        }
-
-        /* Initial State */
-        .kinetic-typography-block .token-unit,
-        .kinetic-typography-block .token-unit span {
-            opacity: 0;
-        }
-
-        @media (max-width: 1000px) {
-            .content-wrapper h1 {
-                width: 90%;
-                font-size: 2rem;
-            }
-
-            .kinetic-typography-block {
-                width: 90%;
-            }
-
-            .kinetic-typography-block p {
-                font-size: 1.25rem;
-            }
-
-            .kinetic-typography-block .token-unit {
-                margin-right: 0.1rem;
-                margin-bottom: 0.15rem;
-                padding: 0.1rem 0.2rem;
-            }
-
-            .kinetic-typography-block .token-unit.highlight-anchor {
-                margin: 0 0.2rem 0.1rem 0.1rem;
-            }
-        }
-
-        /* =========================================
-   NEW SECTION 4: GRID SCROLL STYLES (EXACT MATCH)
-   ========================================= */
-        #grid-scroll-wrapper {
-            position: relative;
-            z-index: 30;
-            background-color: #ffffff;
-            width: 100%;
-        }
-
-        .gs-track {
-            min-height: 250vh;
-            /* Determines scroll length */
-            position: relative;
-        }
-
-        .gs-content {
-            height: 100vh;
-            width: 100%;
-            position: sticky;
-            top: 0;
-            overflow: hidden;
-            background: #ffffff;
-            display: flex;
-            place-items: center;
-            align-content: center;
-        }
-
-        /* Heading Style */
-        .gs-heading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Roboto', sans-serif;
-
-            font-weight: 900;
-            font-size: clamp(3rem, 12vw, 10rem);
-            /* Matches the fluid typography feel */
-            color: #1f1f1f;
-            z-index: 1;
-            /* Behind the images */
-            text-align: center;
-            margin: 0;
-            text-transform: uppercase;
-            line-height: 1;
-            white-space: nowrap;
-        }
-
-        /* The Grid Container */
-        .gs-grid {
-            --gs-offset: 0;
-            --gs-container-width: 1600px;
-            /* Exact gap logic from reference */
-            --gs-gap: clamp(10px, 7.35vw, 80px);
-
-            width: var(--gs-container-width);
-            max-width: calc(100% - 4rem);
-            display: grid;
-            /* 5 columns, 3 rows */
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(3, auto);
-            gap: var(--gs-gap);
-            margin: 0 auto;
-            align-content: center;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            translate: -50% -50%;
-            z-index: 2;
-        }
-
-        /* Images Style - Exact Match */
-        .gs-grid img {
-            width: 100%;
-            aspect-ratio: 4 / 5;
-            /* Exact aspect ratio */
-            object-fit: cover;
-            border-radius: 1rem;
-            /* Exact border radius */
-            display: block;
-        }
-
-        /* Layers using subgrid */
-        .gs-grid>.gs-layer {
-            display: grid;
-            grid-column: 1 / -1;
-            grid-row: 1 / -1;
-            grid-template-columns: subgrid;
-            grid-template-rows: subgrid;
-        }
-
-        /* Layer 1: Outer edges */
-        .gs-grid>.gs-layer:nth-of-type(1) div:nth-of-type(odd) {
-            grid-column: 1;
-        }
-
-        .gs-grid>.gs-layer:nth-of-type(1) div:nth-of-type(even) {
-            grid-column: -2;
-        }
-
-        /* Layer 2: Inner columns */
-        .gs-grid>.gs-layer:nth-of-type(2) div:nth-of-type(odd) {
-            grid-column: calc(2 + var(--gs-offset));
-        }
-
-        .gs-grid>.gs-layer:nth-of-type(2) div:nth-of-type(even) {
-            grid-column: calc(-3 - var(--gs-offset));
-        }
-
-        /* Layer 3: Center column top and bottom */
-        .gs-grid>.gs-layer:nth-of-type(3) div:first-of-type {
-            grid-column: calc(3 + var(--gs-offset));
-            grid-row: 1;
-        }
-
-        .gs-grid>.gs-layer:nth-of-type(3) div:last-of-type {
-            grid-column: calc(3 + var(--gs-offset));
-            grid-row: -1;
-        }
-
-        /* Center Scaler Image */
-        .gs-scaler {
-            position: relative;
-            grid-area: 2 / calc(3 + var(--gs-offset));
-            z-index: 2;
-            width: 100%;
-            height: 100%;
-        }
-
-        .gs-scaler img {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            translate: -50% -50%;
-            object-fit: cover;
-            border-radius: 1rem;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Exact Mobile Logic */
-        @media (max-width: 600px) {
-            .gs-grid {
-                grid-template-columns: repeat(3, 1fr);
-                --gs-offset: -1;
-            }
-
-            .gs-grid>.gs-layer:nth-of-type(1) {
-                display: none;
-            }
-        }
-
-        /* =========================================
-   NEW SECTION 2: WEBGL SLIDER STYLES
-   ========================================= */
-        .slider {
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .slider__text {
-            position: absolute;
-            top: 50%;
-            left: calc(2rem + 3vw);
-            transform: translateY(-50%);
-            z-index: 10;
-            font-size: calc(1rem + 4vw);
-            text-transform: uppercase;
-            line-height: 1.075;
-            color: #fff;
-            font-weight: 500;
-            font-family: 'Roboto', sans-serif;
-            pointer-events: none;
-        }
-
-        .slider__text-line {
-            overflow: hidden;
-        }
-
-        .slider__inner {
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-        }
-
-        .slider__nav {
-            position: absolute;
-            top: 50%;
-            right: 5vw;
-            transform: translateY(-50%);
-            z-index: 10;
-            cursor: pointer;
-        }
-
-        .slider-bullet {
-            display: flex;
-            align-items: center;
-            padding: 1rem 0;
-        }
-
-        .slider-bullet__text {
-            color: #fff;
-            font-size: 0.65rem;
-            margin-right: 1rem;
-        }
-
-        .slider-bullet__line {
-            background-color: #fff;
-            height: 1px;
-            width: 1rem;
-        }
-
-        .slider canvas {
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            filter: blur(8px) brightness(0.9);
-            transform: scale(1.1);
-            /* Scale up slightly to hide blurred edges */
-        }
-
-        .slide {
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            overflow: hidden;
-            opacity: 0;
-            /* Hidden by default, JS handles it */
-            visibility: hidden;
-        }
-
-        .slide__content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-        }
-
-        .slide__img {
-            position: relative;
-            width: 25vw;
-            height: 70vh;
-            padding: 0;
-            margin: 0;
-            min-width: 12.5rem;
-            transform-origin: top;
-        }
-
-        .slide__img:first-child {
-            top: -1.5rem;
-            margin-right: 2rem;
-        }
-
-        .slide__img:last-child {
-            bottom: -1.5rem;
-        }
-
-        .slide__img img {
-            display: block;
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .scroll.js-scroll {
-            position: absolute;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.5);
-            font-family: 'Urbanist', sans-serif;
-            font-size: 0.8rem;
-            z-index: 10;
-            text-transform: uppercase;
-        }
-        @media (max-width: 768px) {
-    .mobile-hidden {
-        display: none !important;
-    }
-}
-    </style>
-
+    <!-- Fonts -->
+    <link rel="preload" href="./assets/fonts/Presicav.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="./assets/fonts/Calibre-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="./assets/fonts/Arial.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=neue-montreal@500&display=swap" rel="stylesheet">
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
+    <script type="module" crossorigin src="./js/index.min.js?v=1754734869502"></script>
+    <link rel="stylesheet" crossorigin href="./css/index.min.css?v=1754734869502">
+    <link rel="stylesheet" href="./style.css">
 
 </head>
 
@@ -1892,8 +39,8 @@
         alt="3D Marker Pen" auto-rotate camera-controls disable-zoom shadow-intensity="1"
         style="width: 80vh; height: 80vh;">
     </model-viewer> -->
-    <img id="marker-3d-canvas"  src="./assets/—Pngtree—sharp tip marker pen_15425294.png" alt="">
-    <section class="loader-screen">
+    <div id="threejs-marker-container"></div>
+      <section class="loader-screen">
         <div class="loader-content">
             <div class="willem__h1">
                 <div class="willem__h1-start">
@@ -1905,9 +52,12 @@
                     <div class="willem-loader__box-inner">
                         <div class="willem__growing-image">
                             <div class="willem__growing-image-wrap">
-                                <img class="willem__cover-image-extra is--1" src="./assets/marker1.jpg" loading="lazy" alt="">
-                                <img class="willem__cover-image-extra is--2" src="./assets/marker2.jpeg" loading="lazy" alt="">
-                                <img class="willem__cover-image-extra is--3" src="./assets/marker3.webp" loading="lazy" alt="">
+                                <img class="willem__cover-image-extra is--1" src="./assets/marker1.jpg" loading="lazy"
+                                    alt="">
+                                <img class="willem__cover-image-extra is--2" src="./assets/marker2.jpeg" loading="lazy"
+                                    alt="">
+                                <img class="willem__cover-image-extra is--3" src="./assets/marker3.webp" loading="lazy"
+                                    alt="">
                                 <img class="willem__cover-image" src='./assets/whitee.png' loading="lazy" alt="">
                             </div>
                         </div>
@@ -2074,7 +224,7 @@
                                             settled deep into the material, giving the line its strong and lasting
                                             presence.
                                         </p>
-                        <p class="mobile-hidden">
+                                        <p class="mobile-hidden">
                                             As the marker moved, the ink revealed its character — rich in color,
                                             balanced in density, and smooth
                                             in motion. Each stroke carried clarity, allowing ideas to take shape without
@@ -2088,7 +238,7 @@
                                             across different
                                             surfaces and textures.
                                         </p>
-                        <p class="mobile-hidden">
+                                        <p class="mobile-hidden">
                                             <B>“This is not just ink,”</B> the creator realized, <B>“it is expression
                                                 itself.”</B>
                                             With every line drawn, the
@@ -2494,6 +644,7 @@
             initGlobalPageCursor();
             initFooterCursor();
             initFooterAnimations();
+            init3DMarker();
         });
 
         // --- GLOBAL PAGE CURSOR ANIMATION (NEW FUNCTION) ---
@@ -2908,22 +1059,197 @@
         }
     </script>
     <script>
-        const modelViewer = document.querySelector('#marker-3d-canvas');
+     // Target the NEW container ID
+const modelViewer = document.querySelector('#threejs-marker-container');
 
-        if (modelViewer) {
-            gsap.to(modelViewer, {
-                opacity: 0,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: "#urbanist-integration", // Trigger when Section 3 hits viewport
-                    start: "top bottom", // Start fading when section 3 top hits bottom of screen
-                    end: "top center",   // Finish fading when section 3 top hits center
-                    scrub: true
-                }
-            });
+if (modelViewer) {
+    gsap.to(modelViewer, {
+        opacity: 0,
+        ease: "none",
+        scrollTrigger: {
+            trigger: "#urbanist-integration", 
+            start: "top bottom", 
+            end: "top center",   
+            scrub: true,
+            // Optimization: hide it completely when invisible so it doesn't render
+            onLeave: () => { modelViewer.style.display = 'none'; },
+            onEnterBack: () => { modelViewer.style.display = 'block'; }
         }
+    });
+}
     </script>
-   
+<script>function init3DMarker() {
+    const container = document.getElementById('threejs-marker-container');
+    if (!container) return;
+
+    // 1. SCENE & CAMERA
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 28;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    // 2. LIGHTING
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(10, 10, 20);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    const spotLight = new THREE.SpotLight(0xffffff, 0.8);
+    spotLight.position.set(-10, 0, 10);
+    scene.add(spotLight);
+
+    // 3. MATERIALS & TEXTURE
+    function createLabelTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1024; canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.fillStyle = '#fcfcfc'; 
+        ctx.fillRect(0, 0, 1024, 512);
+        
+        ctx.fillStyle = '#000000'; 
+        ctx.font = '900 130px Helvetica, Arial'; 
+        ctx.textAlign = 'center';
+        ctx.fillText('WHITE BOARD', 512, 250);
+
+        ctx.fillStyle = '#d91c24'; 
+        ctx.fillRect(720, 170, 250, 90);
+        ctx.fillStyle = '#ffffff'; 
+        ctx.font = 'bold 60px Helvetica, Arial'; 
+        ctx.fillText('Camlin', 845, 235);
+        
+        return new THREE.CanvasTexture(canvas);
+    }
+
+    const labelTex = createLabelTexture();
+    labelTex.wrapS = THREE.RepeatWrapping;
+    labelTex.repeat.set(-1, 1);
+    labelTex.offset.set(0.75, 0);
+
+    const matBody = new THREE.MeshStandardMaterial({ map: labelTex, roughness: 0.3, metalness: 0.05 });
+    const matRed = new THREE.MeshStandardMaterial({ color: 0xd91c24, roughness: 0.2, metalness: 0.1 });
+    const matNib = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
+    const matWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+
+    // 4. MESHES
+    const markerSystem = new THREE.Group();
+    scene.add(markerSystem);
+
+    // --- BODY GROUP ---
+    const bodyGroup = new THREE.Group();
+    markerSystem.add(bodyGroup);
+    
+    const r = 0.8; 
+    const len = 8.0; 
+
+    const cyl = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 64), matBody);
+    cyl.rotation.y = Math.PI; 
+    cyl.castShadow = true;
+    bodyGroup.add(cyl);
+
+    const plug = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.5, 64), matRed);
+    plug.position.y = (len/2) + 0.25;
+    bodyGroup.add(plug);
+
+    const taper = new THREE.Mesh(new THREE.CylinderGeometry(r, 0.45, 1.8, 64), matWhite);
+    taper.position.y = -(len/2) - 0.9;
+    bodyGroup.add(taper);
+
+    const nib = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.9, 32), matNib);
+    nib.position.y = -(len/2) - 2.1;
+    nib.rotation.z = Math.PI; 
+    bodyGroup.add(nib);
+
+    // --- CAP GROUP ---
+    const capGroup = new THREE.Group();
+    markerSystem.add(capGroup);
+    const capLen = 3.8; const capR = r + 0.12;
+
+    const capShell = new THREE.Mesh(new THREE.CylinderGeometry(capR-0.05, capR, capLen, 64), matRed);
+    capShell.geometry.translate(0, capLen/2, 0); 
+    capShell.castShadow = true;
+    capGroup.add(capShell);
+
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(capR+0.1, capR+0.1, 0.6, 64), matRed);
+    ring.position.y = 0.5;
+    capGroup.add(ring);
+
+    const clip = new THREE.Mesh(new THREE.BoxGeometry(0.3, 2.8, 0.5), matRed);
+    clip.position.set(capR + 0.05, 2.0, 0);
+    capGroup.add(clip);
+
+    // 5. INITIAL POSITIONING (Will be overridden by responsive logic below)
+    markerSystem.rotation.z = -Math.PI / 4; 
+
+    // 6. ANIMATION
+    const closedY = -5.0; 
+    const openY = -14.0; 
+    capGroup.position.y = openY;
+
+    const tl = gsap.timeline({
+        scrollTrigger: {
+            trigger: ".hero",
+            start: "top top",
+            end: "80% top",
+            scrub: 1.2,
+        }
+    });
+
+    tl.to(capGroup.position, {
+        y: closedY,
+        ease: "power2.out"
+    });
+
+    // 7. RENDER LOOP
+    function animate() {
+        requestAnimationFrame(animate);
+        markerSystem.position.y += Math.sin(Date.now() * 0.001) * 0.002;
+        renderer.render(scene, camera);
+    }
+    animate();
+
+
+    // --- 8. RESPONSIVE LOGIC (NEW) ---
+    function updateLayout() {
+        // Update camera and renderer first
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+
+        // CHECK SCREEN WIDTH
+        if (width < 768) {
+            // === MOBILE SETTINGS ===
+            // 1. Scale it down to 55%
+            markerSystem.scale.set(0.55, 0.55, 0.55);
+            // 2. Move it closer to center (X=2) because screen is narrow
+            markerSystem.position.set(2.0, 1.5, 0); 
+        } else {
+            // === DESKTOP SETTINGS ===
+            // 1. Full Size
+            markerSystem.scale.set(1, 1, 1);
+            // 2. Original Position (Right side)
+            markerSystem.position.set(6.5, 2, 0);
+        }
+    }
+
+    // Run once on load
+    updateLayout();
+
+    // Run whenever window resizes
+    window.addEventListener('resize', updateLayout);
+}</script>
 </body>
 
 </html>
