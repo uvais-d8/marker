@@ -143,7 +143,7 @@
                 </section>
                 <section class="content">
                     <article class="article">
-                        <h4 style="margin-top: 10px;"><b>Red Marker (Highest Priority)</b></h4>
+                        <h4 style="margin-top: 20px;color: red;"><b>Red Marker (Highest Priority)</b></h4>
                         <p>
                             RED is the most attention-grabbing marker colour. It represents urgency,
                             <b>danger</b>, and high
@@ -155,17 +155,17 @@
                             intention.
                         </p>
 
-                        <h4 style="margin-top: 10px;"><b>Black Marker</b></h4>
+                        <h4 style="margin-top: 20px;color: black;"><b>Black Marker</b></h4>
                         <p>
                             BLACK symbolizes clarity and authority. It is widely used for writing, outlining, and
                             clear
-                            <b>communication</b> due to its high <b>readability</b>.
+                            <b>communication</b> due to its high readability .
                         </p>
                         <p class="mobile-hidden">
                             Because of its professional appearance, black is preferred for formal and final work.
                         </p>
 
-                        <h4 style="margin-top: 10px;"><b>Blue Marker</b></h4>
+                        <h4 style="margin-top: 20px;color: blue;"><b>Blue Marker</b></h4>
                         <p>
                             BLUE represents trust and <b>calmness</b>. It is commonly used for general writing
                             and explanations
@@ -175,7 +175,7 @@
                             This colour is suitable for notes and planning where balance and clarity are needed.
                         </p>
 
-                        <h4 style="margin-top: 10px;"><b>Green Marker (Lowest Priority)</b></h4>
+                        <h4 style="margin-top: 20px;color: green;"><b>Green Marker (Lowest Priority)</b></h4>
                         <p>
                             GREEN stands for positivity and <b>approval</b>. It is often used to show
                             <b>correctness</b> or progress.
@@ -252,46 +252,8 @@
                         </article>
                     </section>
                 </div>
-                <section class="content">
-                    <article class="article">
-                        <h4><b>Impact</b></h4>
-                        <p>
-                            <b>Marker ink</b> is designed to produce strong, high-contrast lines that remain clearly
-                            visible on
-                            a
-                            variety of surfaces. Its fast-drying nature reduces smudging and allows users to work
-                            quickly
-                            without interruption, especially in professional and <b>creative environments</b>.
-                        </p>
-                        <p class="mobile-hidden">
-                            The consistent flow of marker ink helps define shapes and outlines with precision. Once
-                            applied,
-                            the ink penetrates the surface fibers, making corrections difficult and encouraging
-                            confident,
-                            deliberate strokes.
-                        </p>
-                        <p class="mobile-hidden">
-                            Due to its high pigment concentration, marker ink resists fading over time. This makes it
-                            suitable
-                            for signage, illustrations, and notes that require long-lasting visibility.
-                        </p>
+                <section style="background-color: white;" class="content">
 
-                        <h4><b>Legacy</b></h4>
-                        <p>
-                            <b>Markers</b> have become essential tools across <b>education</b>, design, and industry.
-                            Their
-                            reliability and
-                            ease of use have made them a standard choice for communication, <b>planning</b>, and visual
-                            expression.
-                        </p>
-                        <p class="mobile-hidden">
-                            Over time, advancements in ink formulation—such as alcohol-based and water-based inks—have
-                            improved
-                            durability, color richness, and environmental safety, ensuring markers remain relevant and
-                            widely
-                            used.
-                        </p>
-                    </article>
                 </section>
             </div>
             <section class="viewport-section intro-viewport">
@@ -1325,6 +1287,19 @@
                     0
                 );
             }
+
+
+            // C. HIDE MARKER AT PRIME INK SECTION
+            gsap.to(container, {
+                opacity: 0,
+                duration: 0.5,
+                ease: "power2.inOut",
+                scrollTrigger: {
+                    trigger: ".hero-reveal",
+                    start: "top center",
+                    toggleActions: "play none none reverse"
+                }
+            });
 
 
             // --- 6. RENDER LOOP (With Floating Motion) ---

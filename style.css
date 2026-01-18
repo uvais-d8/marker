@@ -1274,7 +1274,7 @@ body.is-loading {
 }
 
 #alice-wrapper .article {
-    max-width: 31.25rem;
+    max-width: 41.25rem;
     padding: 0 1.5rem;
 }
 
@@ -2305,5 +2305,182 @@ body.is-loading {
 @media (max-width: 768px) {
     .mobile-hidden {
         display: none !important;
+    }
+}
+
+/* =========================================
+   NEW REDESIGN: MARKER FEATURE GRID
+   ========================================= */
+
+/* Make the wrapper wide enough */
+#alice-wrapper .content {
+    max-width: 100vw;
+    width: 100%;
+    padding: 8vh 5vw;
+    background: #f4f4f4;
+    /* Subtle gray bg for contrast with glass cards */
+    display: flex;
+    justify-content: center;
+}
+
+.marker-features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1800px;
+    /* Wide layout */
+}
+
+/* Glassmorphism Card Style */
+.feature-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    overflow: hidden;
+    opacity: 0;
+    /* Hidden initially for stats animation */
+    /* Subtle 3D lift */
+    transform: translateY(30px);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* Top Neon borders */
+.card-red {
+    border-top: 4px solid #e71d25;
+}
+
+.card-black {
+    border-top: 4px solid #000000;
+}
+
+.card-blue {
+    border-top: 4px solid #0056b3;
+}
+
+.card-green {
+    border-top: 4px solid #28a745;
+}
+
+/* Dynamic Shadows (Neon Glow on Hover) */
+.card-red:hover {
+    box-shadow: 0 20px 40px rgba(231, 29, 37, 0.15);
+}
+
+.card-black:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-blue:hover {
+    box-shadow: 0 20px 40px rgba(0, 86, 179, 0.15);
+}
+
+.card-green:hover {
+    box-shadow: 0 20px 40px rgba(40, 167, 69, 0.15);
+}
+
+/* Typography */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding-bottom: 1rem;
+}
+
+.card-number {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 900;
+    font-size: 2rem;
+    opacity: 0.2;
+}
+
+.card-label {
+    font-family: 'Arial', sans-serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: bold;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.feature-card h3 {
+    font-family: 'Neue Montreal', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 1rem 0;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+}
+
+.feature-highlight {
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    /* Color match per card */
+}
+
+/* Specific text colors */
+.card-red h3,
+.card-red .feature-highlight {
+    color: #e71d25;
+}
+
+.card-black h3,
+.card-black .feature-highlight {
+    color: #000000;
+}
+
+.card-blue h3,
+.card-blue .feature-highlight {
+    color: #0056b3;
+}
+
+.card-green h3,
+.card-green .feature-highlight {
+    color: #28a745;
+}
+
+.feature-desc {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #444;
+    font-weight: 400;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .marker-features-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .marker-features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .feature-card {
+        margin-bottom: 1rem;
     }
 }
