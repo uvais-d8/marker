@@ -1136,34 +1136,11 @@
             });
         }
     </script>
-    <script>
-        const modelViewer = document.querySelector('#threejs-marker-container');
-        if (modelViewer) {
-            gsap.to(modelViewer, {
-                opacity: 0,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: "#grid-scroll-wrapper",
-
-                    start: "top bottom",
-                    end: "center center",
-
-                    scrub: true,
-                    onLeave: () => { modelViewer.style.display = 'none'; },
-                    onEnterBack: () => { modelViewer.style.display = 'block'; }
-                }
-            });
-        }
-    </script>
-    <script>
-        function init3DMarker() {
+    <script>function init3DMarker() {
             const container = document.getElementById('threejs-marker-container');
             if (!container) return;
 
-            // 0. FIX Z-INDEX
-            container.style.zIndex = "999";
-
-            // 1. SCENE & CAMERA
+            // --- 1. SETUP THREE.JS SCENE ---
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 100);
             camera.position.z = 28;
@@ -1175,159 +1152,209 @@
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             container.appendChild(renderer.domElement);
 
-            // 2. LIGHTING
+            // Lights
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
-
             const dirLight = new THREE.DirectionalLight(0xffffff, 1);
             dirLight.position.set(10, 10, 20);
             dirLight.castShadow = true;
             scene.add(dirLight);
-
             const spotLight = new THREE.SpotLight(0xffffff, 0.8);
             spotLight.position.set(-10, 0, 10);
             scene.add(spotLight);
 
-            // 3. MATERIALS
+            // --- 2. BUILD THE MARKER ---
+            // Materials
             function createLabelTexture() {
                 const canvas = document.createElement('canvas');
                 canvas.width = 1024; canvas.height = 512;
                 const ctx = canvas.getContext('2d');
-
-                ctx.fillStyle = '#fcfcfc';
-                ctx.fillRect(0, 0, 1024, 512);
-
-                ctx.fillStyle = '#000000';
-                ctx.font = '900 130px Helvetica, Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('WHITE BOARD', 512, 250);
-
-                ctx.fillStyle = '#d91c24';
-                ctx.fillRect(720, 170, 250, 90);
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 60px Helvetica, Arial';
-                ctx.fillText('Camlin', 845, 235);
-
+                ctx.fillStyle = '#fcfcfc'; ctx.fillRect(0, 0, 1024, 512);
+                ctx.fillStyle = '#000000'; ctx.font = '900 130px Helvetica, Arial'; ctx.textAlign = 'center'; ctx.fillText('WHITE BOARD', 512, 250);
+                ctx.fillStyle = '#d91c24'; ctx.fillRect(720, 170, 250, 90);
+                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 60px Helvetica, Arial'; ctx.fillText('Camlin', 845, 235);
                 return new THREE.CanvasTexture(canvas);
             }
-
             const labelTex = createLabelTexture();
-            labelTex.wrapS = THREE.RepeatWrapping;
-            labelTex.repeat.set(-1, 1);
-            labelTex.offset.set(0.75, 0);
+            labelTex.wrapS = THREE.RepeatWrapping; labelTex.repeat.set(-1, 1); labelTex.offset.set(0.75, 0);
 
             const matBody = new THREE.MeshStandardMaterial({ map: labelTex, roughness: 0.3, metalness: 0.05 });
             const matRed = new THREE.MeshStandardMaterial({ color: 0xd91c24, roughness: 0.2, metalness: 0.1 });
             const matNib = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
             const matWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
 
-            // 4. MESHES
+            // Groups: markerSystem (GSAP moves this) -> floatGroup (Math moves this) -> body/cap
             const markerSystem = new THREE.Group();
             scene.add(markerSystem);
+            const floatGroup = new THREE.Group();
+            markerSystem.add(floatGroup);
+
             const r = 0.8; const len = 8.0;
 
-            // --- BODY (White Part) ---
+            // Body
             const bodyGroup = new THREE.Group();
-            markerSystem.add(bodyGroup);
-
+            floatGroup.add(bodyGroup);
             const cyl = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 64), matBody);
-            cyl.rotation.y = Math.PI;
-            cyl.castShadow = true;
-            bodyGroup.add(cyl);
-
+            cyl.rotation.y = Math.PI; cyl.castShadow = true; bodyGroup.add(cyl);
             const plug = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.5, 64), matRed);
-            plug.position.y = (len / 2) + 0.25;
-            bodyGroup.add(plug);
-
+            plug.position.y = (len / 2) + 0.25; bodyGroup.add(plug);
             const taper = new THREE.Mesh(new THREE.CylinderGeometry(r, 0.45, 1.8, 64), matWhite);
-            taper.position.y = -(len / 2) - 0.9;
-            bodyGroup.add(taper);
+            taper.position.y = -(len / 2) - 0.9; bodyGroup.add(taper);
+            // Replaced sharp Cone with blunt Cylinder for smoother look
+            const nib = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.3, 0.9, 32), matNib);
+            nib.position.y = -(len / 2) - 2.1; nib.rotation.z = Math.PI; bodyGroup.add(nib);
 
-            const nib = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.9, 32), matNib);
-            nib.position.y = -(len / 2) - 2.1;
-            nib.rotation.z = Math.PI;
-            bodyGroup.add(nib);
+            // Cap
             const capGroup = new THREE.Group();
-            markerSystem.add(capGroup);
+            floatGroup.add(capGroup);
             const capLen = 3.8; const capR = r + 0.12;
-
             const capShell = new THREE.Mesh(new THREE.CylinderGeometry(capR - 0.05, capR, capLen, 64), matRed);
-            capShell.geometry.translate(0, -capLen / 2, 0);
-            capShell.castShadow = true;
-            capGroup.add(capShell);
-
+            capShell.geometry.translate(0, -capLen / 2, 0); capShell.castShadow = true; capGroup.add(capShell);
             const ring = new THREE.Mesh(new THREE.CylinderGeometry(capR + 0.1, capR + 0.1, 0.6, 64), matRed);
-            ring.position.y = -0.5;
-            capGroup.add(ring);
-
+            ring.position.y = -0.5; capGroup.add(ring);
             const clip = new THREE.Mesh(new THREE.BoxGeometry(0.3, 2.8, 0.5), matRed);
-            clip.position.set(capR + 0.05, -2.0, 0);
-            capGroup.add(clip);
+            clip.position.set(capR + 0.05, -2.0, 0); capGroup.add(clip);
+
+            // Initial Layout
+            const bodyStartY = 12.0; const capStartY = -14.0;
+            const bodyClosedY = 0; const capClosedY = -3.9;
+            bodyGroup.position.y = bodyStartY; capGroup.position.y = capStartY;
+
+            // --- 3. ANIMATION CONFIGURATION ---
+            // This is where you define the "Dance" for each section
+            const isMobile = window.innerWidth < 768;
+
+            const sectionStates = [
+                {
+                    // STATE 0: HERO (Initial)
+                    // Cap Closing Animation happens here separately
+                    trigger: ".hero",
+                    start: "top top", end: "bottom top",
+                    desktop: { x: 6.5, y: 2, z: 0, rotX: 0, rotY: 0, rotZ: -0.78, scale: 1 },
+                    mobile: { x: 2.0, y: 1.5, z: 0, rotX: 0, rotY: 0, rotZ: -0.78, scale: 0.4 }
+                },
+                {
+                    // STATE 1: URBANIST (Move to Left Side, Rotate 90 deg)
+                    trigger: "#urbanist-integration",
+                    start: "top bottom", end: "center center",
+                    desktop: { x: -9, y: 0, z: 0, rotX: 0.2, rotY: Math.PI, rotZ: Math.PI - 0.5, scale: 0.9 },
+                    mobile: { x: -2, y: -4, z: 0, rotX: 0.2, rotY: Math.PI, rotZ: Math.PI - 0.5, scale: 0.35 }
+                },
+                {
+                    // STATE 2: GRID SCROLL (Move Top Right, Horizontal)
+                    trigger: "#grid-scroll-wrapper",
+                    start: "top bottom", end: "center center",
+                    desktop: { x: 8, y: 4, z: -2, rotX: 0, rotY: Math.PI * 2, rotZ: -1.57, scale: 0.8 },
+                    mobile: { x: 2, y: 5, z: -2, rotX: 0, rotY: Math.PI * 2, rotZ: -1.57, scale: 0.35 }
+                },
+                {
+                    // STATE 3: ALICE SECTION (Move Bottom Left, Diagonal Flip)
+                    trigger: "#alice-wrapper",
+                    start: "top bottom", end: "center center",
+                    desktop: { x: -8, y: -3, z: 2, rotX: 0.5, rotY: Math.PI * 3, rotZ: Math.PI - 0.7, scale: 0.9 },
+                    mobile: { x: -2, y: -2, z: 2, rotX: 0.5, rotY: Math.PI * 3, rotZ: Math.PI - 0.7, scale: 0.35 }
+                },
+                {
+                    // STATE 4: TEXT/CAPABILITIES (Center Right, Vertical)
+                    trigger: ".capabilities-segment",
+                    start: "top bottom", end: "center center",
+                    desktop: { x: 9, y: 0, z: 0, rotX: 0, rotY: Math.PI * 3.5, rotZ: Math.PI, scale: 0.9 },
+                    mobile: { x: 2.5, y: 0, z: 0, rotX: 0, rotY: Math.PI * 3.5, rotZ: Math.PI, scale: 0.35 }
+                }
+            ];
+
+            // --- 4. APPLY INITIAL POSITION ---
+            const startState = isMobile ? sectionStates[0].mobile : sectionStates[0].desktop;
+            markerSystem.position.set(startState.x, startState.y, startState.z);
+            markerSystem.rotation.set(startState.rotX, startState.rotY, startState.rotZ);
+            markerSystem.scale.set(startState.scale, startState.scale, startState.scale);
 
 
-            markerSystem.rotation.z = -Math.PI / 4;
-            const bodyClosedY = 0;
-            const capClosedY = -3.9;
-            const bodyStartY = 12.0;
-            const capStartY = -14.0;
+            // --- 5. CREATE SCROLL TRIGGERS ---
 
-            bodyGroup.position.y = bodyStartY;
-            capGroup.position.y = capStartY;
-
-            // 6. ANIMATION TIMELINE
-            const tl = gsap.timeline({
+            // A. SPECIAL HERO CAP ANIMATION (Closing the marker)
+            const heroTl = gsap.timeline({
                 scrollTrigger: {
                     trigger: ".hero",
                     start: "top top",
                     end: "80% top",
-                    scrub: 1.2,
+                    scrub: 1
                 }
             });
+            heroTl.to(bodyGroup.position, { y: bodyClosedY, ease: "power2.out" }, 0);
+            heroTl.to(capGroup.position, { y: capClosedY, ease: "power2.out" }, 0);
 
-            tl.to(bodyGroup.position, { y: bodyClosedY, ease: "power2.out" }, 0);
-            tl.to(capGroup.position, { y: capClosedY, ease: "power2.out" }, 0);
 
-            // 7. RENDER LOOP
+            // B. MOVEMENT ANIMATIONS (Connecting Sections)
+            // We skip index 0 because that's our starting point
+            for (let i = 1; i < sectionStates.length; i++) {
+                const prevState = sectionStates[i - 1];
+                const currState = sectionStates[i];
+
+                const prevCfg = isMobile ? prevState.mobile : prevState.desktop;
+                const currCfg = isMobile ? currState.mobile : currState.desktop;
+
+                // Create a timeline for this section's transition
+                const tl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: currState.trigger,
+                        start: currState.start,
+                        end: currState.end,
+                        scrub: isMobile ? 1 : 1.5, // Faster scrub for mobile responsiveness
+                    }
+                });
+
+                // Position
+                tl.fromTo(markerSystem.position,
+                    { x: prevCfg.x, y: prevCfg.y, z: prevCfg.z },
+                    { x: currCfg.x, y: currCfg.y, z: currCfg.z, ease: "power1.inOut", immediateRender: false },
+                    0
+                );
+
+                // Rotation
+                tl.fromTo(markerSystem.rotation,
+                    { x: prevCfg.rotX, y: prevCfg.rotY, z: prevCfg.rotZ },
+                    { x: currCfg.rotX, y: currCfg.rotY, z: currCfg.rotZ, ease: "power1.inOut", immediateRender: false },
+                    0
+                );
+
+                // Scale
+                tl.fromTo(markerSystem.scale,
+                    { x: prevCfg.scale, y: prevCfg.scale, z: prevCfg.scale },
+                    { x: currCfg.scale, y: currCfg.scale, z: currCfg.scale, ease: "power1.inOut", immediateRender: false },
+                    0
+                );
+            }
+
+
+            // --- 6. RENDER LOOP (With Floating Motion) ---
             function animate() {
                 requestAnimationFrame(animate);
-                markerSystem.position.y += Math.sin(Date.now() * 0.001) * 0.002;
+                const t = Date.now() * 0.001;
+
+                // Independent Idle Animation (Sine Waves)
+                // This happens on TOP of the GSAP scrolling movement
+                floatGroup.position.y = Math.sin(t * 1.5) * 0.3; // Bob up/down
+                floatGroup.rotation.x = Math.sin(t * 1.2) * 0.1; // Gentle tilt
+                floatGroup.rotation.z = Math.cos(t * 0.9) * 0.1; // Gentle sway
+
                 renderer.render(scene, camera);
             }
             animate();
 
-            // 8. RESPONSIVE
-            function updateLayout() {
-                const width = window.innerWidth;
-                const height = window.innerHeight;
-                camera.aspect = width / height;
-                camera.updateProjectionMatrix();
-                renderer.setSize(width, height);
 
-                if (width < 768) {
-                    markerSystem.scale.set(0.55, 0.55, 0.55);
-                    markerSystem.position.set(2.0, 1.5, 0);
-                } else {
-                    markerSystem.scale.set(1, 1, 1);
-                    markerSystem.position.set(6.5, 2, 0);
-                }
+            // --- 7. RESIZE HANDLER ---
+            function onResize() {
+                const w = window.innerWidth;
+                const h = window.innerHeight;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
+                // Note: We don't reset positions here to avoid conflict with ScrollTrigger
+                // A full refresh is better for responsive layout changes
             }
-            updateLayout();
-            window.addEventListener('resize', updateLayout);
-            gsap.to(markerSystem.position, {
-                x: 25,
-                y: 25,
-                ease: "power1.in",
-                scrollTrigger: {
-                    trigger: "#urbanist-integration",
-                    start: "top top",
-                    end: "center top",
-                    scrub: 1,
-                    onLeave: () => { container.style.display = 'none'; },
-                    onEnterBack: () => { container.style.display = 'block'; }
-                }
-            });
-        }
-    </script>
+            window.addEventListener('resize', onResize);
+        }</script>
     <script>
         function initGlobalTextAnimations() {
             const textElements = document.querySelectorAll("h1, h2, h3, h4, p, li, span.footer-big-text");
@@ -1421,9 +1448,12 @@
             ctx.strokeStyle = "rgba(0,0,0,1)"; // Color doesn't matter for destination-out, alpha does
         }
 
-        // Initialize and listen for resize
+        // Initialize and listen for resize with redundancy for mobile
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
+        window.addEventListener("load", resizeCanvas);
+        // Fallback for mobile browser address bar shifts
+        setTimeout(resizeCanvas, 500);
 
         function getCoords(e) {
             const rect = canvas.getBoundingClientRect();
