@@ -908,51 +908,7 @@ body.is-loading {
 .pane:nth-of-type(3) .urbanist-floating-img {
     translate: -150% -50%;
 }
-
-/* =========================================
-           SECTION 3: HISTORY STYLES
-           ========================================= */
-#scroll-section {
-    container: inline-size;
-    display: grid;
-    position: relative;
-    min-height: 1800px;
-    padding-block-start: 15vh;
-    font-family: 'Montserrat', sans-serif;
-    background: transparent;
-    z-index: 10;
-}
-
-#scroll-section img {
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-    display: block;
-    height: auto;
-    max-width: 100%;
-    animation: reveal linear both;
-    animation-timeline: view();
-    animation-range: 10% 60%;
-}
-
-#scroll-section .btn {
-    background-color: rgb(21, 21, 21);
-    border-radius: 99px;
-    color: white;
-    display: block;
-    font-size: 18px;
-    font-weight: 900;
-    letter-spacing: .02em;
-    line-height: 42px;
-    height: 42px;
-    padding: 0 40px;
-    text-decoration: none;
-    transition: background-color .4s ease-out;
-    width: fit-content;
-}
-
-#scroll-section .btn:hover {
-    background-color: rgb(243, 87, 87);
-}
-
+ 
 .line-svg {
     grid-row: 1;
     grid-column: 1;
@@ -1860,6 +1816,8 @@ body.is-loading {
     align-items: center;
     text-align: center;
     border-radius: 2rem;
+    position: relative;
+    z-index: 20;
 }
 
 .content-wrapper h1 {
@@ -1870,6 +1828,29 @@ body.is-loading {
     line-height: 1;
 }
 
+/* Container setup */
+.viewport-section {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Initial State */
+.intro-viewport .content-wrapper,
+.action-trigger-zone .content-wrapper,
+.conclusion-viewport .content-wrapper {
+    opacity: 1;
+    will-change: transform, opacity; /* Optimizes performance */
+}
+
+/* Text setup */
+.char {
+    display: inline-block;
+    opacity: 0;
+}
 /* --- Section Specific Colors --- */
 
 /* Intro (Previously Hero) - New Color: Electric Violet */
