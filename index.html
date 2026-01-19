@@ -255,7 +255,7 @@
                         </article>
                     </section>
                 </div>
-              
+
             </div>
             <section class="viewport-section intro-viewport">
                 <div class="content-wrapper">
@@ -579,6 +579,34 @@
             });
             gsap.ticker.lagSmoothing(0);
 
+            // =========================================================
+            // 1. SETUP AUDIO LOGIC
+            // =========================================================
+            const typeSound = new Audio('./assets/keyboard-typing-effect-free-393912.mp3');
+            typeSound.loop = true; // Loops continuously while scrolling
+            typeSound.volume = 0.5; // Adjust volume (0.0 to 1.0)
+
+            let typeSoundTimeout;
+
+            // Function to play sound only when moving
+            function manageTypingSound(velocity) {
+                // If scroll speed is significant (moving)
+                if (Math.abs(velocity) > 5) {
+                    if (typeSound.paused) {
+                        typeSound.play().catch(e => { }); // Start playing
+                    }
+
+                    // Clear any timer that was about to stop the sound
+                    clearTimeout(typeSoundTimeout);
+
+                    // Set a new timer to stop sound if motion stops for 150ms
+                    typeSoundTimeout = setTimeout(() => {
+                        typeSound.pause();
+                    }, 150);
+                }
+            }
+            // =========================================================
+
             // Updated Selector
             const textBlocks = document.querySelectorAll(".kinetic-typography-block p");
 
@@ -586,15 +614,8 @@
             const wordHighlightRGB = "45, 59, 85";
 
             const specialKeywords = [
-                "designed",
-                "natural",
-                "control",
-                "ideas",
-                "smooth",
-                "performance",
-                "creation",
-                "attention",
-                "value",
+                "designed", "natural", "control", "ideas", "smooth",
+                "performance", "creation", "attention", "value",
             ];
 
             textBlocks.forEach((paragraph) => {
@@ -605,7 +626,6 @@
                 splitWords.forEach((wordStr) => {
                     if (wordStr.trim()) {
                         const tokenContainer = document.createElement("div");
-                        // Updated Class Name
                         tokenContainer.className = "token-unit";
 
                         const innerSpan = document.createElement("span");
@@ -614,7 +634,6 @@
                         const cleanWord = wordStr.toLowerCase().replace(/[.,!?;:"]/g, "");
 
                         if (specialKeywords.includes(cleanWord)) {
-                            // Updated Class Names
                             tokenContainer.classList.add("highlight-anchor");
                             innerSpan.classList.add("emphasis-pill", cleanWord);
                         }
@@ -636,6 +655,11 @@
                     end: `+=${window.innerHeight * 4}`,
                     pinSpacing: true,
                     onUpdate: (self) => {
+
+                        // --- TRIGGER AUDIO ---
+                        manageTypingSound(self.getVelocity());
+                        // ---------------------
+
                         const progress = self.progress;
                         // Updated Selector
                         const allTokens = Array.from(
@@ -722,14 +746,16 @@
                             }
                         });
                     },
+                    // Stop sound immediately if we leave the section (scrolled past it)
+                    onLeave: () => { typeSound.pause(); },
+                    onLeaveBack: () => { typeSound.pause(); }
                 });
             });
         });
     </script>
     <script>
         gsap.registerPlugin(ScrollTrigger);
-
-        // --- 0. LOADER ANIMATION (OSMO/WILLEM) ---
+// --- 0. LOADER ANIMATION (OSMO/WILLEM) ---
         function initLoader() {
             const container = document.querySelector('.loader-screen');
             const loadingLetter = container.querySelectorAll('.willem__letter');
@@ -738,6 +764,10 @@
             const headingStart = container.querySelectorAll('.willem__h1-start');
             const headingEnd = container.querySelectorAll('.willem__h1-end');
             const coverImageExtra = container.querySelectorAll('.willem__cover-image-extra');
+
+            // 1. SETUP AUDIO
+            const loaderSound = new Audio('./assets/loader.mp3');
+            loaderSound.volume = 0.5;
 
             const tl = gsap.timeline({
                 defaults: { ease: 'expo.inOut' },
@@ -758,10 +788,29 @@
             if (headingStart.length) { tl.fromTo(headingStart, { x: '0em' }, { x: '-0.05em', duration: 1.25 }, '<'); }
             if (headingEnd.length) { tl.fromTo(headingEnd, { x: '0em' }, { x: '0.05em', duration: 1.25 }, '<'); }
             if (coverImageExtra.length) { tl.fromTo(coverImageExtra, { opacity: 1 }, { opacity: 0, duration: 0.05, ease: 'none', stagger: 0.5 }, '-=0.05'); }
-            if (growingImage.length) { tl.to(growingImage, { width: '100vw', height: '100vh', duration: 1.5 }, '< 1.25'); }
-            if (box.length) { tl.to(box, { width: '100vw', duration: 1.5 }, '<'); }
-        }
+            
+            // --- 2. SYNCHRONIZED EXPANSION & SOUND ---
+            
+            // Create a label for the exact moment the expansion should start
+            tl.addLabel("zoomEffect", "< 1.25");
 
+            // A. Expand the Image (Visual) - referencing the label
+            if (growingImage.length) { 
+                tl.to(growingImage, { width: '100vw', height: '100vh', duration: 1.5 }, "zoomEffect"); 
+            }
+            
+            // B. Expand the Box/Text Mask (Visual) - referencing the SAME label
+            // This ensures it moves exactly with the image, fixing the text glitch
+            if (box.length) { 
+                tl.to(box, { width: '100vw', duration: 1.5 }, "zoomEffect"); 
+            }
+
+            // C. Play Sound - referencing the label + 0.4s delay
+            // It plays slightly later to match the visual "whoosh" of the easing
+            tl.call(() => {
+                loaderSound.play().catch(e => console.warn("Audio autoplay blocked", e));
+            }, null, "zoomEffect+=0.4");
+        }
         document.addEventListener('DOMContentLoaded', () => {
             initLoader();
             initCarousel();
@@ -1299,15 +1348,30 @@
 
             // --- 5. CREATE SCROLL TRIGGERS ---
 
+            // 1. SETUP AUDIO (Add this new part)
+            const capSound = new Audio('./assets/closeSound.mpeg');
+            capSound.volume = 0.6; // Adjust volume if needed
+
             // A. SPECIAL HERO CAP ANIMATION (Closing the marker)
             const heroTl = gsap.timeline({
                 scrollTrigger: {
                     trigger: ".hero",
                     start: "top top",
                     end: "80% top",
-                    scrub: 1
+                    scrub: 1,
+                    // NEW: Play sound when scrolling down finishes the "closing" action
+                    onLeave: () => {
+                        capSound.currentTime = 0; // Reset sound to start
+                        capSound.play().catch(e => console.log("Audio waiting for interaction"));
+                    },
+                    // Optional: If you want it to click again if they scroll up and then back down
+                    onEnterBack: () => {
+                        // Resets logic if needed, but usually sound only plays on close
+                    }
                 }
             });
+
+            // ... (Rest of your existing code: heroTl.to bodyGroup, capGroup etc) ...
             heroTl.to(bodyGroup.position, { y: bodyClosedY, ease: "power2.out" }, 0);
             heroTl.to(capGroup.position, { y: capClosedY, ease: "power2.out" }, 0);
 
@@ -1546,7 +1610,7 @@
         canvas.addEventListener("touchmove", draw, { passive: false });
         canvas.addEventListener("touchend", handleEnd);
 
-        const cursor = document.querySelector(".custom-cursor"); cursor || console.warn("No .custom-cursor found"); const interactiveSelector = ["a[href]", "button", "canvas", '[role="button"]', "input:not([disabled])", "select:not([disabled])", "textarea:not([disabled])", '[data-cursor="interactive"]'].join(","), stickyItems = document.querySelectorAll(".sticky-item"); let isSticky = !1; function isPureBlack(e) { if (!e || !e.startsWith("rgb")) return !1; const [t, s, o] = e.match(/\d+/g).map(Number); return t === 0 && s === 0 && o === 0 } function isBackgroundBlack(e) { for (; e && e !== document.body;) { const t = getComputedStyle(e).backgroundColor; if (t !== "rgba(0, 0, 0, 0)" && !isPureBlack(t)) return !1; e = e.parentElement } return !0 } function getAllElementsAt(e, t) { const s = [], o = []; let l; for (; (l = document.elementFromPoint(e, t)) && !s.includes(l);)s.push(l), o.push({ el: l, pe: l.style.pointerEvents }), l.style.pointerEvents = "none"; return o.forEach(({ el: n, pe: a }) => n.style.pointerEvents = a), s } let rAF = null; function handlePointerMove(e) { rAF || (rAF = requestAnimationFrame(() => { isSticky || (cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`); const s = getAllElementsAt(e.clientX, e.clientY).every(isBackgroundBlack); cursor.classList.toggle("red", s); const o = document.elementFromPoint(e.clientX, e.clientY), l = o && o.closest(interactiveSelector); cursor.classList.toggle("--interactive", !!l), rAF = null })) } document.addEventListener("mousemove", handlePointerMove), stickyItems.forEach(e => { e.addEventListener("mouseenter", () => { const t = e.getBoundingClientRect(), s = t.left + t.width / 2, o = t.top + t.height / 2; cursor.classList.add("--sticky"), cursor.style.transform = `translate(${s}px, ${o}px) translate(-50%, -50%)`, isSticky = !0 }), e.addEventListener("mouseleave", () => { cursor.classList.remove("--sticky"), isSticky = !1 }) }), document.addEventListener("mouseleave", () => cursor.style.opacity = "0"), document.addEventListener("mouseenter", () => cursor.style.opacity = "1");
+        // const cursor = document.querySelector(".custom-cursor"); cursor || console.warn("No .custom-cursor found"); const interactiveSelector = ["a[href]", "button", "canvas", '[role="button"]', "input:not([disabled])", "select:not([disabled])", "textarea:not([disabled])", '[data-cursor="interactive"]'].join(","), stickyItems = document.querySelectorAll(".sticky-item"); let isSticky = !1; function isPureBlack(e) { if (!e || !e.startsWith("rgb")) return !1; const [t, s, o] = e.match(/\d+/g).map(Number); return t === 0 && s === 0 && o === 0 } function isBackgroundBlack(e) { for (; e && e !== document.body;) { const t = getComputedStyle(e).backgroundColor; if (t !== "rgba(0, 0, 0, 0)" && !isPureBlack(t)) return !1; e = e.parentElement } return !0 } function getAllElementsAt(e, t) { const s = [], o = []; let l; for (; (l = document.elementFromPoint(e, t)) && !s.includes(l);)s.push(l), o.push({ el: l, pe: l.style.pointerEvents }), l.style.pointerEvents = "none"; return o.forEach(({ el: n, pe: a }) => n.style.pointerEvents = a), s } let rAF = null; function handlePointerMove(e) { rAF || (rAF = requestAnimationFrame(() => { isSticky || (cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`); const s = getAllElementsAt(e.clientX, e.clientY).every(isBackgroundBlack); cursor.classList.toggle("red", s); const o = document.elementFromPoint(e.clientX, e.clientY), l = o && o.closest(interactiveSelector); cursor.classList.toggle("--interactive", !!l), rAF = null })) } document.addEventListener("mousemove", handlePointerMove), stickyItems.forEach(e => { e.addEventListener("mouseenter", () => { const t = e.getBoundingClientRect(), s = t.left + t.width / 2, o = t.top + t.height / 2; cursor.classList.add("--sticky"), cursor.style.transform = `translate(${s}px, ${o}px) translate(-50%, -50%)`, isSticky = !0 }), e.addEventListener("mouseleave", () => { cursor.classList.remove("--sticky"), isSticky = !1 }) }), document.addEventListener("mouseleave", () => cursor.style.opacity = "0"), document.addEventListener("mouseenter", () => cursor.style.opacity = "1");
     </script>
 </body>
 
