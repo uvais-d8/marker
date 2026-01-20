@@ -5,185 +5,475 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MARKER - Studio</title>
-    <!-- Fonts -->
-    <link rel="preload" href="./assets/fonts/Presicav.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-    <link rel="preload" href="./assets/fonts/Calibre-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-    <link rel="preload" href="./assets/fonts/Arial.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://api.fontshare.com/v2/css?f[]=neue-montreal@500&display=swap" rel="stylesheet">
-
-    <!-- Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
-    <link rel="stylesheet" crossorigin href="./css/index.min.css?v=1754734869502">
     <link rel="stylesheet" href="./style.css">
-    <style>
-        /* Specific overrides for standalone playground */
-        body {
-            overflow: hidden;
-            /* Lock scroll strictly for app feel */
-            background-color: #f4f4f4;
-            overscroll-behavior: none;
-            /* Prevent bounce on Mac */
+  <style>
+    /* =========================================
+       1. GLOBAL & SETUP
+       ========================================= */
+    body {
+        overflow: hidden;
+        background-color: #f4f4f4;
+        overscroll-behavior: none;
+        touch-action: none; /* Prevents scrolling while drawing */
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    .playground-wrapper {
+        height: 100vh;
+        width: 100vw;
+        position: relative;
+        cursor: crosshair;
+    }
+
+    .playground-wrapper.panning {
+        cursor: grab;
+    }
+
+    .playground-wrapper.panning:active {
+        cursor: grabbing;
+    }
+
+    /* =========================================
+       2. NAVIGATION & CONTROLS
+       ========================================= */
+    /* Back Button */
+    .back-btn {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 100;
+        padding: 10px 20px;
+        background: black;
+        color: white;
+        text-decoration: none;
+        border-radius: 20px;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        transition: background 0.3s;
+    }
+
+    .back-btn:hover {
+        background: #333;
+    }
+
+    /* Mobile Menu Toggle (Hidden on Desktop) */
+    .mobile-menu-toggle {
+        display: none;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 101;
+        width: 44px;
+        height: 44px;
+        background: white;
+        border: 1px solid rgba(0,0,0,0.1);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        align-items: center;
+        justify-content: center;
+        color: #333;
+        transition: transform 0.2s;
+    }
+    
+    .mobile-menu-toggle:active {
+        transform: scale(0.9);
+    }
+
+    /* Zoom Controls */
+    .zoom-controls {
+        position: absolute;
+        bottom: 30px;
+        left: 30px;
+        display: flex;
+        gap: 10px;
+        z-index: 1000;
+    }
+
+    .zoom-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid #ddd;
+        background: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* =========================================
+       3. UI CONTAINER (BASE STYLES)
+       ========================================= */
+    .playground-ui {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 15px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 60px; /* Collapsed width */
+        transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.4s ease;
+        overflow: hidden;
+    }
+
+    .ui-header {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+        transition: opacity 0.3s ease 0.1s;
+    }
+
+    .ui-header h3 {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 0;
+        color: #888;
+        font-weight: 700;
+    }
+
+    /* Wrapper Groups */
+    .tools-group, .color-picker {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+    }
+
+    /* =========================================
+       4. BUTTON STYLES (SHARED)
+       ========================================= */
+    .tool-btn, .action-btn, .color-item {
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        background: #f2f2f2;
+        color: #666;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        transition: all 0.2s;
+        position: relative;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Ensure no weird squares */
+    .tool-btn::before, .tool-btn::after {
+        display: none !important;
+        content: none !important;
+    }
+
+    /* Icons */
+    .tool-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        display: block;
+    }
+
+    /* Text Labels (Hidden by default on Desktop) */
+    .tool-btn span, .color-item span, .action-btn span {
+        display: none;
+        margin-left: 12px;
+        opacity: 0;
+        white-space: nowrap;
+        font-size: 13px;
+    }
+
+    /* Active State */
+    .tool-btn.active, .color-item.active {
+        background: #111;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    /* Clear Button Specifics */
+    .action-btn {
+        background: transparent;
+        border-color: #eee;
+        margin-top: auto;
+    }
+    .action-btn:hover {
+        background: #d91c24;
+        color: #fff;
+        border-color: #d91c24;
+    }
+
+    /* Color Dot Inner Circle */
+    .color-item .color-dot {
+        width: 100%; 
+        height: 100%;
+        border-radius: 50%;
+        border: 1px solid rgba(0,0,0,0.1);
+        pointer-events: none;
+    }
+
+    /* =========================================
+       5. DESKTOP SPECIFIC (Hover to Expand)
+       ========================================= */
+    @media (min-width: 769px) {
+        /* Color Button Desktop Styling (Circle only) */
+        .color-item {
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid transparent;
+        }
+        .color-item.active {
+            transform: scale(1.2);
+            border-color: #000; /* Ring around active color */
+            background: transparent;
         }
 
-        .playground-wrapper {
-            height: 100vh;
-            width: 100vw;
-            position: relative;
-            cursor: crosshair;
-            /* Default cursor */
+        /* Hover Expansion Logic */
+        .playground-ui:hover {
+            width: 200px;
+            align-items: flex-start;
+            padding: 25px;
         }
 
-        .playground-wrapper.panning {
-            cursor: grab;
+        .playground-ui:hover .ui-header {
+            opacity: 1;
+            width: auto;
+            height: auto;
+            margin-bottom: 10px;
         }
 
-        .playground-wrapper.panning:active {
-            cursor: grabbing;
+        .playground-ui:hover .color-picker {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .playground-ui:hover .tool-btn {
+            width: 100%;
+            justify-content: flex-start;
+            padding: 10px 12px;
+        }
+
+        .playground-ui:hover .tool-btn span {
+            display: inline-block;
+            opacity: 1;
+            animation: fadeIn 0.3s ease forwards;
+        }
+    }
+
+    @keyframes fadeIn {
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* =========================================
+       6. MOBILE SPECIFIC (Right Side Dropdown)
+       ========================================= */
+    @media (max-width: 768px) {
+        
+        .mobile-menu-toggle {
+            display: flex;
         }
 
         .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 100;
-            padding: 10px 20px;
-            background: black;
-            color: white;
-            text-decoration: none;
-            font-family: 'Neue Montreal', sans-serif;
-            border-radius: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.8rem;
+            top: 20px; left: 20px;
+            padding: 12px 20px;
+            z-index: 102;
         }
 
-        .back-btn:hover {
-            background: #333;
-        }
-
-        /* Extra UI for Zoom/Pan */
-        .zoom-controls {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            display: flex;
+        /* --- DROPDOWN CONTAINER --- */
+        .playground-ui {
+            top: 75px; 
+            right: 20px; 
+            left: auto; /* Unset desktop left */
+            transform: none; /* Remove desktop centering */
+            
+            /* KEY: Half Width of Screen */
+            width: 50vw !important; 
+            min-width: 160px; 
+            max-width: 250px;
+            
+            height: auto;
+            max-height: 0; /* Hidden initially */
+            padding: 0 15px !important; /* No vertical padding when hidden */
+            opacity: 0;
+            
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important; /* Align content to left of dropdown */
             gap: 10px;
-            z-index: 1000;
-            /* Increased z-index */
+            
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 12px;
+            pointer-events: none;
+            
+            /* Smooth opening animation */
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            overflow: hidden;
+        }
+
+        /* OPEN STATE */
+        .playground-ui.is-open {
+            max-height: 80vh;
+            padding: 15px !important;
+            opacity: 1;
             pointer-events: auto;
-            /* Explicitly allowed */
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
         }
 
-        .zoom-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 1px solid #ddd;
-            background: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
+        /* Hide Header to keep it clean */
+        .ui-header {
+            display: none !important;
         }
 
-        .zoom-btn:hover {
-            background: #eee;
+        /* --- LIST ITEM LAYOUT --- */
+        
+        /* Make groups vertical */
+        .color-picker, .tools-group {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 8px;
         }
 
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .zoom-controls {
-                bottom: 120px;
-                /* Moved UP significantly */
-                left: 20px;
-            }
-
-            .playground-ui {
-                bottom: 20px;
-                /* Adjust main UI bar if needed */
-                max-width: 95%;
-                /* Prevent edge clipping */
-                flex-wrap: wrap;
-                /* Allow wrapping if too many tools */
-                gap: 5px;
-            }
-
-            .tool-btn,
-            .zoom-btn,
-            .back-btn {
-                min-width: 44px;
-                /* Touch target size standards */
-                min-height: 44px;
-            }
-
-            .back-btn {
-                top: 15px;
-                left: 15px;
-                padding: 12px 20px;
-                /* Larger hit area */
-            }
-
-            /* Stack tools for better mobile layout if needed */
-            .tools-group {
-                gap: 5px;
-            }
+        /* UNIFY BUTTON STYLES FOR LIST VIEW */
+        .tool-btn, .color-item, .action-btn {
+            width: 100% !important;
+            height: auto !important;
+            padding: 10px 12px !important;
+            justify-content: flex-start !important; /* Align text left */
+            background: transparent; /* Clean look */
+            border-radius: 8px;
+            border: none;
         }
-    </style>
+
+        /* Force Text Visibility */
+        .tool-btn span, .color-item span, .action-btn span {
+            display: inline-block !important;
+            opacity: 1 !important;
+            margin-left: 12px;
+            font-size: 12px !important; /* Small Words */
+            font-weight: 500;
+            color: #444;
+        }
+
+        /* Active State Mobile */
+        .tool-btn.active, .color-item.active {
+            background-color: #f0f0f0; /* Subtle grey highlight */
+        }
+        .tool-btn.active span, .color-item.active span {
+            color: #000;
+            font-weight: 700;
+        }
+
+        /* Mobile Color Dot sizing */
+        .color-item .color-dot {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        /* Clear Button at bottom */
+        .action-btn {
+            margin-top: 10px !important;
+            background-color: #fff0f0;
+            color: #d91c24;
+        }
+        .action-btn span {
+            color: #d91c24;
+        }
+
+        /* Zoom Controls Centered */
+        .zoom-controls {
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+        }
+    }
+</style>
 </head>
 
 <body>
-    <!-- Transition Overlay for Entrance/Exit -->
     <div class="transition-overlay"
         style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999; transform-origin:bottom;">
     </div>
 
-    <a href="#" class="back-btn" onclick="goHome(event)">← Back to Home</a>
+    <a href="#" class="back-btn" onclick="goHome(event)">← Home</a>
+
+    <button class="mobile-menu-toggle" id="mobile-toggle" onclick="toggleMobileMenu()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </button>
 
     <section id="drawing-playground" class="viewport-section" style="height: 100vh; padding: 0;">
         <div class="playground-wrapper" id="playground-wrapper">
 
             <div class="grid-layer" id="grid-layer" style="transform-origin: 0 0;"></div>
 
-            <div class="playground-ui">
+            <div class="playground-ui" id="playground-ui">
                 <div class="ui-header">
-                    <h3>Studio</h3>
+                    <h3>Tools</h3>
                 </div>
 
                 <div class="color-picker">
-                    <button class="color-btn active" data-color="#000000" style="background-color: #000000;"
-                        title="Black"></button>
-                    <button class="color-btn" data-color="#d91c24" style="background-color: #d91c24;"
-                        title="Red"></button>
-                    <button class="color-btn" data-color="#2b4eff" style="background-color: #2b4eff;"
-                        title="Blue"></button>
-                    <button class="color-btn" data-color="#00a651" style="background-color: #00a651;"
-                        title="Green"></button>
-                </div>
+    <button class="color-item active" data-color="#000000" title="Black">
+        <div class="color-dot" style="background-color: #000000;"></div>
+        <span>Black</span>
+    </button>
+    
+    <button class="color-item" data-color="#d91c24" title="Red">
+        <div class="color-dot" style="background-color: #d91c24;"></div>
+        <span>Red</span>
+    </button>
+    
+    <button class="color-item" data-color="#2b4eff" title="Blue">
+        <div class="color-dot" style="background-color: #2b4eff;"></div>
+        <span>Blue</span>
+    </button>
+    
+    <button class="color-item" data-color="#00a651" title="Green">
+        <div class="color-dot" style="background-color: #00a651;"></div>
+        <span>Green</span>
+    </button>
+</div>
 
                 <div class="tools-group">
-                    <button id="btn-pan" class="tool-btn" title="Pan Tool (Space)">
-                        <!-- Hand/Pan Icon -->
+                    <button id="btn-pan" class="tool-btn" title="Pan">
                         <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
                             <path fill="currentColor"
-                                d="M23,5.5V20c0,2.2-1.8,4-4,4h-7.3c-1.08,0-2.1-0.43-2.85-1.19L1,14.83l3.77-3.79 c0.45-0.45,1.2-0.58,1.76-0.3l0.47,0.26V2.5C7,1.4,7.9,0.5,9,0.5S11,1.4,11,2.5V7h1V1.5C12,0.4,12.9-0.5,14-0.5S16,0.4,16,1.5V7h1 V2.5c0-1.1,0.9-2,2-2s2,0.9,2,2V7h1V5.5C22,4.4,22.9,3.5,24,3.5S26,4.4,26,5.5z M10,12V2.5l0,0c0-0.55-0.45-1-1-1s-1,0.45-1,1V12 H10z M14,12V1.5l0,0c0-0.55-0.45-1-1-1s-1,0.45-1,1V12H14z M18,12V2.5l0,0c0-0.55-0.45-1-1-1s-1,0.45-1,1V12H18z M22,12V5.5l0,0 c0-0.55-0.45-1-1-1s-1,0.45-1,1V12H22z"
+                                d="M23,5.5V20c0,2.2-1.8,4-4,4h-7.3c-1.08,0-2.1-0.43-2.85-1.19L1,14.83l3.77-3.79 c0.45-0.45,1.2-0.58,1.76-0.3l0.47,0.26V2.5C7,1.4,7.9,0.5,9,0.5S11,1.4,11,2.5V7h1V1.5C12,0.4,12.9-0.5,14-0.5S16,0.4,16,1.5V7h1 V2.5c0-1.1,0.9-2,2-2s2,0.9,2,2V7h1V5.5C22,4.4,22.9,3.5,24,3.5S26,4.4,26,5.5z"
                                 transform="scale(0.8) translate(2,4)" />
                         </svg>
-                        <span>Pan</span>
+                        <span>Pan View</span>
                     </button>
 
-                    <button id="btn-marker" class="tool-btn active" title="Marker (M)">
+                    <button id="btn-marker" class="tool-btn active" title="Marker">
                         <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
                             <path fill="currentColor"
                                 d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
@@ -191,38 +481,43 @@
                         <span>Marker</span>
                     </button>
 
-                    <button id="btn-eraser" class="tool-btn" title="Eraser (E)">
+                    <button id="btn-eraser" class="tool-btn" title="Eraser">
                         <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
                             <path fill="currentColor"
-                                d="M16.24 3.56l4.95 4.94c.78.79.78 2.05 0 2.84L12 20.53a4.008 4.008 0 0 1-5.66 0L2.81 17c-.78-.79-.78-2.05 0-2.84l10.6-10.6c.79-.78 2.05-.78 2.83 0zM4.22 15.58l3.54 3.53c.78.79 2.04.79 2.83 0l8.48-8.48-3.54-3.54-11.31 11.31v-.01z" />
+                                d="M16.24 3.56l4.95 4.94c.78.79.78 2.05 0 2.84L12 20.53a4.008 4.008 0 0 1-5.66 0L2.81 17c-.78-.79-.78-2.05 0-2.84l10.6-10.6c.79-.78 2.05-.78 2.83 0z" />
                         </svg>
                         <span>Eraser</span>
                     </button>
 
-                    <button id="btn-grid" class="tool-btn" title="Toggle Grid (G)">
+                    <button id="btn-grid" class="tool-btn" title="Grid">
                         <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
                             <path fill="currentColor"
                                 d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z" />
                         </svg>
-                        <span>Grid Off</span>
+                        <span>Toggle Grid</span>
                     </button>
 
-                    <button id="btn-save" class="tool-btn" title="Save Image (S)">
+                    <button id="btn-save" class="tool-btn" title="Save">
                         <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
                             <path fill="currentColor" d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" />
                         </svg>
-                        <span>Save</span>
+                        <span>Save Image</span>
                     </button>
                 </div>
 
-                <button id="btn-clear" class="action-btn">Clear</button>
+                <button id="btn-clear" class="action-btn" title="Clear">
+                    <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    <span>Clear Canvas</span>
+                </button>
             </div>
 
             <div class="zoom-controls">
-                <button class="zoom-btn" id="btn-zoom-out" title="Zoom Out (-)">-</button>
-                <button class="zoom-btn" id="btn-zoom-reset" title="Reset View (0)"
-                    style="font-size: 0.8rem; width: auto; padding: 0 15px; border-radius: 20px;">100%</button>
-                <button class="zoom-btn" id="btn-zoom-in" title="Zoom In (+)">+</button>
+                <button class="zoom-btn" id="btn-zoom-out" title="Zoom Out">-</button>
+                <button class="zoom-btn" id="btn-zoom-reset" title="Reset">100%</button>
+                <button class="zoom-btn" id="btn-zoom-in" title="Zoom In">+</button>
             </div>
 
             <canvas id="playground-canvas"></canvas>
@@ -230,6 +525,36 @@
     </section>
 
     <script>
+        // --- MOBILE MENU TOGGLE LOGIC ---
+        function toggleMobileMenu() {
+            const ui = document.getElementById('playground-ui');
+            const toggleBtn = document.getElementById('mobile-toggle');
+            
+            ui.classList.toggle('is-open');
+            
+            // Icon Swap (Menu <-> Close)
+            if(ui.classList.contains('is-open')) {
+                toggleBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+            } else {
+                toggleBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
+            }
+        }
+
+        // Close when clicking outside
+        document.getElementById('playground-wrapper').addEventListener('touchstart', (e) => {
+            if (!e.target.closest('.playground-ui') && !e.target.closest('.mobile-menu-toggle')) {
+                const ui = document.getElementById('playground-ui');
+                const toggleBtn = document.getElementById('mobile-toggle');
+                if (ui.classList.contains('is-open')) {
+                    ui.classList.remove('is-open');
+                    toggleBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
+                }
+            }
+        });
+
+        // ----------------------------------------------------
+        // LOGIC FOR DRAWING & ZOOMING
+        // ----------------------------------------------------
         function initPlayground() {
             const canvas = document.getElementById('playground-canvas');
             const container = document.getElementById('playground-wrapper');
@@ -240,139 +565,96 @@
 
             const ctx = canvas.getContext('2d');
 
-            // --- STATE ---
-            let strokes = []; // { points: [{x,y}, ...], color, size, isEraser }
+            let strokes = []; 
             let currentStroke = null;
-
             let camera = { x: 0, y: 0, zoom: 1 };
             let isDragging = false;
             let lastMouse = { x: 0, y: 0 };
-
-            // Tools: 'marker', 'eraser', 'pan'
             let activeTool = 'marker';
             let currentColor = '#000000';
             let currentSize = 6;
-            let isEraser = false; // Flag for drawing logic
+            let isEraser = false; 
 
-            // --- 1. SETUP CANVAS & RESIZE ---
             function resize() {
                 const dpr = window.devicePixelRatio || 1;
                 const rect = container.getBoundingClientRect();
-
                 canvas.width = rect.width * dpr;
                 canvas.height = rect.height * dpr;
-
                 canvas.style.width = rect.width + 'px';
                 canvas.style.height = rect.height + 'px';
-
-                // Reset context scale/transform because canvas resize clears it
-                // We handle transform in the render loop manually
                 render();
             }
             window.addEventListener('resize', resize);
-            resize(); // Initial call
+            resize(); 
 
-            // --- 2. COORDINATE SYSTEMS ---
-            // Screen (Pixel) -> World (Infinite Canvas)
             function toWorld(screenX, screenY) {
                 const dpr = window.devicePixelRatio || 1;
-                // Canvas coordinates are scaled by DPR, so we adjust screen input first
                 return {
                     x: (screenX * dpr - camera.x) / camera.zoom,
                     y: (screenY * dpr - camera.y) / camera.zoom
                 };
             }
 
-            // World -> Screen
-            function toScreen(worldX, worldY) {
-                // Not strictly needed for drawing, but useful for debugging
-                return {
-                    x: worldX * camera.zoom + camera.x,
-                    y: worldY * camera.zoom + camera.y
-                };
-            }
-
-            // --- 3. RENDER LOOP ---
             function render() {
                 const dpr = window.devicePixelRatio || 1;
-
-                // Clear the entire physical canvas
                 ctx.save();
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.restore();
 
-                // Apply Camera Transform
                 ctx.save();
                 ctx.translate(camera.x, camera.y);
                 ctx.scale(camera.zoom, camera.zoom);
 
-                // Draw All Strokes
                 strokes.forEach(stroke => drawStroke(stroke));
-                // Draw Current Stroke (if valid)
                 if (currentStroke) drawStroke(currentStroke);
 
                 ctx.restore();
 
-                // Update Grid appearance (optional visual feedback)
                 if (gridLayer) {
                     gridLayer.style.backgroundSize = `${40 * camera.zoom}px ${40 * camera.zoom}px`;
                     gridLayer.style.backgroundPosition = `${camera.x / dpr}px ${camera.y / dpr}px`;
                 }
-
-                // Update Label
                 if (zoomLabel) zoomLabel.innerText = Math.round(camera.zoom * 100) + "%";
             }
 
             function drawStroke(stroke) {
                 if (stroke.points.length < 1) return;
-
                 ctx.lineWidth = stroke.size;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
-
                 if (stroke.isEraser) {
-                    // For eraser to work on a transparent canvas, we use destination-out
-                    // BUT: inside the transform stack, this works relative to existing pixels.
                     ctx.globalCompositeOperation = 'destination-out';
-                    ctx.lineWidth = stroke.size * 8; // Eraser is MUCH bigger (increased from 2)
+                    ctx.lineWidth = stroke.size * 8; 
                 } else {
                     ctx.globalCompositeOperation = 'source-over';
                     ctx.strokeStyle = stroke.color;
                 }
-
                 ctx.beginPath();
                 const p0 = stroke.points[0];
                 ctx.moveTo(p0.x, p0.y);
-
                 if (stroke.points.length < 3) {
-                    // Dot
                     ctx.lineTo(p0.x, p0.y);
                     ctx.stroke();
                     return;
                 }
-
                 for (let i = 1; i < stroke.points.length - 2; i++) {
                     const c = (stroke.points[i].x + stroke.points[i + 1].x) / 2;
                     const d = (stroke.points[i].y + stroke.points[i + 1].y) / 2;
                     ctx.quadraticCurveTo(stroke.points[i].x, stroke.points[i].y, c, d);
                 }
-
                 const i = stroke.points.length - 2;
                 ctx.quadraticCurveTo(stroke.points[i].x, stroke.points[i].y, stroke.points[i + 1].x, stroke.points[i + 1].y);
                 ctx.stroke();
             }
 
-            // --- 4. INPUT HANDLING ---
             function getPointerPos(e) {
                 const rect = container.getBoundingClientRect();
-                // For single touch/mouse
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 return { x: clientX - rect.left, y: clientY - rect.top };
             }
 
-            // Pinch Helpers
             let initialPinchDist = null;
             let lastPinchZoom = 1;
 
@@ -390,80 +672,45 @@
             }
 
             function handleStart(e) {
-                // FIXED: Don't hijack touches on UI elements
-                if (e.target.closest('.playground-ui') ||
-                    e.target.closest('.zoom-controls') ||
-                    e.target.closest('.back-btn')) {
-                    return;
-                }
-
+                if (e.target.closest('.playground-ui') || e.target.closest('.zoom-controls') || e.target.closest('.back-btn') || e.target.closest('.mobile-menu-toggle')) return;
                 e.preventDefault();
-
-                // Multi-touch Pinch Start
                 if (e.touches && e.touches.length === 2) {
                     initialPinchDist = getPinchDist(e);
                     lastPinchZoom = camera.zoom;
-                    // We also want to track center for panning during zoom? 
-                    // For simplicity, just zoom relative to center
-                    isDragging = false; // Disable drawing/panning while pinching
+                    isDragging = false; 
                     return;
                 }
-
                 const pos = getPointerPos(e);
                 lastMouse = pos;
                 isDragging = true;
-
                 if (activeTool === 'pan' || (e.button === 1) || (e.type === 'mousedown' && e.shiftKey)) {
                     container.classList.add('panning');
                     return;
                 }
-
-                // Start Drawing
                 const worldPos = toWorld(pos.x, pos.y);
-                currentStroke = {
-                    points: [worldPos],
-                    color: currentColor,
-                    size: currentSize,
-                    isEraser: isEraser
-                };
+                currentStroke = { points: [worldPos], color: currentColor, size: currentSize, isEraser: isEraser };
                 render();
             }
 
             function handleMove(e) {
                 e.preventDefault();
-
-                // Multi-touch Pinch Move
                 if (e.touches && e.touches.length === 2 && initialPinchDist) {
                     const dist = getPinchDist(e);
                     const center = getPinchCenter(e);
                     const dpr = window.devicePixelRatio || 1;
-
-                    // Calculate Zoom Factor
                     const scale = dist / initialPinchDist;
                     let newZoom = lastPinchZoom * scale;
                     newZoom = Math.min(Math.max(newZoom, 0.1), 5);
-
-                    // Zoom towards pinch center
-                    // To do this strictly: 
-                    // World point under center BEFORE zoom = World point under center AFTER zoom
-                    // W = (Screen - CamOld) / ZoomOld
-                    // W = (Screen - CamNew) / ZoomNew
-                    // => CamNew = Screen - W * ZoomNew
-
                     const wx = (center.x * dpr - camera.x) / camera.zoom;
                     const wy = (center.y * dpr - camera.y) / camera.zoom;
-
                     camera.x = center.x * dpr - wx * newZoom;
                     camera.y = center.y * dpr - wy * newZoom;
                     camera.zoom = newZoom;
-
                     render();
                     return;
                 }
-
                 if (!isDragging) return;
                 const pos = getPointerPos(e);
-
                 if (activeTool === 'pan' || container.classList.contains('panning')) {
                     const dpr = window.devicePixelRatio || 1;
                     const dx = (pos.x - lastMouse.x) * dpr;
@@ -474,26 +721,14 @@
                     render();
                     return;
                 }
-
-                // Continue Drawing
                 const worldPos = toWorld(pos.x, pos.y);
-                if (currentStroke) {
-                    currentStroke.points.push(worldPos);
-                    render();
-                }
+                if (currentStroke) { currentStroke.points.push(worldPos); render(); }
                 lastMouse = pos;
             }
 
             function handleEnd(e) {
-                // Reset Pinch
-                if (e.touches && e.touches.length < 2) {
-                    initialPinchDist = null;
-                }
-
-                if (currentStroke) {
-                    strokes.push(currentStroke);
-                    currentStroke = null;
-                }
+                if (e.touches && e.touches.length < 2) initialPinchDist = null;
+                if (currentStroke) { strokes.push(currentStroke); currentStroke = null; }
                 isDragging = false;
                 container.classList.remove('panning');
                 render();
@@ -504,51 +739,36 @@
                 const zoomIntensity = 0.1;
                 const direction = e.deltaY > 0 ? -1 : 1;
                 const factor = 1 + (direction * zoomIntensity);
-
-                // Zoom focused on mouse pointer
                 const pos = getPointerPos(e);
                 const dpr = window.devicePixelRatio || 1;
-
-                // Mouse in world coordinates before zoom
                 const wx = (pos.x * dpr - camera.x) / camera.zoom;
                 const wy = (pos.y * dpr - camera.y) / camera.zoom;
-
                 let newZoom = camera.zoom * factor;
-                newZoom = Math.min(Math.max(newZoom, 0.1), 5); // Clamp 10% to 500%
-
-                // Adjust camera so consistent world point remains under mouse
+                newZoom = Math.min(Math.max(newZoom, 0.1), 5);
                 camera.x = pos.x * dpr - wx * newZoom;
                 camera.y = pos.y * dpr - wy * newZoom;
                 camera.zoom = newZoom;
-
                 render();
             }
 
-            // --- 5. EVENT LISTENERS ---
             container.addEventListener('mousedown', handleStart);
-            window.addEventListener('mousemove', handleMove); // Window to catch drags outside
+            window.addEventListener('mousemove', handleMove);
             window.addEventListener('mouseup', handleEnd);
-
             container.addEventListener('touchstart', handleStart, { passive: false });
             container.addEventListener('touchmove', handleMove, { passive: false });
             container.addEventListener('touchend', handleEnd);
-
             container.addEventListener('wheel', handleWheel, { passive: false });
 
-            // --- 6. UI LOGIC ---
             const btnMarker = document.getElementById('btn-marker');
             const btnEraser = document.getElementById('btn-eraser');
             const btnPan = document.getElementById('btn-pan');
             const btns = [btnMarker, btnEraser, btnPan];
-            const colorBtns = document.querySelectorAll('.color-btn');
+            const colorItems = document.querySelectorAll('.color-item');
 
             function activateTool(name) {
                 activeTool = name;
                 btns.forEach(b => b.classList.remove('active'));
-
-                // Reset Cursor
                 container.style.cursor = 'crosshair';
-
                 if (name === 'marker') {
                     btnMarker.classList.add('active');
                     isEraser = false;
@@ -556,8 +776,6 @@
                 } else if (name === 'eraser') {
                     btnEraser.classList.add('active');
                     isEraser = true;
-                    // Custom Circle Eraser Cursor using SVG
-                    // Circle with cross to indicate erasing area
                     const eraserSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='none' stroke='black' stroke-width='2'/><line x1='8' y1='16' x2='24' y2='16' stroke='black' stroke-width='1'/></svg>`;
                     container.style.cursor = `url('data:image/svg+xml;utf8,${encodeURIComponent(eraserSvg)}') 16 16, auto`;
                 } else if (name === 'pan') {
@@ -570,51 +788,30 @@
             btnEraser.addEventListener('click', () => activateTool('eraser'));
             btnPan.addEventListener('click', () => activateTool('pan'));
 
-            colorBtns.forEach(btn => {
+            colorItems.forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    colorBtns.forEach(b => b.classList.remove('active'));
-                    e.target.classList.add('active');
-                    currentColor = e.target.dataset.color;
-                    activateTool('marker'); // Auto switch back to marker on color pick
+                    colorItems.forEach(b => b.classList.remove('active'));
+                    const target = e.target.closest('.color-item');
+                    target.classList.add('active');
+                    currentColor = target.dataset.color;
+                    activateTool('marker');
                 });
             });
 
-            // Grid
             let isGridOn = false;
             document.getElementById('btn-grid').addEventListener('click', function () {
                 isGridOn = !isGridOn;
                 gridLayer.classList.toggle('visible', isGridOn);
                 this.classList.toggle('active', isGridOn);
-                this.querySelector('span').innerText = isGridOn ? 'Grid On' : 'Grid Off';
             });
 
-            // Clear
-            document.getElementById('btn-clear').addEventListener('click', () => {
-                strokes = [];
-                render();
-            });
+            document.getElementById('btn-clear').addEventListener('click', () => { strokes = []; render(); });
+            document.getElementById('btn-zoom-in').addEventListener('click', () => { camera.zoom = Math.min(camera.zoom * 1.2, 5); render(); });
+            document.getElementById('btn-zoom-out').addEventListener('click', () => { camera.zoom = Math.max(camera.zoom / 1.2, 0.1); render(); });
+            document.getElementById('btn-zoom-reset').addEventListener('click', () => { camera.zoom = 1; camera.x = 0; camera.y = 0; render(); });
 
-            // Zoom Buttons
-            document.getElementById('btn-zoom-in').addEventListener('click', () => {
-                camera.zoom = Math.min(camera.zoom * 1.2, 5);
-                render();
-            });
-            document.getElementById('btn-zoom-out').addEventListener('click', () => {
-                camera.zoom = Math.max(camera.zoom / 1.2, 0.1);
-                render();
-            });
-            document.getElementById('btn-zoom-reset').addEventListener('click', () => {
-                camera.zoom = 1;
-                camera.x = 0;
-                camera.y = 0;
-                render();
-            });
-
-            // Save (Advanced: Render everything to a temp canvas)
             document.getElementById('btn-save').addEventListener('click', () => {
-                // Determine bounds of drawing
                 if (strokes.length === 0) { alert("Nothing to save!"); return; }
-
                 let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
                 strokes.forEach(s => {
                     s.points.forEach(p => {
@@ -624,41 +821,29 @@
                         if (p.y > maxY) maxY = p.y;
                     });
                 });
-
-                // Add padding
                 const padding = 50;
                 minX -= padding; minY -= padding;
                 maxX += padding; maxY += padding;
                 const w = maxX - minX;
                 const h = maxY - minY;
-
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = w;
                 tempCanvas.height = h;
                 const tCtx = tempCanvas.getContext('2d');
-
-                // Fill white
                 tCtx.fillStyle = '#f4f4f4';
                 tCtx.fillRect(0, 0, w, h);
-
-                // Draw strokes shifted by minX, minY
                 tCtx.translate(-minX, -minY);
-
-                // Re-use draw logic (simplified inline)
                 strokes.forEach(stroke => {
                     tCtx.lineWidth = stroke.size;
                     tCtx.lineCap = 'round';
                     tCtx.lineJoin = 'round';
                     if (stroke.isEraser) {
-                        tCtx.globalCompositeOperation = 'destination-out'; // Won't work perfect on white bg fill, but okay for now
-                        // Actually, for save to image with white bg, eraser should paint WHITE
                         tCtx.globalCompositeOperation = 'source-over';
                         tCtx.strokeStyle = '#f4f4f4';
                     } else {
                         tCtx.globalCompositeOperation = 'source-over';
                         tCtx.strokeStyle = stroke.color;
                     }
-
                     tCtx.beginPath();
                     tCtx.moveTo(stroke.points[0].x, stroke.points[0].y);
                     for (let i = 1; i < stroke.points.length - 2; i++) {
@@ -673,60 +858,26 @@
                         tCtx.lineTo(stroke.points[0].x, stroke.points[0].y);
                     tCtx.stroke();
                 });
-
                 const link = document.createElement('a');
-                link.download = `marker-sketch-infinite-${Date.now()}.png`;
+                link.download = `marker-sketch-${Date.now()}.png`;
                 link.href = tempCanvas.toDataURL('image/png');
                 link.click();
             });
-
-            // Key Shortcuts
-            window.addEventListener('keydown', (e) => {
-                if (e.code === 'Space') activateTool('pan');
-                if (e.key === 'm') activateTool('marker');
-                if (e.key === 'e') activateTool('eraser');
-                if (e.key === 'g') document.getElementById('btn-grid').click();
-                if (e.key === 's') document.getElementById('btn-save').click();
-            });
-            window.addEventListener('keyup', (e) => {
-                if (e.code === 'Space') activateTool('marker'); // Revert to marker on release? standard UX varies
-            });
-
-            // Initial Render
             render();
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             initPlayground();
-
-            // --- TRANSITION LOGIC ---
             const overlay = document.querySelector('.transition-overlay');
-
-            // 1. Entrance Reveal (Slide Curtain Up)
             if (overlay) {
-                gsap.to(overlay, {
-                    scaleY: 0,
-                    duration: 1,
-                    ease: "power4.inOut",
-                    delay: 0.2
-                });
+                gsap.to(overlay, { scaleY: 0, duration: 1, ease: "power4.inOut", delay: 0.2 });
             }
-
-            // 2. Return Home Logic
             window.goHome = function (e) {
                 e.preventDefault();
                 if (overlay) {
-                    gsap.set(overlay, { transformOrigin: "bottom" }); // Ensure it rises from bottom (or falls from top? User wants smooth return)
-                    // Let's make it fall from top for variety? Or consistent bottom-up?
-                    // "Return Home" -> maybe reverse direction? 
-                    // Let's stick to "Curtain Close" (Bottom Up) for consistency with Index
+                    gsap.set(overlay, { transformOrigin: "bottom" });
                     gsap.to(overlay, {
-                        scaleY: 1,
-                        duration: 0.8,
-                        ease: "power4.inOut",
-                        onComplete: () => {
-                            window.location.href = 'index.html';
-                        }
+                        scaleY: 1, duration: 0.8, ease: "power4.inOut", onComplete: () => { window.location.href = 'index.html'; }
                     });
                 } else {
                     window.location.href = 'index.html';
@@ -735,5 +886,4 @@
         });
     </script>
 </body>
-
 </html>

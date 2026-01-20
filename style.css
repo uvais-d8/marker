@@ -34,6 +34,7 @@
     opacity: 1 !important;
     visibility: visible !important;
 }
+
 .hero__title {
     position: absolute;
     bottom: 80px;
@@ -41,19 +42,19 @@
     width: 100%;
     text-align: center;
     /* CHANGED: Lowered z-index slightly (below loader's 9999) but above video */
-    z-index: 9990; 
+    z-index: 9990;
     color: #000;
     font-family: 'Neue Montreal', sans-serif;
     font-size: 15vw;
     font-weight: 900;
     margin: 0;
     pointer-events: none;
-    
+
     /* CHANGED: Removed !important so we can toggle it with CSS */
-    opacity: 1; 
-    visibility: visible; 
+    opacity: 1;
+    visibility: visible;
     transform: none;
-    
+
     /* ADDED: Smooth fade in transition */
     transition: opacity 0.5s ease, visibility 0.5s ease;
 }
@@ -1312,7 +1313,7 @@ body.is-loading {
     justify-content: center;
     padding: 0;
     position: relative;
-    margin-top: -60vh;
+    margin-top: -60vh; 
     pointer-events: none;
 }
 
@@ -1326,6 +1327,114 @@ body.is-loading {
     padding-bottom: 8rem;
     position: relative;
     z-index: 2;
+}
+/* =========================================
+   DESKTOP LAYOUT REDESIGN (Alice Section)
+   ========================================= */
+@media (min-width: 769px) {
+
+    /* 1. Widen the Container */
+    #alice-wrapper .hero-reveal__content-inner {
+        max-width: 1100px; /* Much wider to fit columns */
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    /* 2. Create a 2-Column Grid Layout */
+    #alice-wrapper .hero-reveal__content-p {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Two equal columns */
+        gap: 3rem 5rem; /* Space between rows and columns */
+        text-align: left;
+        padding-bottom: 15vh;
+        margin-top: 5vh; /* Adjust vertical position */
+    }
+
+    /* 3. Small, Technical Typography */
+    #alice-wrapper .hero-reveal__content-p p {
+        font-size: 0.95rem !important; /* Smaller, precise size */
+        line-height: 1.9 !important; /* Airy line-height for readability */
+        color: rgba(255, 255, 255, 0.7); /* Softer white for reading comfort */
+        margin-bottom: 0; /* Remove default margins, grid handles spacing */
+        font-weight: 400;
+        letter-spacing: 0.03em;
+        max-width: 100%; /* Ensure it fills the column */
+        
+        /* Reset mobile overrides */
+        border: none;
+        padding: 0;
+    }
+
+    /* 4. High-Contrast Highlights */
+    #alice-wrapper .hero-reveal__content-p p b {
+        color: #ffffff; /* Pure white */
+        font-weight: 700;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Subtle underline */
+    }
+
+    /* 5. The Quote (Last Paragraph) - Feature Layout */
+    /* This spans across the bottom like a footer */
+    #alice-wrapper .hero-reveal__content-p p:last-child {
+        grid-column: 1 / -1; /* Span full width */
+        margin-top: 4rem;
+        
+        /* New Look */
+        font-family: 'Bodoni Moda', serif; /* Optional: If you have it, or fallback */
+        font-size: 2.5rem !important;
+        font-weight: 300;
+        font-style: italic;
+        line-height: 1.2 !important;
+        
+        text-align: center;
+        color: #ffffff;
+        opacity: 1;
+        
+        /* Remove the side border from previous design */
+        border-left: none;
+        padding-left: 0;
+    }
+
+    /* Add a small decorative separator above the quote */
+    #alice-wrapper .hero-reveal__content-p p:last-child::before {
+        content: "✦";
+        display: block;
+        font-size: 1.5rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin-bottom: 2rem;
+        font-style: normal;
+    }
+}
+@media (max-width: 768px) {
+    #alice-wrapper .hero-reveal__content-p {
+        padding: 0 1rem;
+    }
+}
+
+#alice-wrapper .hero-reveal__content-p p {
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.95);
+    min-width: 200px;
+    /* prevent flex crushing */
+
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    /* Let browser decide */
+    -webkit-hyphens: none !important;
+    -moz-hyphens: none !important;
+    hyphens: none !important;
+}
+
+/* Quote emphasis */
+#alice-wrapper .hero-reveal__content-p p:last-child {
+    font-size: 1.5rem;
+    font-weight: 300;
+    opacity: 0.8;
+    border-left: 2px solid white;
+    padding-left: 1.5rem;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
 }
 
 #alice-wrapper .hero-reveal__parallax {
@@ -1831,7 +1940,34 @@ body.is-loading {
     position: relative;
     z-index: 20;
 }
+/* --- CRITICAL FIX: SOLID WORD BLOCKS --- */
+.content-wrapper h1 .word {
+    display: inline-block !important; /* Treats the word as a solid block */
+    white-space: nowrap !important;   /* Prevents the block from breaking inside */
+}
 
+/* Ensure the spaces between words allow breaking */
+.content-wrapper h1 {
+    display: block !important;
+    flex-wrap: wrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+    width: 90% !important; /* Ensure container width constraints */
+}
+
+@media (max-width: 768px) {
+    .content-wrapper h1 {
+        /* Ensure font size allows words to fit */
+        font-size: clamp(1.8rem, 8vw, 3rem) !important; 
+        
+        /* Disable breaking logic */
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+        -webkit-hyphens: none !important;
+        hyphens: none !important;
+    }
+}
 .content-wrapper h1 {
     width: 90%;
     color: #121212;
@@ -1976,7 +2112,26 @@ body.is-loading {
 .kinetic-typography-block .token-unit span {
     opacity: 0;
 }
+/* --- FIX FOR BIG TEXT CARDS ON MOBILE --- */
+@media (max-width: 768px) {
+    .content-wrapper h1 {
+        /* 1. Disable all forms of word breaking/splitting */
+        -webkit-hyphens: none !important;
+        -moz-hyphens: none !important;
+        -ms-hyphens: none !important;
+        hyphens: none !important;
+        word-break: keep-all !important; /* Strongest rule: Keep words together */
+        overflow-wrap: normal !important;
 
+        /* 2. Resize font so words actually fit on screen */
+        /* This prevents the browser from FORCING a break because the word is too big */
+        font-size: clamp(2rem, 8vw, 3rem) !important; 
+        
+        /* 3. Layout adjustments */
+        width: 90% !important;
+        line-height: 1.2 !important;
+    }
+}
 @media (max-width: 1000px) {
     .content-wrapper h1 {
         width: 90%;
@@ -2001,6 +2156,7 @@ body.is-loading {
         margin: 0 0.2rem 0.1rem 0.1rem;
     }
 }
+
 /* =========================================
    NEW SECTION 4: GRID SCROLL STYLES (EXACT MATCH)
    ========================================= */
@@ -2712,6 +2868,7 @@ body {
         transform: translateX(0);
     }
 }
+
 /* =========================================
    BASE STYLES (Desktop Default)
    ========================================= */
@@ -2801,6 +2958,7 @@ body.hide-cursor #global-cursor-canvas {
    ========================================= */
 /* We wrap this in a media query so mobile doesn't weirdly expand on tap */
 @media (min-width: 769px) {
+
     .playground-ui:hover .tool-btn,
     .playground-ui:hover .action-btn {
         width: auto;
@@ -2812,44 +2970,48 @@ body.hide-cursor #global-cursor-canvas {
     }
 
     .playground-ui:hover .tool-btn::before {
-        display: none; /* Hide placeholder icon when text shows */
+        display: none;
+        /* Hide placeholder icon when text shows */
     }
 }
+
 /* =========================================
    MOBILE RESPONSIVE FIX
    ========================================= */
 @media (max-width: 768px) {
-    
+
     .playground-ui {
         /* 1. Ensure the bar fits within the screen width */
         width: calc(100% - 40px) !important;
         max-width: 100vw;
         height: auto !important;
-        
+
         /* 2. Switch to Horizontal Row */
         flex-direction: row !important;
         align-items: center !important;
-        justify-content: flex-start !important; /* Start from left */
-        
+        justify-content: flex-start !important;
+        /* Start from left */
+
         /* 3. Reset Positioning (Keep your original coordinates) */
         bottom: 20px;
         left: 20px;
         top: auto;
         transform: none;
-        
+
         padding: 10px 15px !important;
-        gap: 10px; /* Consistent gap between all items */
+        gap: 10px;
+        /* Consistent gap between all items */
     }
 
     /* Prevent the "Hover to Expand" effect on mobile */
     .playground-ui:hover {
-        width: calc(100% - 40px) !important; 
+        width: calc(100% - 40px) !important;
     }
 
     /* =========================================
        VISIBILITY & SIZING (The "Minimized" Look)
        ========================================= */
-    
+
     /* 1. Hide ALL text labels to save space */
     .ui-header,
     .tools-group span,
@@ -2872,9 +3034,10 @@ body.hide-cursor #global-cursor-canvas {
     .tool-btn {
         width: 40px !important;
         height: 40px !important;
-        min-width: 40px !important; /* Prevents squishing */
+        min-width: 40px !important;
+        /* Prevents squishing */
         padding: 0 !important;
-        
+
         display: flex !important;
         align-items: center;
         justify-content: center;
@@ -2892,20 +3055,22 @@ body.hide-cursor #global-cursor-canvas {
         display: flex !important;
         flex-direction: row !important;
         gap: 8px;
-        margin: 0 8px !important; /* Add slight separation */
+        margin: 0 8px !important;
+        /* Add slight separation */
     }
 
     /* =========================================
        THE POSITION FIX (Action Button)
        ========================================= */
-    
+
     /* On Desktop, this was 'margin-top: auto' (bottom). 
        On Mobile, we change it to 'margin-left: auto' 
        to push it to the far right side of the row. */
     .action-btn {
         margin-top: 0 !important;
-        margin-left: auto !important; /* Pushes button to the right end */
-        
+        margin-left: auto !important;
+        /* Pushes button to the right end */
+
         width: 40px !important;
         height: 40px !important;
         min-width: 40px !important;
@@ -2924,94 +3089,94 @@ body.hide-cursor #global-cursor-canvas {
 
 
 .black-hole-btn {
-                        position: relative;
-                        width: 300px;
-                        height: 100px;
-                        border-radius: 80px;
-                        background: #000;
-                        color: #fff;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        flex-direction: column;
-                        cursor: pointer;
-                        z-index: 10;
-                        transition: transform 0.3s ease-out;
-                        /* Fallback */
-                        text-decoration: none;
-                        overflow: hidden;
-                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-                        border: none;
-                    }
-                      
-                    .magnetic-wrap {
-                        display: inline-block;
-                        position: relative;
-                        padding: 50px;
-                        /* Area for magnetic catch */
-                    }
+    position: relative;
+    width: 300px;
+    height: 100px;
+    border-radius: 80px;
+    background: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.3s ease-out;
+    /* Fallback */
+    text-decoration: none;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: none;
+}
 
-                    
+.magnetic-wrap {
+    display: inline-block;
+    position: relative;
+    padding: 50px;
+    /* Area for magnetic catch */
+}
 
-                    .btn-text {
-                        font-family: 'Inter', sans-serif;
-                        font-size: 1.2rem;
-                        font-weight: 500;
-                        z-index: 2;
-                        pointer-events: none;
-                        mix-blend-mode: difference;
-                        transition: transform 0.3s ease;
-                    }
 
-                    .btn-text-hover {
-                        position: absolute;
-                        opacity: 0;
-                        font-size: 0.9rem;
-                        margin-top: 10px;
-                        font-weight: 300;
-                        letter-spacing: 2px;
-                        text-transform: uppercase;
-                        transform: translateY(20px);
-                        transition: all 0.4s ease;
-                        color: #fff;
-                    }
 
-                    .black-hole-btn:hover .btn-text-hover {
-                        opacity: 0.7;
-                        transform: translateY(25px);
-                    }
+.btn-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 500;
+    z-index: 2;
+    pointer-events: none;
+    mix-blend-mode: difference;
+    transition: transform 0.3s ease;
+}
 
-                    .black-hole-btn:hover .btn-text {
-                        transform: translateY(-10px);
-                    }
+.btn-text-hover {
+    position: absolute;
+    opacity: 0;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+    color: #fff;
+}
 
-                    /* Liquid Effect */
-                    .black-hole-btn::after {
-                        content: '';
-                        position: absolute;
-                        width: 100%;
-                        height: 100%;
-                        background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-                        opacity: 0;
-                        transform: scale(0.5);
-                        transition: opacity 0.4s ease, transform 0.4s ease;
-                    }
+.black-hole-btn:hover .btn-text-hover {
+    opacity: 0.7;
+    transform: translateY(25px);
+}
 
-                    .black-hole-btn:hover::after {
-                        opacity: 1;
-                        transform: scale(1.2);
-                    }
+.black-hole-btn:hover .btn-text {
+    transform: translateY(-10px);
+}
 
-                    /* Transition Overlay */
-                    .transition-overlay {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100vw;
-                        height: 100vh;
-                        background: #000;
-                        z-index: 9999;
-                        transform: scaleY(0);
-                        transform-origin: bottom;
-                        pointer-events: none;
-                    } 
+/* Liquid Effect */
+.black-hole-btn::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.black-hole-btn:hover::after {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* Transition Overlay */
+.transition-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 9999;
+    transform: scaleY(0);
+    transform-origin: bottom;
+    pointer-events: none;
+}

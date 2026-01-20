@@ -259,7 +259,7 @@
             </div>
             <section class="viewport-section intro-viewport">
                 <div class="content-wrapper">
-                    <h1>A creative marker built for clarity & expression.</h1>
+                    <h1>A creative marker built for clarity, control, and expression.</h1>
                 </div>
             </section>
             <section class="viewport-section narrative-segment scroll-sequence-host">
@@ -281,7 +281,7 @@
             </section>
             <section class="viewport-section action-trigger-zone">
                 <div class="content-wrapper">
-                    <h1>Create with confidence using Marker powerful tools.</h1>
+                    <h1>Create with confidence using Marker's powerful tools.</h1>
                 </div>
             </section>
             <section class="viewport-section capabilities-segment scroll-sequence-host">
@@ -303,9 +303,10 @@
             </section>
             <section class="viewport-section conclusion-viewport">
                 <div class="content-wrapper">
-                    <h1>Marker empowers , to defines ideas with their purpose.</h1>
+                    <h1>Marker empowers creators to define ideas with their purpose.</h1>
                 </div>
             </section>
+            
             <style>
                 @media (max-width: 768px) {
 
@@ -325,7 +326,7 @@
 
                 <div class="magnetic-wrap" id="mag-wrap">
                     <button class="black-hole-btn" id="mag-btn" onclick="goToPlayground()">
-                        <span class="btn-text">Enter playground</span>
+                        <span class="btn-text">Enter board</span>
                         <span class="btn-text-hover">Explore</span>
                     </button>
                 </div>
@@ -483,85 +484,99 @@
 
         </main>
     </div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        gsap.registerPlugin(ScrollTrigger);
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            gsap.registerPlugin(ScrollTrigger);
+        // Helper function to animate a specific section
+        function animateSection(selector) {
+            const section = document.querySelector(selector);
+            if (!section) return;
 
-            // Helper function to animate a specific section
-            function animateSection(selector) {
-                const section = document.querySelector(selector);
-                if (!section) return;
+            const card = section.querySelector('.content-wrapper');
+            const heading = card ? section.querySelector('h1') : null;
 
-                const card = section.querySelector('.content-wrapper');
-                const heading = card ? section.querySelector('h1') : null;
+            if (!card || !heading) return;
 
-                if (!card || !heading) return;
+            // --- FIX START: WORD-BASED SPLITTING ---
+            // 1. Get the raw text
+            const originalText = heading.innerText.trim();
+            
+            // 2. Split by spaces to get an array of words
+            const words = originalText.split(/\s+/);
+            
+            // 3. Rebuild HTML
+            // We wrap each word in a <span class="word">
+            // We join them back together with a standard space " "
+            heading.innerHTML = words.map(word => {
+                // Split the word into chars for the animation
+                const charSpans = word.split('').map(char => 
+                    `<span class="char" style="display:inline-block;">${char}</span>`
+                ).join('');
+                
+                // Return the word wrapper
+                return `<span class="word">${charSpans}</span>`;
+            }).join(' '); // <--- This ' ' is the break point for the browser
+            // --- FIX END ---
 
-                // 1. Split Text
-                const text = heading.innerText;
-                heading.innerHTML = text.split("").map(char =>
-                    char === " " ? `<span style="display:inline-block; width: 0.3em;">&nbsp;</span>` : `<span class="char">${char}</span>`
-                ).join("");
+            // 2. Timeline
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 75%",
+                    end: "bottom 25%",
+                    toggleActions: "play none none reverse"
+                }
+            });
 
-                // 2. Timeline
-                const tl = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: section,
-                        start: "top 75%",
-                        end: "bottom 25%",
-                        toggleActions: "play none none reverse"
-                    }
-                });
+            // 3. Card Animation
+            tl.fromTo(card,
+                {
+                    scale: 0.2,
+                    opacity: 0,
+                    y: 50,
+                    borderRadius: "10rem"
+                },
+                {
+                    duration: 1.5,
+                    scale: 1,
+                    opacity: 1,
+                    y: 0,
+                    borderRadius: "2rem",
+                    ease: "expo.out",
+                    clearProps: "all"
+                }
+            );
 
-                // 3. Card Animation
-                tl.fromTo(card,
+            // 4. Text Animation
+            const chars = heading.querySelectorAll(".char");
+            if (chars.length > 0) {
+                tl.fromTo(chars,
                     {
-                        scale: 0.2,
+                        y: 20,
                         opacity: 0,
-                        y: 50,
-                        borderRadius: "10rem"
+                        filter: "blur(10px)"
                     },
                     {
-                        duration: 1.5,
-                        scale: 1,
-                        opacity: 1,
+                        duration: 1,
                         y: 0,
-                        borderRadius: "2rem",
-                        ease: "expo.out",
-                        clearProps: "all"
-                    }
-                );
-
-                // 4. Text Animation
-                const chars = heading.querySelectorAll(".char");
-                if (chars.length > 0) {
-                    tl.fromTo(chars,
-                        {
-                            y: 20,
-                            opacity: 0,
-                            filter: "blur(10px)"
-                        },
-                        {
-                            duration: 1,
-                            y: 0,
-                            opacity: 1,
-                            filter: "blur(0px)",
-                            stagger: 0.02,
-                            ease: "power2.out"
-                        }, "-=1.2");
-                }
+                        opacity: 1,
+                        filter: "blur(0px)",
+                        stagger: 0.02,
+                        ease: "power2.out"
+                    }, "-=1.2");
             }
+        }
 
-            // Explicitly call for each section to ensure they all get registered
-            animateSection(".intro-viewport");
-            animateSection(".action-trigger-zone");
-            animateSection(".conclusion-viewport");
+        // Explicitly call for each section
+        animateSection(".intro-viewport");
+        animateSection(".action-trigger-zone");
+        animateSection(".conclusion-viewport");
 
-            // Refresh ScrollTrigger
-            ScrollTrigger.refresh();
-        });
-    </script>
+        // Refresh ScrollTrigger
+        ScrollTrigger.refresh();
+    });
+</script>
     <script>
         // --- 1. TYPED SWAP EFFECT LOGIC ---
         function initTypedSwap() {
@@ -863,65 +878,87 @@
             });
         });
     </script>
-    <script>
+<script>
         gsap.registerPlugin(ScrollTrigger);
         // --- 0. LOADER ANIMATION (OSMO/WILLEM) ---
-        function initLoader() {
-            const container = document.querySelector('.loader-screen');
-            const loadingLetter = container.querySelectorAll('.willem__letter');
-            const box = container.querySelectorAll('.willem-loader__box');
-            const growingImage = container.querySelectorAll('.willem__growing-image');
-            const headingStart = container.querySelectorAll('.willem__h1-start');
-            const headingEnd = container.querySelectorAll('.willem__h1-end');
-            const coverImageExtra = container.querySelectorAll('.willem__cover-image-extra');
+        // REPLACE your existing initLoader function with this one:
 
-            // 1. SETUP AUDIO
-            const loaderSound = new Audio('./assets/loader.mp3');
-            loaderSound.volume = 0.5;
+function initLoader() {
+    const container = document.querySelector('.loader-screen');
+    const loadingLetter = container.querySelectorAll('.willem__letter');
+    const box = container.querySelectorAll('.willem-loader__box');
+    const growingImage = container.querySelectorAll('.willem__growing-image');
+    const headingStart = container.querySelectorAll('.willem__h1-start');
+    const headingEnd = container.querySelectorAll('.willem__h1-end');
+    const coverImageExtra = container.querySelectorAll('.willem__cover-image-extra');
 
-            const tl = gsap.timeline({
-                defaults: { ease: 'expo.inOut' },
-                onComplete: () => {
-                    document.body.classList.remove('is-loading');
-                    gsap.to(container, {
-                        opacity: 0,
-                        display: 'none',
-                        duration: 0.5,
-                        onComplete: () => ScrollTrigger.refresh()
-                    });
-                }
+    // 1. SETUP AUDIO
+    const loaderSound = new Audio('./assets/loader.mp3');
+    loaderSound.volume = 0.5;
+
+    const tl = gsap.timeline({
+        defaults: { ease: 'expo.inOut' },
+        onComplete: () => {
+            document.body.classList.remove('is-loading');
+
+            // --- AUTOMATIC CLICK LOGIC ---
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+
+            // 1. Dispatch 'mousemove' first. 
+            // This wakes up the cursor and stops the idle animation.
+            const moveEvent = new MouseEvent('mousemove', {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                clientX: centerX,
+                clientY: centerY
             });
+            window.dispatchEvent(moveEvent);
 
-            if (loadingLetter) { tl.from(loadingLetter, { yPercent: 100, stagger: 0.025, duration: 1.25 }); }
-            if (box.length) { tl.fromTo(box, { width: '0em' }, { width: '1em', duration: 1.25 }, '< 1.25'); }
-            if (growingImage.length) { tl.fromTo(growingImage, { width: '0%' }, { width: '100%', duration: 1.25 }, '<'); }
-            if (headingStart.length) { tl.fromTo(headingStart, { x: '0em' }, { x: '-0.05em', duration: 1.25 }, '<'); }
-            if (headingEnd.length) { tl.fromTo(headingEnd, { x: '0em' }, { x: '0.05em', duration: 1.25 }, '<'); }
-            if (coverImageExtra.length) { tl.fromTo(coverImageExtra, { opacity: 1 }, { opacity: 0, duration: 0.05, ease: 'none', stagger: 0.5 }, '-=0.05'); }
+            // 2. Dispatch 'click'.
+            // This triggers visual ripples or interactions.
+            const clickEvent = new MouseEvent('click', {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                clientX: centerX,
+                clientY: centerY
+            });
+            window.dispatchEvent(clickEvent);
+            // -----------------------------
 
-            // --- 2. SYNCHRONIZED EXPANSION & SOUND ---
-
-            // Create a label for the exact moment the expansion should start
-            tl.addLabel("zoomEffect", "< 1.25");
-
-            // A. Expand the Image (Visual) - referencing the label
-            if (growingImage.length) {
-                tl.to(growingImage, { width: '100vw', height: '100vh', duration: 1.5 }, "zoomEffect");
-            }
-
-            // B. Expand the Box/Text Mask (Visual) - referencing the SAME label
-            // This ensures it moves exactly with the image, fixing the text glitch
-            if (box.length) {
-                tl.to(box, { width: '100vw', duration: 1.5 }, "zoomEffect");
-            }
-
-            // C. Play Sound - referencing the label + 0.4s delay
-            // It plays slightly later to match the visual "whoosh" of the easing
-            tl.call(() => {
-                loaderSound.play().catch(e => console.warn("Audio autoplay blocked", e));
-            }, null, "zoomEffect+=0.4");
+            gsap.to(container, {
+                opacity: 0,
+                display: 'none',
+                duration: 0.5,
+                onComplete: () => ScrollTrigger.refresh()
+            });
         }
-        document.addEventListener('DOMContentLoaded', () => {
+    });
+
+    if (loadingLetter) { tl.from(loadingLetter, { yPercent: 100, stagger: 0.025, duration: 1.25 }); }
+    if (box.length) { tl.fromTo(box, { width: '0em' }, { width: '1em', duration: 1.25 }, '< 1.25'); }
+    if (growingImage.length) { tl.fromTo(growingImage, { width: '0%' }, { width: '100%', duration: 1.25 }, '<'); }
+    if (headingStart.length) { tl.fromTo(headingStart, { x: '0em' }, { x: '-0.05em', duration: 1.25 }, '<'); }
+    if (headingEnd.length) { tl.fromTo(headingEnd, { x: '0em' }, { x: '0.05em', duration: 1.25 }, '<'); }
+    if (coverImageExtra.length) { tl.fromTo(coverImageExtra, { opacity: 1 }, { opacity: 0, duration: 0.05, ease: 'none', stagger: 0.5 }, '-=0.05'); }
+
+    // --- 2. SYNCHRONIZED EXPANSION & SOUND ---
+    tl.addLabel("zoomEffect", "< 1.25");
+
+    if (growingImage.length) {
+        tl.to(growingImage, { width: '100vw', height: '100vh', duration: 1.5 }, "zoomEffect");
+    }
+
+    if (box.length) {
+        tl.to(box, { width: '100vw', duration: 1.5 }, "zoomEffect");
+    }
+
+    tl.call(() => {
+        loaderSound.play().catch(e => console.warn("Audio autoplay blocked", e));
+    }, null, "zoomEffect+=0.4");
+}        document.addEventListener('DOMContentLoaded', () => {
             initLoader();
             initCarousel();
             initGlobalPageCursor();
@@ -930,8 +967,7 @@
             init3DMarker();
             initGlobalTextAnimations();
             initMobileHeadingEffect();
-        });
-
+        }); 
         // --- GLOBAL PAGE CURSOR ANIMATION (NEW FUNCTION) ---
         function initGlobalPageCursor() {
             const globalCanvas = document.querySelector('#global-cursor-canvas');
