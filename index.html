@@ -1674,8 +1674,14 @@
                 // Let's use GSAP if available, otherwise fallback.
 
                 if (typeof gsap !== 'undefined') {
-                    // Reset for animation
-                    gsap.set(card, { scale: 0.8, opacity: 0, y: 50, borderRadius: "100px" });
+                    // Reset for animation: Start VERY small (almost a dot)
+                    gsap.set(card, {
+                        scale: 0.05,        // Very small size
+                        opacity: 0,
+                        y: 80,
+                        borderRadius: "50%", // Fully rounded to look like a dot/circle
+                        filter: "blur(10px)"
+                    });
 
                     // Split text if needed
                     if (!heading.querySelector('.char')) {
@@ -1690,15 +1696,29 @@
                         });
                     }
                     const chars = heading.querySelectorAll('.char');
-                    gsap.set(chars, { y: 20, opacity: 0, filter: "blur(10px)" });
+                    gsap.set(chars, { y: 30, opacity: 0, filter: "blur(8px)" });
 
                     const tl = gsap.timeline();
+
+                    // Card Animation: Smooth expansion from dot to card
                     tl.to(card, {
-                        scale: 1, opacity: 1, y: 0, borderRadius: "32px", duration: 1.2, ease: "expo.out"
+                        duration: 1.4,
+                        scale: 1,
+                        opacity: 1,
+                        y: 0,
+                        borderRadius: "32px", // Transition to card radius
+                        filter: "blur(0px)",
+                        ease: "power4.out"    // Very smooth deceleration
                     })
+                        // Text Animation: Elegant fade-up
                         .to(chars, {
-                            y: 0, opacity: 1, filter: "blur(0px)", stagger: 0.02, duration: 0.8, ease: "power2.out"
-                        }, "-=0.8");
+                            duration: 1,
+                            y: 0,
+                            opacity: 1,
+                            filter: "blur(0px)",
+                            stagger: 0.02,
+                            ease: "power2.out"
+                        }, "-=1.0"); // Start slightly earlier during card expansion
                 } else {
                     // CSS Fallback if GSAP missing
                     card.style.transition = "transform 1s, opacity 1s";
