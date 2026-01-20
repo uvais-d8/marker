@@ -75,7 +75,10 @@
             left: 30px;
             display: flex;
             gap: 10px;
-            z-index: 100;
+            z-index: 1000;
+            /* Increased z-index */
+            pointer-events: auto;
+            /* Explicitly allowed */
         }
 
         .zoom-btn {
@@ -91,10 +94,51 @@
             justify-content: center;
             font-weight: bold;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .zoom-btn:hover {
             background: #eee;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .zoom-controls {
+                bottom: 120px;
+                /* Moved UP significantly */
+                left: 20px;
+            }
+
+            .playground-ui {
+                bottom: 20px;
+                /* Adjust main UI bar if needed */
+                max-width: 95%;
+                /* Prevent edge clipping */
+                flex-wrap: wrap;
+                /* Allow wrapping if too many tools */
+                gap: 5px;
+            }
+
+            .tool-btn,
+            .zoom-btn,
+            .back-btn {
+                min-width: 44px;
+                /* Touch target size standards */
+                min-height: 44px;
+            }
+
+            .back-btn {
+                top: 15px;
+                left: 15px;
+                padding: 12px 20px;
+                /* Larger hit area */
+            }
+
+            /* Stack tools for better mobile layout if needed */
+            .tools-group {
+                gap: 5px;
+            }
         }
     </style>
 </head>
@@ -171,14 +215,14 @@
                     </button>
                 </div>
 
-                <div class="zoom-controls">
-                    <button class="zoom-btn" id="btn-zoom-out" title="Zoom Out (-)">-</button>
-                    <button class="zoom-btn" id="btn-zoom-reset" title="Reset View (0)"
-                        style="font-size: 0.8rem; width: auto; padding: 0 15px; border-radius: 20px;">100%</button>
-                    <button class="zoom-btn" id="btn-zoom-in" title="Zoom In (+)">+</button>
-                </div>
-
                 <button id="btn-clear" class="action-btn">Clear</button>
+            </div>
+
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="btn-zoom-out" title="Zoom Out (-)">-</button>
+                <button class="zoom-btn" id="btn-zoom-reset" title="Reset View (0)"
+                    style="font-size: 0.8rem; width: auto; padding: 0 15px; border-radius: 20px;">100%</button>
+                <button class="zoom-btn" id="btn-zoom-in" title="Zoom In (+)">+</button>
             </div>
 
             <canvas id="playground-canvas"></canvas>
@@ -291,7 +335,7 @@
                     // For eraser to work on a transparent canvas, we use destination-out
                     // BUT: inside the transform stack, this works relative to existing pixels.
                     ctx.globalCompositeOperation = 'destination-out';
-                    ctx.lineWidth = stroke.size * 2; // Eraser is bigger
+                    ctx.lineWidth = stroke.size * 8; // Eraser is MUCH bigger (increased from 2)
                 } else {
                     ctx.globalCompositeOperation = 'source-over';
                     ctx.strokeStyle = stroke.color;
@@ -322,21 +366,56 @@
             // --- 4. INPUT HANDLING ---
             function getPointerPos(e) {
                 const rect = container.getBoundingClientRect();
+                // For single touch/mouse
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 return { x: clientX - rect.left, y: clientY - rect.top };
             }
 
+            // Pinch Helpers
+            let initialPinchDist = null;
+            let lastPinchZoom = 1;
+
+            function getPinchDist(e) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                return Math.hypot(dx, dy);
+            }
+
+            function getPinchCenter(e) {
+                const rect = container.getBoundingClientRect();
+                const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                return { x: cx - rect.left, y: cy - rect.top };
+            }
+
             function handleStart(e) {
+                // FIXED: Don't hijack touches on UI elements
+                if (e.target.closest('.playground-ui') ||
+                    e.target.closest('.zoom-controls') ||
+                    e.target.closest('.back-btn')) {
+                    return;
+                }
+
                 e.preventDefault();
+
+                // Multi-touch Pinch Start
+                if (e.touches && e.touches.length === 2) {
+                    initialPinchDist = getPinchDist(e);
+                    lastPinchZoom = camera.zoom;
+                    // We also want to track center for panning during zoom? 
+                    // For simplicity, just zoom relative to center
+                    isDragging = false; // Disable drawing/panning while pinching
+                    return;
+                }
+
                 const pos = getPointerPos(e);
                 lastMouse = pos;
                 isDragging = true;
 
                 if (activeTool === 'pan' || (e.button === 1) || (e.type === 'mousedown' && e.shiftKey)) {
-                    // Middle Click or Pan Tool or Shift+Click -> Pan
                     container.classList.add('panning');
-                    return; // Don't start a stroke
+                    return;
                 }
 
                 // Start Drawing
@@ -351,8 +430,38 @@
             }
 
             function handleMove(e) {
-                if (!isDragging) return;
                 e.preventDefault();
+
+                // Multi-touch Pinch Move
+                if (e.touches && e.touches.length === 2 && initialPinchDist) {
+                    const dist = getPinchDist(e);
+                    const center = getPinchCenter(e);
+                    const dpr = window.devicePixelRatio || 1;
+
+                    // Calculate Zoom Factor
+                    const scale = dist / initialPinchDist;
+                    let newZoom = lastPinchZoom * scale;
+                    newZoom = Math.min(Math.max(newZoom, 0.1), 5);
+
+                    // Zoom towards pinch center
+                    // To do this strictly: 
+                    // World point under center BEFORE zoom = World point under center AFTER zoom
+                    // W = (Screen - CamOld) / ZoomOld
+                    // W = (Screen - CamNew) / ZoomNew
+                    // => CamNew = Screen - W * ZoomNew
+
+                    const wx = (center.x * dpr - camera.x) / camera.zoom;
+                    const wy = (center.y * dpr - camera.y) / camera.zoom;
+
+                    camera.x = center.x * dpr - wx * newZoom;
+                    camera.y = center.y * dpr - wy * newZoom;
+                    camera.zoom = newZoom;
+
+                    render();
+                    return;
+                }
+
+                if (!isDragging) return;
                 const pos = getPointerPos(e);
 
                 if (activeTool === 'pan' || container.classList.contains('panning')) {
@@ -375,7 +484,12 @@
                 lastMouse = pos;
             }
 
-            function handleEnd() {
+            function handleEnd(e) {
+                // Reset Pinch
+                if (e.touches && e.touches.length < 2) {
+                    initialPinchDist = null;
+                }
+
                 if (currentStroke) {
                     strokes.push(currentStroke);
                     currentStroke = null;
@@ -431,15 +545,24 @@
             function activateTool(name) {
                 activeTool = name;
                 btns.forEach(b => b.classList.remove('active'));
+
+                // Reset Cursor
+                container.style.cursor = 'crosshair';
+
                 if (name === 'marker') {
                     btnMarker.classList.add('active');
                     isEraser = false;
+                    container.style.cursor = 'crosshair';
                 } else if (name === 'eraser') {
                     btnEraser.classList.add('active');
                     isEraser = true;
+                    // Custom Circle Eraser Cursor using SVG
+                    // Circle with cross to indicate erasing area
+                    const eraserSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='none' stroke='black' stroke-width='2'/><line x1='8' y1='16' x2='24' y2='16' stroke='black' stroke-width='1'/></svg>`;
+                    container.style.cursor = `url('data:image/svg+xml;utf8,${encodeURIComponent(eraserSvg)}') 16 16, auto`;
                 } else if (name === 'pan') {
                     btnPan.classList.add('active');
-                    // Just tool switch
+                    container.style.cursor = 'grab';
                 }
             }
 
