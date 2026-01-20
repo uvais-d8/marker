@@ -306,182 +306,291 @@
                     <h1>Marker empowers creators to define ideas with purpose.</h1>
                 </div>
             </section>
-<section id="drawing-playground" class="viewport-section" data-lenis-prevent>
+            <section id="drawing-playground" class="viewport-section" data-lenis-prevent>
                 <div class="playground-wrapper">
-                    
+
+                    <div class="grid-layer" id="grid-layer"></div>
+
                     <div class="playground-ui">
                         <div class="ui-header">
-                            <h3>Test the Ink</h3>
-                            <p>Draw anywhere.</p>
+                            <h3>Studio</h3>
                         </div>
-                        
+
                         <div class="color-picker">
-                            <button class="color-btn active" data-color="#000000" style="background-color: #000000;"></button>
-                            <button class="color-btn" data-color="#d91c24" style="background-color: #d91c24;"></button> <button class="color-btn" data-color="#2b4eff" style="background-color: #2b4eff;"></button> <button class="color-btn" data-color="#00a651" style="background-color: #00a651;"></button> </div>
-
-                        <div class="tools-picker">
-                            <button id="btn-marker" class="tool-btn active">Marker</button>
-                            <button id="btn-eraser" class="tool-btn">Eraser</button>
+                            <button class="color-btn active" data-color="#000000" style="background-color: #000000;"
+                                title="Black"></button>
+                            <button class="color-btn" data-color="#d91c24" style="background-color: #d91c24;"
+                                title="Red"></button>
+                            <button class="color-btn" data-color="#2b4eff" style="background-color: #2b4eff;"
+                                title="Blue"></button>
+                            <button class="color-btn" data-color="#00a651" style="background-color: #00a651;"
+                                title="Green"></button>
                         </div>
 
-                        <button id="btn-clear" class="action-btn">Clear Canvas</button>
+                        <div class="tools-group">
+                            <button id="btn-marker" class="tool-btn active" title="Marker">
+                                <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
+                                    <path fill="currentColor"
+                                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                </svg>
+                                <span>Marker</span>
+                            </button>
+
+                            <button id="btn-eraser" class="tool-btn" title="Eraser">
+                                <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
+                                    <path fill="currentColor"
+                                        d="M16.24 3.56l4.95 4.94c.78.79.78 2.05 0 2.84L12 20.53a4.008 4.008 0 0 1-5.66 0L2.81 17c-.78-.79-.78-2.05 0-2.84l10.6-10.6c.79-.78 2.05-.78 2.83 0zM4.22 15.58l3.54 3.53c.78.79 2.04.79 2.83 0l8.48-8.48-3.54-3.54-11.31 11.31v-.01z" />
+                                </svg>
+                                <span>Eraser</span>
+                            </button>
+
+                            <button id="btn-grid" class="tool-btn" title="Toggle Grid">
+                                <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
+                                    <path fill="currentColor"
+                                        d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z" />
+                                </svg>
+                                <span>Grid Off</span>
+                            </button>
+
+                            <button id="btn-save" class="tool-btn" title="Save Image">
+                                <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
+                                    <path fill="currentColor" d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" />
+                                </svg>
+                                <span>Save</span>
+                            </button>
+                        </div>
+
+                        <button id="btn-clear" class="action-btn">Clear</button>
+                    </div>
+
+                    <div class="playground-nav">
+                        <button id="nav-up" class="nav-arrow" title="Scroll Up">↑</button>
+                        <button id="nav-down" class="nav-arrow" title="Scroll Down">↓</button>
                     </div>
 
                     <canvas id="playground-canvas"></canvas>
                 </div>
             </section>
-<script>
-        // --- DRAWING PLAYGROUND LOGIC ---
-        function initPlayground() {
-            const canvas = document.getElementById('playground-canvas');
-            const container = document.getElementById('drawing-playground');
-            
-            if (!canvas || !container) return;
 
-            const ctx = canvas.getContext('2d');
-            let isDrawing = false;
-            let lastX = 0;
-            let lastY = 0;
-            
-            // Default Settings
-            let currentColor = '#000000';
-            let currentLineWidth = 8;
-            let isEraser = false;
+            <script>
+                function initPlayground() {
+                    const canvas = document.getElementById('playground-canvas');
+                    const container = document.getElementById('drawing-playground');
+                    const gridLayer = document.getElementById('grid-layer');
 
-            // 1. Setup Canvas Size (High DPI support)
-            function resizePlayground() {
-                const rect = container.getBoundingClientRect();
-                const dpr = window.devicePixelRatio || 1;
-                
-                canvas.width = rect.width * dpr;
-                canvas.height = rect.height * dpr;
-                
-                canvas.style.width = rect.width + 'px';
-                canvas.style.height = rect.height + 'px';
-                
-                ctx.scale(dpr, dpr);
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-            }
+                    if (!canvas || !container) return;
 
-            // Initial Resize
-            resizePlayground();
-            window.addEventListener('resize', resizePlayground);
+                    const ctx = canvas.getContext('2d');
 
-            // 2. Drawing Functions
-            function startDrawing(e) {
-                isDrawing = true;
-                const { x, y } = getPos(e);
-                lastX = x;
-                lastY = y;
-                
-                // Draw a single dot if clicked
-                draw(e);
-            }
+                    // Drawing State
+                    let isDrawing = false;
+                    let points = [];
 
-            function stopDrawing() {
-                isDrawing = false;
-                ctx.beginPath(); // Reset path to prevent connecting lines
-            }
+                    // Config
+                    let currentColor = '#000000';
+                    let currentSize = 6;
+                    let isEraser = false;
 
-            function draw(e) {
-                if (!isDrawing) return;
-                
-                // Prevent scrolling on mobile touches
-                if(e.type === 'touchmove') e.preventDefault();
+                    // --- 1. SETUP CANVAS & RESIZE ---
+                    function resize() {
+                        const dpr = window.devicePixelRatio || 1;
+                        const rect = container.getBoundingClientRect();
 
-                const { x, y } = getPos(e);
+                        canvas.width = rect.width * dpr;
+                        canvas.height = rect.height * dpr;
 
-                ctx.lineWidth = isEraser ? 40 : currentLineWidth;
-                
-                if (isEraser) {
-                    ctx.globalCompositeOperation = 'destination-out'; // Erase transparency
-                } else {
-                    ctx.globalCompositeOperation = 'source-over'; // Draw Color
-                    ctx.strokeStyle = currentColor;
+                        canvas.style.width = rect.width + 'px';
+                        canvas.style.height = rect.height + 'px';
+
+                        ctx.scale(dpr, dpr);
+                        ctx.lineCap = 'round';
+                        ctx.lineJoin = 'round';
+                    }
+                    resize();
+                    window.addEventListener('resize', resize);
+
+                    // --- 2. SMOOTH DRAWING ALGORITHM ---
+                    function getPos(e) {
+                        const rect = canvas.getBoundingClientRect();
+                        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                        return {
+                            x: clientX - rect.left,
+                            y: clientY - rect.top
+                        };
+                    }
+
+                    function startDrawing(e) {
+                        isDrawing = true;
+                        const pos = getPos(e);
+                        points.push(pos);
+
+                        // Draw a single dot immediately
+                        ctx.beginPath();
+                        ctx.fillStyle = isEraser ? '#f4f4f4' : currentColor; // Simple eraser visual for dot
+                        // Note: For true eraser we use blending modes, but for single dot this is a fallback
+                        ctx.arc(pos.x, pos.y, currentSize / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    function draw(e) {
+                        if (!isDrawing) return;
+                        if (e.type === 'touchmove') e.preventDefault(); // Block scrolling while drawing
+
+                        const pos = getPos(e);
+                        points.push(pos);
+
+                        // Setup Context
+                        ctx.lineWidth = isEraser ? 40 : currentSize;
+
+                        if (isEraser) {
+                            ctx.globalCompositeOperation = 'destination-out';
+                        } else {
+                            ctx.globalCompositeOperation = 'source-over';
+                            ctx.strokeStyle = currentColor;
+                        }
+
+                        // Draw Smooth Curve using Quadratic Curves
+                        // We need at least 3 points to draw a curve
+                        if (points.length < 3) {
+                            const b = points[0];
+                            ctx.beginPath();
+                            ctx.arc(b.x, b.y, ctx.lineWidth / 2, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.closePath();
+                            return;
+                        }
+
+                        ctx.beginPath();
+                        ctx.moveTo(points[0].x, points[0].y);
+
+                        for (let i = 1; i < points.length - 2; i++) {
+                            const c = (points[i].x + points[i + 1].x) / 2;
+                            const d = (points[i].y + points[i + 1].y) / 2;
+                            ctx.quadraticCurveTo(points[i].x, points[i].y, c, d);
+                        }
+
+                        // For the last 2 points
+                        const i = points.length - 2;
+                        ctx.quadraticCurveTo(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
+                        ctx.stroke();
+                    }
+
+                    function stopDrawing() {
+                        isDrawing = false;
+                        points = []; // Reset points for next stroke
+                    }
+
+                    // --- 3. EVENT LISTENERS ---
+                    canvas.addEventListener('mousedown', startDrawing);
+                    canvas.addEventListener('mousemove', draw);
+                    canvas.addEventListener('mouseup', stopDrawing);
+                    canvas.addEventListener('mouseout', stopDrawing);
+
+                    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+                    canvas.addEventListener('touchmove', draw, { passive: false });
+                    canvas.addEventListener('touchend', stopDrawing);
+
+                    // --- 4. UI CONTROLS ---
+                    const colorBtns = document.querySelectorAll('.color-btn');
+                    const btnMarker = document.getElementById('btn-marker');
+                    const btnEraser = document.getElementById('btn-eraser');
+                    const btnGrid = document.getElementById('btn-grid');
+                    const btnClear = document.getElementById('btn-clear');
+                    const btnSave = document.getElementById('btn-save');
+                    // Color Selection
+                    colorBtns.forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            colorBtns.forEach(b => b.classList.remove('active'));
+                            e.target.classList.add('active');
+                            currentColor = e.target.dataset.color;
+                            isEraser = false;
+
+                            btnEraser.classList.remove('active');
+                            btnMarker.classList.add('active');
+                        });
+                    });
+
+                    // Tools
+                    btnMarker.addEventListener('click', () => {
+                        isEraser = false;
+                        btnMarker.classList.add('active');
+                        btnEraser.classList.remove('active');
+                    });
+
+                    btnEraser.addEventListener('click', () => {
+                        isEraser = true;
+                        btnEraser.classList.add('active');
+                        btnMarker.classList.remove('active');
+                        colorBtns.forEach(b => b.classList.remove('active'));
+                    });
+
+                    // Grid Toggle
+                    let isGridOn = false;
+                    btnGrid.addEventListener('click', () => {
+                        isGridOn = !isGridOn;
+                        if (isGridOn) {
+                            gridLayer.classList.add('visible');
+                            btnGrid.classList.add('active');
+                            btnGrid.querySelector('span').innerText = 'Grid On';
+                        } else {
+                            gridLayer.classList.remove('visible');
+                            btnGrid.classList.remove('active');
+                            btnGrid.querySelector('span').innerText = 'Grid Off';
+                        }
+                    });
+
+                    // Clear
+                    btnClear.addEventListener('click', () => {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    });
+                    // 2. ADD THIS NEW SAVE FUNCTION LOGIC
+                    btnSave.addEventListener('click', () => {
+                        // Create a temporary canvas to composite the image
+                        // (This ensures the background is white, not transparent, when saved)
+                        const tempCanvas = document.createElement('canvas');
+                        const tempCtx = tempCanvas.getContext('2d');
+
+                        tempCanvas.width = canvas.width;
+                        tempCanvas.height = canvas.height;
+
+                        // Fill white background (Paper color)
+                        tempCtx.fillStyle = '#f4f4f4';
+                        tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+                        // Draw the user's artwork on top
+                        tempCtx.drawImage(canvas, 0, 0);
+
+                        // Create download link
+                        const link = document.createElement('a');
+                        link.download = `marker-sketch-${Date.now()}.png`; // Unique filename
+                        link.href = tempCanvas.toDataURL('image/png');
+                        link.click();
+                    });
+                    // --- 5. NAVIGATION & CURSOR MANAGEMENT ---
+                    const navUp = document.getElementById('nav-up');
+                    const navDown = document.getElementById('nav-down');
+
+                    navUp.addEventListener('click', () => {
+                        // Find section before playground
+                        const prevSection = container.previousElementSibling;
+                        if (prevSection) prevSection.scrollIntoView({ behavior: 'smooth' });
+                    });
+
+                    navDown.addEventListener('click', () => {
+                        const footer = document.getElementById('advanced-footer');
+                        if (footer) footer.scrollIntoView({ behavior: 'smooth' });
+                    });
+
+                    // Hide Custom Cursor specifically for this section
+                    container.addEventListener('mouseenter', () => document.body.classList.add('hide-cursor'));
+                    container.addEventListener('mouseleave', () => document.body.classList.remove('hide-cursor'));
                 }
 
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(x, y);
-                ctx.stroke();
-
-                lastX = x;
-                lastY = y;
-            }
-
-            // Helper to get mouse/touch coordinates relative to canvas
-            function getPos(e) {
-                const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return {
-                    x: clientX - rect.left,
-                    y: clientY - rect.top
-                };
-            }
-
-            // 3. Event Listeners (Mouse & Touch)
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
-
-            canvas.addEventListener('touchstart', startDrawing, { passive: false });
-            canvas.addEventListener('touchmove', draw, { passive: false });
-            canvas.addEventListener('touchend', stopDrawing);
-
-            // 4. UI Controls
-            const colorBtns = document.querySelectorAll('.color-btn');
-            const btnMarker = document.getElementById('btn-marker');
-            const btnEraser = document.getElementById('btn-eraser');
-            const btnClear = document.getElementById('btn-clear');
-
-            // Handle Color Selection
-            colorBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    // Update Active State
-                    colorBtns.forEach(b => b.classList.remove('active'));
-                    e.target.classList.add('active');
-                    
-                    // Switch to Marker Mode automatically
-                    isEraser = false;
-                    currentColor = e.target.dataset.color;
-                    
-                    // Update Tool UI
-                    btnEraser.classList.remove('active');
-                    btnMarker.classList.add('active');
+                document.addEventListener("DOMContentLoaded", () => {
+                    initPlayground();
                 });
-            });
-
-            // Handle Marker Tool
-            btnMarker.addEventListener('click', () => {
-                isEraser = false;
-                btnMarker.classList.add('active');
-                btnEraser.classList.remove('active');
-            });
-
-            // Handle Eraser Tool
-            btnEraser.addEventListener('click', () => {
-                isEraser = true;
-                btnEraser.classList.add('active');
-                btnMarker.classList.remove('active');
-                // Remove active class from colors strictly for visual feedback
-                colorBtns.forEach(b => b.classList.remove('active'));
-            });
-
-            // Handle Clear Board
-            btnClear.addEventListener('click', () => {
-                const rect = container.getBoundingClientRect();
-                ctx.clearRect(0, 0, rect.width, rect.height);
-            });
-        }
-
-        // Initialize when DOM is ready (Add this to your existing listener)
-        document.addEventListener("DOMContentLoaded", () => {
-            initPlayground(); 
-        });
-    </script>
+            </script>
             <footer id="advanced-footer">
 
                 <div class="footer-container">
@@ -929,7 +1038,7 @@
     </script>
     <script>
         gsap.registerPlugin(ScrollTrigger);
-// --- 0. LOADER ANIMATION (OSMO/WILLEM) ---
+        // --- 0. LOADER ANIMATION (OSMO/WILLEM) ---
         function initLoader() {
             const container = document.querySelector('.loader-screen');
             const loadingLetter = container.querySelectorAll('.willem__letter');
@@ -962,21 +1071,21 @@
             if (headingStart.length) { tl.fromTo(headingStart, { x: '0em' }, { x: '-0.05em', duration: 1.25 }, '<'); }
             if (headingEnd.length) { tl.fromTo(headingEnd, { x: '0em' }, { x: '0.05em', duration: 1.25 }, '<'); }
             if (coverImageExtra.length) { tl.fromTo(coverImageExtra, { opacity: 1 }, { opacity: 0, duration: 0.05, ease: 'none', stagger: 0.5 }, '-=0.05'); }
-            
+
             // --- 2. SYNCHRONIZED EXPANSION & SOUND ---
-            
+
             // Create a label for the exact moment the expansion should start
             tl.addLabel("zoomEffect", "< 1.25");
 
             // A. Expand the Image (Visual) - referencing the label
-            if (growingImage.length) { 
-                tl.to(growingImage, { width: '100vw', height: '100vh', duration: 1.5 }, "zoomEffect"); 
+            if (growingImage.length) {
+                tl.to(growingImage, { width: '100vw', height: '100vh', duration: 1.5 }, "zoomEffect");
             }
-            
+
             // B. Expand the Box/Text Mask (Visual) - referencing the SAME label
             // This ensures it moves exactly with the image, fixing the text glitch
-            if (box.length) { 
-                tl.to(box, { width: '100vw', duration: 1.5 }, "zoomEffect"); 
+            if (box.length) {
+                tl.to(box, { width: '100vw', duration: 1.5 }, "zoomEffect");
             }
 
             // C. Play Sound - referencing the label + 0.4s delay
@@ -1688,13 +1797,13 @@
             });
         }
     </script>
- <script>
+    <script>
         const canvas = document.getElementById("hero-canvas");
         const ctx = canvas.getContext("2d");
         let lastPos = null;
 
         // --- FIX 1: Allow default touch actions so users can scroll ---
-        canvas.style.touchAction = "auto"; 
+        canvas.style.touchAction = "auto";
 
         function resizeCanvas() {
             const dpr = window.devicePixelRatio || 1;
@@ -1766,15 +1875,15 @@
 
         // --- Custom Cursor Logic (Kept unchanged) ---
         const cursor = document.querySelector(".custom-cursor");
-        if(cursor) { // Added safety check
+        if (cursor) { // Added safety check
             const interactiveSelector = ["a[href]", "button", "canvas", '[role="button"]', "input:not([disabled])", "select:not([disabled])", "textarea:not([disabled])", '[data-cursor="interactive"]'].join(",");
             const stickyItems = document.querySelectorAll(".sticky-item");
             let isSticky = false;
-            
+
             function isPureBlack(e) { if (!e || !e.startsWith("rgb")) return !1; const [t, s, o] = e.match(/\d+/g).map(Number); return t === 0 && s === 0 && o === 0 }
             function isBackgroundBlack(e) { for (; e && e !== document.body;) { const t = getComputedStyle(e).backgroundColor; if (t !== "rgba(0, 0, 0, 0)" && !isPureBlack(t)) return !1; e = e.parentElement } return !0 }
             function getAllElementsAt(e, t) { const s = [], o = []; let l; for (; (l = document.elementFromPoint(e, t)) && !s.includes(l);)s.push(l), o.push({ el: l, pe: l.style.pointerEvents }), l.style.pointerEvents = "none"; return o.forEach(({ el: n, pe: a }) => n.style.pointerEvents = a), s }
-            
+
             let rAF = null;
             function handlePointerMove(e) { rAF || (rAF = requestAnimationFrame(() => { isSticky || (cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`); const s = getAllElementsAt(e.clientX, e.clientY).every(isBackgroundBlack); cursor.classList.toggle("red", s); const o = document.elementFromPoint(e.clientX, e.clientY), l = o && o.closest(interactiveSelector); cursor.classList.toggle("--interactive", !!l), rAF = null })) }
             document.addEventListener("mousemove", handlePointerMove);
