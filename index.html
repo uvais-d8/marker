@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 
 <head>
@@ -259,7 +259,7 @@
             </div>
             <section class="viewport-section intro-viewport">
                 <div class="content-wrapper">
-                    <h1>A creative marker built for clarity  & expression.</h1>
+                    <h1>A creative marker built for clarity & expression.</h1>
                 </div>
             </section>
             <section class="viewport-section narrative-segment scroll-sequence-host">
@@ -305,300 +305,29 @@
                 <div class="content-wrapper">
                     <h1>Marker empowers , to defines ideas with their purpose.</h1>
                 </div>
-            </section><style>
-    @media (max-width: 768px) {
-        .content-wrapper h1, .kinetic-typography-block p {
-            -webkit-hyphens: none;
-            hyphens: none;
-            word-break: normal;
-        }
-    }
-</style>
-            <section id="drawing-playground" class="viewport-section" data-lenis-prevent>
-                <div class="playground-wrapper">
+            </section>
+            <style>
+                @media (max-width: 768px) {
 
-                    <div class="grid-layer" id="grid-layer"></div>
+                    .content-wrapper h1,
+                    .kinetic-typography-block p {
+                        -webkit-hyphens: none;
+                        hyphens: none;
+                        word-break: normal;
+                    }
+                }
+            </style>
 
-                    <div class="playground-ui">
-                        <div class="ui-header">
-                            <h3>Studio</h3>
-                        </div>
-
-                        <div class="color-picker">
-                            <button class="color-btn active" data-color="#000000" style="background-color: #000000;"
-                                title="Black"></button>
-                            <button class="color-btn" data-color="#d91c24" style="background-color: #d91c24;"
-                                title="Red"></button>
-                            <button class="color-btn" data-color="#2b4eff" style="background-color: #2b4eff;"
-                                title="Blue"></button>
-                            <button class="color-btn" data-color="#00a651" style="background-color: #00a651;"
-                                title="Green"></button>
-                        </div>
-
-                        <div class="tools-group">
-                            <button id="btn-marker" class="tool-btn active" title="Marker">
-                                <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
-                                    <path fill="currentColor"
-                                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                                </svg>
-                                <span>Marker</span>
-                            </button>
-
-                            <button id="btn-eraser" class="tool-btn" title="Eraser">
-                                <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
-                                    <path fill="currentColor"
-                                        d="M16.24 3.56l4.95 4.94c.78.79.78 2.05 0 2.84L12 20.53a4.008 4.008 0 0 1-5.66 0L2.81 17c-.78-.79-.78-2.05 0-2.84l10.6-10.6c.79-.78 2.05-.78 2.83 0zM4.22 15.58l3.54 3.53c.78.79 2.04.79 2.83 0l8.48-8.48-3.54-3.54-11.31 11.31v-.01z" />
-                                </svg>
-                                <span>Eraser</span>
-                            </button>
-
-                            <button id="btn-grid" class="tool-btn" title="Toggle Grid">
-                                <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
-                                    <path fill="currentColor"
-                                        d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z" />
-                                </svg>
-                                <span>Grid Off</span>
-                            </button>
-
-                            <button id="btn-save" class="tool-btn" title="Save Image">
-                                <svg class="tool-icon" viewBox="0 0 24 24" width="24" height="24">
-                                    <path fill="currentColor" d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" />
-                                </svg>
-                                <span>Save</span>
-                            </button>
-                        </div>
-
-                        <button id="btn-clear" class="action-btn">Clear</button>
-                    </div>
-
-                    <div class="playground-nav">
-                        <button id="nav-up" class="nav-arrow" title="Scroll Up">↑</button>
-                        <button id="nav-down" class="nav-arrow" title="Scroll Down">↓</button>
-                    </div>
-
-                    <canvas id="playground-canvas"></canvas>
-                </div>
+            <section class="viewport-section"
+                style="height: 50vh; display: flex; align-items: center; justify-content: center;">
+                <a href="playground.html"
+                    style="font-size: 2rem; padding: 20px 40px; background: #000; color: #fff; text-decoration: none; border-radius: 50px; font-family: sans-serif;">
+                    Enter Playground
+                </a>
             </section>
 
-            <script>
-                function initPlayground() {
-                    const canvas = document.getElementById('playground-canvas');
-                    const container = document.getElementById('drawing-playground');
-                    const gridLayer = document.getElementById('grid-layer');
 
-                    if (!canvas || !container) return;
 
-                    const ctx = canvas.getContext('2d');
-
-                    // Drawing State
-                    let isDrawing = false;
-                    let points = [];
-
-                    // Config
-                    let currentColor = '#000000';
-                    let currentSize = 6;
-                    let isEraser = false;
-
-                    // --- 1. SETUP CANVAS & RESIZE ---
-                    function resize() {
-                        const dpr = window.devicePixelRatio || 1;
-                        const rect = container.getBoundingClientRect();
-
-                        canvas.width = rect.width * dpr;
-                        canvas.height = rect.height * dpr;
-
-                        canvas.style.width = rect.width + 'px';
-                        canvas.style.height = rect.height + 'px';
-
-                        ctx.scale(dpr, dpr);
-                        ctx.lineCap = 'round';
-                        ctx.lineJoin = 'round';
-                    }
-                    resize();
-                    window.addEventListener('resize', resize);
-
-                    // --- 2. SMOOTH DRAWING ALGORITHM ---
-                    function getPos(e) {
-                        const rect = canvas.getBoundingClientRect();
-                        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                        return {
-                            x: clientX - rect.left,
-                            y: clientY - rect.top
-                        };
-                    }
-
-                    function startDrawing(e) {
-                        isDrawing = true;
-                        const pos = getPos(e);
-                        points.push(pos);
-
-                        // Draw a single dot immediately
-                        ctx.beginPath();
-                        ctx.fillStyle = isEraser ? '#f4f4f4' : currentColor; // Simple eraser visual for dot
-                        // Note: For true eraser we use blending modes, but for single dot this is a fallback
-                        ctx.arc(pos.x, pos.y, currentSize / 2, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-
-                    function draw(e) {
-                        if (!isDrawing) return;
-                        if (e.type === 'touchmove') e.preventDefault(); // Block scrolling while drawing
-
-                        const pos = getPos(e);
-                        points.push(pos);
-
-                        // Setup Context
-                        ctx.lineWidth = isEraser ? 40 : currentSize;
-
-                        if (isEraser) {
-                            ctx.globalCompositeOperation = 'destination-out';
-                        } else {
-                            ctx.globalCompositeOperation = 'source-over';
-                            ctx.strokeStyle = currentColor;
-                        }
-
-                        // Draw Smooth Curve using Quadratic Curves
-                        // We need at least 3 points to draw a curve
-                        if (points.length < 3) {
-                            const b = points[0];
-                            ctx.beginPath();
-                            ctx.arc(b.x, b.y, ctx.lineWidth / 2, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.closePath();
-                            return;
-                        }
-
-                        ctx.beginPath();
-                        ctx.moveTo(points[0].x, points[0].y);
-
-                        for (let i = 1; i < points.length - 2; i++) {
-                            const c = (points[i].x + points[i + 1].x) / 2;
-                            const d = (points[i].y + points[i + 1].y) / 2;
-                            ctx.quadraticCurveTo(points[i].x, points[i].y, c, d);
-                        }
-
-                        // For the last 2 points
-                        const i = points.length - 2;
-                        ctx.quadraticCurveTo(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
-                        ctx.stroke();
-                    }
-
-                    function stopDrawing() {
-                        isDrawing = false;
-                        points = []; // Reset points for next stroke
-                    }
-
-                    // --- 3. EVENT LISTENERS ---
-                    canvas.addEventListener('mousedown', startDrawing);
-                    canvas.addEventListener('mousemove', draw);
-                    canvas.addEventListener('mouseup', stopDrawing);
-                    canvas.addEventListener('mouseout', stopDrawing);
-
-                    canvas.addEventListener('touchstart', startDrawing, { passive: false });
-                    canvas.addEventListener('touchmove', draw, { passive: false });
-                    canvas.addEventListener('touchend', stopDrawing);
-
-                    // --- 4. UI CONTROLS ---
-                    const colorBtns = document.querySelectorAll('.color-btn');
-                    const btnMarker = document.getElementById('btn-marker');
-                    const btnEraser = document.getElementById('btn-eraser');
-                    const btnGrid = document.getElementById('btn-grid');
-                    const btnClear = document.getElementById('btn-clear');
-                    const btnSave = document.getElementById('btn-save');
-                    // Color Selection
-                    colorBtns.forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            colorBtns.forEach(b => b.classList.remove('active'));
-                            e.target.classList.add('active');
-                            currentColor = e.target.dataset.color;
-                            isEraser = false;
-
-                            btnEraser.classList.remove('active');
-                            btnMarker.classList.add('active');
-                        });
-                    });
-
-                    // Tools
-                    btnMarker.addEventListener('click', () => {
-                        isEraser = false;
-                        btnMarker.classList.add('active');
-                        btnEraser.classList.remove('active');
-                    });
-
-                    btnEraser.addEventListener('click', () => {
-                        isEraser = true;
-                        btnEraser.classList.add('active');
-                        btnMarker.classList.remove('active');
-                        colorBtns.forEach(b => b.classList.remove('active'));
-                    });
-
-                    // Grid Toggle
-                    let isGridOn = false;
-                    btnGrid.addEventListener('click', () => {
-                        isGridOn = !isGridOn;
-                        if (isGridOn) {
-                            gridLayer.classList.add('visible');
-                            btnGrid.classList.add('active');
-                            btnGrid.querySelector('span').innerText = 'Grid On';
-                        } else {
-                            gridLayer.classList.remove('visible');
-                            btnGrid.classList.remove('active');
-                            btnGrid.querySelector('span').innerText = 'Grid Off';
-                        }
-                    });
-
-                    // Clear
-                    btnClear.addEventListener('click', () => {
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    });
-                    // 2. ADD THIS NEW SAVE FUNCTION LOGIC
-                    btnSave.addEventListener('click', () => {
-                        // Create a temporary canvas to composite the image
-                        // (This ensures the background is white, not transparent, when saved)
-                        const tempCanvas = document.createElement('canvas');
-                        const tempCtx = tempCanvas.getContext('2d');
-
-                        tempCanvas.width = canvas.width;
-                        tempCanvas.height = canvas.height;
-
-                        // Fill white background (Paper color)
-                        tempCtx.fillStyle = '#f4f4f4';
-                        tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-                        // Draw the user's artwork on top
-                        tempCtx.drawImage(canvas, 0, 0);
-
-                        // Create download link
-                        const link = document.createElement('a');
-                        link.download = `marker-sketch-${Date.now()}.png`; // Unique filename
-                        link.href = tempCanvas.toDataURL('image/png');
-                        link.click();
-                    });
-                    // --- 5. NAVIGATION & CURSOR MANAGEMENT ---
-                    const navUp = document.getElementById('nav-up');
-                    const navDown = document.getElementById('nav-down');
-
-                    navUp.addEventListener('click', () => {
-                        // Find section before playground
-                        const prevSection = container.previousElementSibling;
-                        if (prevSection) prevSection.scrollIntoView({ behavior: 'smooth' });
-                    });
-
-                    navDown.addEventListener('click', () => {
-                        const footer = document.getElementById('advanced-footer');
-                        if (footer) footer.scrollIntoView({ behavior: 'smooth' });
-                    });
-
-                    // Hide Custom Cursor specifically for this section
-                    container.addEventListener('mouseenter', () => document.body.classList.add('hide-cursor'));
-                    container.addEventListener('mouseleave', () => document.body.classList.remove('hide-cursor'));
-                }
-
-                document.addEventListener("DOMContentLoaded", () => {
-                    initPlayground();
-                });
-            </script>
             <footer id="advanced-footer">
 
                 <div class="footer-container">
@@ -682,14 +411,15 @@
         document.addEventListener("DOMContentLoaded", () => {
             gsap.registerPlugin(ScrollTrigger);
 
-            const targets = [".intro-viewport", ".action-trigger-zone", ".conclusion-viewport"];
-
-            targets.forEach(selector => {
+            // Helper function to animate a specific section
+            function animateSection(selector) {
                 const section = document.querySelector(selector);
                 if (!section) return;
 
                 const card = section.querySelector('.content-wrapper');
-                const heading = card.querySelector('h1');
+                const heading = card ? section.querySelector('h1') : null;
+
+                if (!card || !heading) return;
 
                 // 1. Split Text
                 const text = heading.innerText;
@@ -697,7 +427,7 @@
                     char === " " ? `<span style="display:inline-block; width: 0.3em;">&nbsp;</span>` : `<span class="char">${char}</span>`
                 ).join("");
 
-                // 2. The Timeline
+                // 2. Timeline
                 const tl = gsap.timeline({
                     scrollTrigger: {
                         trigger: section,
@@ -707,40 +437,52 @@
                     }
                 });
 
-                // 3. The "Smooth" Expansion
+                // 3. Card Animation
                 tl.fromTo(card,
                     {
-                        scale: 0.2,       // Starts very tiny
+                        scale: 0.2,
                         opacity: 0,
-                        y: 50,            // Starts slightly lower
-                        borderRadius: "10rem" // Starts very rounded
+                        y: 50,
+                        borderRadius: "10rem"
                     },
                     {
-                        duration: 1.8,    // Longer duration for smoothness
+                        duration: 1.5,
                         scale: 1,
                         opacity: 1,
                         y: 0,
                         borderRadius: "2rem",
-                        ease: "expo.out", // The "Luxury" curve: Fast start, slow finish
+                        ease: "expo.out",
                         clearProps: "all"
                     }
-                )
-                    // 4. Smooth Text Fade-in with Blur
-                    .fromTo(heading.querySelectorAll(".char"),
+                );
+
+                // 4. Text Animation
+                const chars = heading.querySelectorAll(".char");
+                if (chars.length > 0) {
+                    tl.fromTo(chars,
                         {
                             y: 20,
                             opacity: 0,
-                            filter: "blur(10px)" // Starts blurry
+                            filter: "blur(10px)"
                         },
                         {
                             duration: 1,
                             y: 0,
                             opacity: 1,
-                            filter: "blur(0px)", // Becomes clear
+                            filter: "blur(0px)",
                             stagger: 0.02,
                             ease: "power2.out"
-                        }, "-=1.4"); // Start early while card is still expanding
-            });
+                        }, "-=1.2");
+                }
+            }
+
+            // Explicitly call for each section to ensure they all get registered
+            animateSection(".intro-viewport");
+            animateSection(".action-trigger-zone");
+            animateSection(".conclusion-viewport");
+
+            // Refresh ScrollTrigger
+            ScrollTrigger.refresh();
         });
     </script>
     <script>
@@ -1899,6 +1641,88 @@
             document.addEventListener("mouseleave", () => cursor.style.opacity = "0");
             document.addEventListener("mouseenter", () => cursor.style.opacity = "1");
         }
+    </script>
+    <script>
+        // ULTIMATE ROBUST ANIMATION SCRIPT
+        // Injected inline to guarantee execution
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Initializing Inline Card Animations...");
+            const targets = [".intro-viewport", ".action-trigger-zone", ".conclusion-viewport"];
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    // Trigger if any part is visible
+                    if (entry.isIntersecting) {
+                        animateEntry(entry.target);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 }); // Low threshold to ensure it catches
+
+            function animateEntry(section) {
+                if (section.dataset.animating === "true") return;
+                section.dataset.animating = "true";
+
+                const card = section.querySelector('.content-wrapper');
+                const heading = card ? section.querySelector('h1') : null;
+
+                if (!card || !heading) return;
+
+                // Ensure visibility (in case it was hidden)
+                card.style.opacity = '1';
+                // But we want to animate from 0 if possible. 
+                // Let's use GSAP if available, otherwise fallback.
+
+                if (typeof gsap !== 'undefined') {
+                    // Reset for animation
+                    gsap.set(card, { scale: 0.8, opacity: 0, y: 50, borderRadius: "100px" });
+
+                    // Split text if needed
+                    if (!heading.querySelector('.char')) {
+                        const text = heading.innerText;
+                        heading.innerHTML = '';
+                        text.split("").forEach(char => {
+                            const s = document.createElement('span');
+                            s.className = 'char';
+                            s.innerHTML = char === ' ' ? '&nbsp;' : char;
+                            s.style.display = 'inline-block';
+                            heading.appendChild(s);
+                        });
+                    }
+                    const chars = heading.querySelectorAll('.char');
+                    gsap.set(chars, { y: 20, opacity: 0, filter: "blur(10px)" });
+
+                    const tl = gsap.timeline();
+                    tl.to(card, {
+                        scale: 1, opacity: 1, y: 0, borderRadius: "32px", duration: 1.2, ease: "expo.out"
+                    })
+                        .to(chars, {
+                            y: 0, opacity: 1, filter: "blur(0px)", stagger: 0.02, duration: 0.8, ease: "power2.out"
+                        }, "-=0.8");
+                } else {
+                    // CSS Fallback if GSAP missing
+                    card.style.transition = "transform 1s, opacity 1s";
+                    card.style.transform = "scale(1) translateY(0)";
+                    card.style.opacity = "1";
+                }
+            }
+
+            targets.forEach(sel => {
+                const el = document.querySelector(sel);
+                if (el) observer.observe(el);
+            });
+
+            // FAILSAFE: Force visible after 3 seconds
+            setTimeout(() => {
+                targets.forEach(sel => {
+                    const el = document.querySelector(sel);
+                    if (el && !el.dataset.animating) {
+                        const card = el.querySelector('.content-wrapper');
+                        if (card) card.style.opacity = 1;
+                    }
+                });
+            }, 3000);
+        });
     </script>
 </body>
 
