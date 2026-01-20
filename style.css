@@ -34,28 +34,28 @@
     opacity: 1 !important;
     visibility: visible !important;
 }
-
 .hero__title {
     position: absolute;
     bottom: 80px;
     left: 0;
     width: 100%;
     text-align: center;
-    z-index: 10 !important;
-    /* Lowered from 99999 to sit BEHIND loader but ABOVE canvas */
-    color: #000 !important;
-    /* Back to black to test basic visibility first */
+    /* CHANGED: Lowered z-index slightly (below loader's 9999) but above video */
+    z-index: 9990; 
+    color: #000;
     font-family: 'Neue Montreal', sans-serif;
     font-size: 15vw;
-    /* MASSIVE */
     font-weight: 900;
     margin: 0;
     pointer-events: none;
-    opacity: 0;
-    /* START HIDDEN */
-    visibility: hidden;
-    transform: none !important;
-    /* Prevent JS transforms from moving it offscreen */
+    
+    /* CHANGED: Removed !important so we can toggle it with CSS */
+    opacity: 1; 
+    visibility: visible; 
+    transform: none;
+    
+    /* ADDED: Smooth fade in transition */
+    transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 
 /* =========================================
@@ -2713,118 +2713,11 @@ body {
         transform: translateX(0);
     }
 }
+/* =========================================
+   BASE STYLES (Desktop Default)
+   ========================================= */
 
-/* Mobile Adjustments: Icons are always visible, text usually hidden to save space */
-@media (max-width: 768px) {
-    .playground-ui {
-        width: calc(100% - 40px);
-        flex-direction: row;
-        justify-content: space-between;
-    }
-
-    .tools-group {
-        flex-direction: row;
-        width: auto;
-    }
-
-    .tool-btn span {
-        display: none !important;
-        /* Hide text on mobile to save space */
-    }
-
-    .tool-btn {
-        padding: 10px;
-        width: 44px;
-        /* Fixed square size on mobile */
-        height: 44px;
-    }
-}
-
-/* Mobile Responsive Adjustments */
-@media (max-width: 768px) {
-    .playground-ui {
-        width: calc(100% - 40px);
-        /* Fit screen with margin */
-        height: auto;
-        bottom: 20px;
-        left: 20px;
-        top: auto;
-        transform: none;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        /* Center items vertically */
-        padding: 10px 15px;
-        /* Compacter container padding */
-    }
-
-    .playground-ui:hover {
-        width: calc(100% - 40px);
-        /* prevent expansion width change on mobile */
-    }
-
-    /* Hide text labels on mobile to save space */
-    .ui-header,
-    .tools-group span,
-    .action-btn {
-        display: none !important;
-        /* Optionally hide 'Clear' button text or keep icon */
-    }
-
-    /* Make Color Picker Horizontal and smaller */
-    .color-picker {
-        flex-direction: row;
-        gap: 8px;
-    }
-
-    .color-btn {
-        width: 20px;
-        /* Smaller color dots */
-        height: 20px;
-    }
-
-    /* Align tools horizontally */
-    .tools-group {
-        flex-direction: row;
-        width: auto;
-        gap: 8px;
-        /* Tighter spacing */
-    }
-
-    /* --- SMALLER BUTTONS HERE --- */
-    .tool-btn {
-        padding: 6px;
-        /* Less padding */
-        width: 36px;
-        /* Smaller width */
-        height: 36px;
-        /* Smaller height */
-        min-width: 36px;
-        /* Force minimum size */
-        border-radius: 6px;
-        /* Slightly tighter radius */
-    }
-
-    /* Scale down the icons slightly to fit the new button size */
-    .tool-icon {
-        width: 18px;
-        height: 18px;
-    }
-
-    /* Move Navigation Arrows up slightly */
-    .playground-nav {
-        bottom: 90px;
-        right: 20px;
-    }
-
-    .nav-arrow {
-        width: 38px;
-        height: 38px;
-        font-size: 16px;
-    }
-}
-
-/* Icons for collapsed state */
+/* Default Icon Placeholder (Square) */
 .tool-btn::before {
     content: '';
     display: block;
@@ -2834,32 +2727,20 @@ body {
     border-radius: 2px;
 }
 
+/* Hide text by default in collapsed state */
 .tool-btn span {
     display: none;
     margin-left: 8px;
 }
 
-/* Expanded state text */
-.playground-ui:hover .tool-btn,
-.playground-ui:hover .action-btn {
-    width: auto;
-    padding: 8px 12px;
-}
-
-.playground-ui:hover .tool-btn span {
-    display: inline;
-}
-
-.playground-ui:hover .tool-btn::before {
-    display: none;
-}
-
+/* Active State */
 .tool-btn.active {
     background: #000;
     color: #fff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* Action Button (Clear/Reset) */
 .action-btn {
     background: transparent;
     border-color: #eee;
@@ -2873,7 +2754,7 @@ body {
     border-color: #d91c24;
 }
 
-/* Navigation Arrows */
+/* Navigation Arrows (Bottom Right) */
 .playground-nav {
     position: absolute;
     right: 30px;
@@ -2907,50 +2788,137 @@ body {
     border-color: #000;
 }
 
+/* Cursor Utility */
 body.hide-cursor .custom-cursor,
 body.hide-cursor #global-cursor-canvas {
     opacity: 0 !important;
     visibility: hidden !important;
     transition: none !important;
-    /* Removes lag immediately */
     pointer-events: none !important;
 }
 
-/* Mobile Responsive */
+/* =========================================
+   DESKTOP HOVER EFFECTS (Non-Mobile Only)
+   ========================================= */
+/* We wrap this in a media query so mobile doesn't weirdly expand on tap */
+@media (min-width: 769px) {
+    .playground-ui:hover .tool-btn,
+    .playground-ui:hover .action-btn {
+        width: auto;
+        padding: 8px 12px;
+    }
+
+    .playground-ui:hover .tool-btn span {
+        display: inline;
+    }
+
+    .playground-ui:hover .tool-btn::before {
+        display: none; /* Hide placeholder icon when text shows */
+    }
+}
+/* =========================================
+   MOBILE RESPONSIVE FIX
+   ========================================= */
 @media (max-width: 768px) {
+    
     .playground-ui {
-        width: calc(100% - 40px);
-        height: auto;
+        /* 1. Ensure the bar fits within the screen width */
+        width: calc(100% - 40px) !important;
+        max-width: 100vw;
+        height: auto !important;
+        
+        /* 2. Switch to Horizontal Row */
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important; /* Start from left */
+        
+        /* 3. Reset Positioning (Keep your original coordinates) */
         bottom: 20px;
         left: 20px;
         top: auto;
         transform: none;
-        flex-direction: row;
-        justify-content: space-between;
-        padding: 15px;
+        
+        padding: 10px 15px !important;
+        gap: 10px; /* Consistent gap between all items */
     }
 
+    /* Prevent the "Hover to Expand" effect on mobile */
     .playground-ui:hover {
-        width: calc(100% - 40px);
+        width: calc(100% - 40px) !important; 
     }
 
+    /* =========================================
+       VISIBILITY & SIZING (The "Minimized" Look)
+       ========================================= */
+    
+    /* 1. Hide ALL text labels to save space */
     .ui-header,
-    .tools-group span {
+    .tools-group span,
+    .action-btn span,
+    .tool-btn span {
         display: none !important;
     }
 
-    .color-picker {
-        flex-direction: row;
-    }
-
+    /* 2. Reset Tools Group to flow horizontally */
     .tools-group {
-        flex-direction: row;
-        width: auto;
+        display: flex !important;
+        flex-direction: row !important;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
         gap: 8px;
     }
 
+    /* 3. Make Buttons Square & Visible */
+    .tool-btn {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important; /* Prevents squishing */
+        padding: 0 !important;
+        
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        margin: 0 !important;
+    }
+
+    /* Ensure icons show up */
+    .tool-btn::before {
+        display: block !important;
+        margin: 0 !important;
+    }
+
+    /* 4. Fix Color Picker */
+    .color-picker {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 8px;
+        margin: 0 8px !important; /* Add slight separation */
+    }
+
+    /* =========================================
+       THE POSITION FIX (Action Button)
+       ========================================= */
+    
+    /* On Desktop, this was 'margin-top: auto' (bottom). 
+       On Mobile, we change it to 'margin-left: auto' 
+       to push it to the far right side of the row. */
+    .action-btn {
+        margin-top: 0 !important;
+        margin-left: auto !important; /* Pushes button to the right end */
+        
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Adjust Nav Arrows to not overlap */
     .playground-nav {
-        bottom: 100px;
+        bottom: 90px;
         right: 20px;
     }
 }

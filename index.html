@@ -259,7 +259,7 @@
             </div>
             <section class="viewport-section intro-viewport">
                 <div class="content-wrapper">
-                    <h1>A creative marker built for clarity, control, and expression.</h1>
+                    <h1>A creative marker built for clarity  & expression.</h1>
                 </div>
             </section>
             <section class="viewport-section narrative-segment scroll-sequence-host">
@@ -281,7 +281,7 @@
             </section>
             <section class="viewport-section action-trigger-zone">
                 <div class="content-wrapper">
-                    <h1>Create with confidence using Marker’s powerful tools.</h1>
+                    <h1>Create with confidence using Marker powerful tools.</h1>
                 </div>
             </section>
             <section class="viewport-section capabilities-segment scroll-sequence-host">
@@ -303,7 +303,7 @@
             </section>
             <section class="viewport-section conclusion-viewport">
                 <div class="content-wrapper">
-                    <h1>Marker empowers creators to define ideas with purpose.</h1>
+                    <h1>Marker empowers creators to defines ideas with purpose.</h1>
                 </div>
             </section>
             <section id="drawing-playground" class="viewport-section" data-lenis-prevent>
@@ -1059,12 +1059,8 @@
                     gsap.to(container, {
                         opacity: 0,
                         display: 'none',
-                        duration: 0.3, // Faster fade out
-                        onComplete: () => {
-                            ScrollTrigger.refresh();
-                            // --- REVEAL HERO TITLE NOW ---
-                            gsap.to('.hero__title', { autoAlpha: 1, duration: 0.4, ease: 'power2.out' }); // Faster reveal
-                        }
+                        duration: 0.5,
+                        onComplete: () => ScrollTrigger.refresh()
                     });
                 }
             });
