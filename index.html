@@ -306,8 +306,182 @@
                     <h1>Marker empowers creators to define ideas with purpose.</h1>
                 </div>
             </section>
+<section id="drawing-playground" class="viewport-section" data-lenis-prevent>
+                <div class="playground-wrapper">
+                    
+                    <div class="playground-ui">
+                        <div class="ui-header">
+                            <h3>Test the Ink</h3>
+                            <p>Draw anywhere.</p>
+                        </div>
+                        
+                        <div class="color-picker">
+                            <button class="color-btn active" data-color="#000000" style="background-color: #000000;"></button>
+                            <button class="color-btn" data-color="#d91c24" style="background-color: #d91c24;"></button> <button class="color-btn" data-color="#2b4eff" style="background-color: #2b4eff;"></button> <button class="color-btn" data-color="#00a651" style="background-color: #00a651;"></button> </div>
 
+                        <div class="tools-picker">
+                            <button id="btn-marker" class="tool-btn active">Marker</button>
+                            <button id="btn-eraser" class="tool-btn">Eraser</button>
+                        </div>
 
+                        <button id="btn-clear" class="action-btn">Clear Canvas</button>
+                    </div>
+
+                    <canvas id="playground-canvas"></canvas>
+                </div>
+            </section>
+<script>
+        // --- DRAWING PLAYGROUND LOGIC ---
+        function initPlayground() {
+            const canvas = document.getElementById('playground-canvas');
+            const container = document.getElementById('drawing-playground');
+            
+            if (!canvas || !container) return;
+
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            
+            // Default Settings
+            let currentColor = '#000000';
+            let currentLineWidth = 8;
+            let isEraser = false;
+
+            // 1. Setup Canvas Size (High DPI support)
+            function resizePlayground() {
+                const rect = container.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
+                
+                ctx.scale(dpr, dpr);
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            }
+
+            // Initial Resize
+            resizePlayground();
+            window.addEventListener('resize', resizePlayground);
+
+            // 2. Drawing Functions
+            function startDrawing(e) {
+                isDrawing = true;
+                const { x, y } = getPos(e);
+                lastX = x;
+                lastY = y;
+                
+                // Draw a single dot if clicked
+                draw(e);
+            }
+
+            function stopDrawing() {
+                isDrawing = false;
+                ctx.beginPath(); // Reset path to prevent connecting lines
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                // Prevent scrolling on mobile touches
+                if(e.type === 'touchmove') e.preventDefault();
+
+                const { x, y } = getPos(e);
+
+                ctx.lineWidth = isEraser ? 40 : currentLineWidth;
+                
+                if (isEraser) {
+                    ctx.globalCompositeOperation = 'destination-out'; // Erase transparency
+                } else {
+                    ctx.globalCompositeOperation = 'source-over'; // Draw Color
+                    ctx.strokeStyle = currentColor;
+                }
+
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+
+                lastX = x;
+                lastY = y;
+            }
+
+            // Helper to get mouse/touch coordinates relative to canvas
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            // 3. Event Listeners (Mouse & Touch)
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            canvas.addEventListener('touchstart', startDrawing, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('touchend', stopDrawing);
+
+            // 4. UI Controls
+            const colorBtns = document.querySelectorAll('.color-btn');
+            const btnMarker = document.getElementById('btn-marker');
+            const btnEraser = document.getElementById('btn-eraser');
+            const btnClear = document.getElementById('btn-clear');
+
+            // Handle Color Selection
+            colorBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Update Active State
+                    colorBtns.forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    // Switch to Marker Mode automatically
+                    isEraser = false;
+                    currentColor = e.target.dataset.color;
+                    
+                    // Update Tool UI
+                    btnEraser.classList.remove('active');
+                    btnMarker.classList.add('active');
+                });
+            });
+
+            // Handle Marker Tool
+            btnMarker.addEventListener('click', () => {
+                isEraser = false;
+                btnMarker.classList.add('active');
+                btnEraser.classList.remove('active');
+            });
+
+            // Handle Eraser Tool
+            btnEraser.addEventListener('click', () => {
+                isEraser = true;
+                btnEraser.classList.add('active');
+                btnMarker.classList.remove('active');
+                // Remove active class from colors strictly for visual feedback
+                colorBtns.forEach(b => b.classList.remove('active'));
+            });
+
+            // Handle Clear Board
+            btnClear.addEventListener('click', () => {
+                const rect = container.getBoundingClientRect();
+                ctx.clearRect(0, 0, rect.width, rect.height);
+            });
+        }
+
+        // Initialize when DOM is ready (Add this to your existing listener)
+        document.addEventListener("DOMContentLoaded", () => {
+            initPlayground(); 
+        });
+    </script>
             <footer id="advanced-footer">
 
                 <div class="footer-container">
@@ -1514,54 +1688,38 @@
             });
         }
     </script>
-    <script>
-        (function () { const t = document.createElement("link").relList; if (t && t.supports && t.supports("modulepreload")) return; for (const l of document.querySelectorAll('link[rel="modulepreload"]')) o(l); new MutationObserver(l => { for (const n of l) if (n.type === "childList") for (const a of n.addedNodes) a.tagName === "LINK" && a.rel === "modulepreload" && o(a) }).observe(document, { childList: !0, subtree: !0 }); function s(l) { const n = {}; return l.integrity && (n.integrity = l.integrity), l.referrerPolicy && (n.referrerPolicy = l.referrerPolicy), l.crossOrigin === "use-credentials" ? n.credentials = "include" : l.crossOrigin === "anonymous" ? n.credentials = "omit" : n.credentials = "same-origin", n } function o(l) { if (l.ep) return; l.ep = !0; const n = s(l); fetch(l.href, n) } })(); let slideUp = (e, t = 500, s = 0) => { e.classList.contains("--slide") || (e.classList.add("--slide"), e.style.transitionProperty = "height, margin, padding", e.style.transitionDuration = t + "ms", e.style.height = `${e.offsetHeight}px`, e.offsetHeight, e.style.overflow = "hidden", e.style.height = s ? `${s}px` : "0px", e.style.paddingTop = 0, e.style.paddingBottom = 0, e.style.marginTop = 0, e.style.marginBottom = 0, window.setTimeout(() => { e.hidden = !s, s || e.style.removeProperty("height"), e.style.removeProperty("padding-top"), e.style.removeProperty("padding-bottom"), e.style.removeProperty("margin-top"), e.style.removeProperty("margin-bottom"), s || e.style.removeProperty("overflow"), e.style.removeProperty("transition-duration"), e.style.removeProperty("transition-property"), e.classList.remove("--slide"), document.dispatchEvent(new CustomEvent("slideUpDone", { detail: { target: e } })) }, t)) }, slideDown = (e, t = 500, s = 0) => { if (!e.classList.contains("--slide")) { e.classList.add("--slide"), e.hidden = e.hidden ? !1 : null, s && e.style.removeProperty("height"); let o = e.offsetHeight; e.style.overflow = "hidden", e.style.height = s ? `${s}px` : "0px", e.style.paddingTop = 0, e.style.paddingBottom = 0, e.style.marginTop = 0, e.style.marginBottom = 0, e.offsetHeight, e.style.transitionProperty = "height, margin, padding", e.style.transitionDuration = t + "ms", e.style.height = o + "px", e.style.removeProperty("padding-top"), e.style.removeProperty("padding-bottom"), e.style.removeProperty("margin-top"), e.style.removeProperty("margin-bottom"), window.setTimeout(() => { e.style.removeProperty("height"), e.style.removeProperty("overflow"), e.style.removeProperty("transition-duration"), e.style.removeProperty("transition-property"), e.classList.remove("--slide"), document.dispatchEvent(new CustomEvent("slideDownDone", { detail: { target: e } })) }, t) } }, slideToggle = (e, t = 500) => e.hidden ? slideDown(e, t) : slideUp(e, t), bodyLockStatus = !0, bodyLockToggle = (e = 500) => { document.documentElement.hasAttribute("data-fls-scrolllock") ? bodyUnlock(e) : bodyLock(e) }, bodyUnlock = (e = 500) => { if (bodyLockStatus) { const t = document.querySelectorAll("[data-fls-lp]"); setTimeout(() => { t.forEach(s => { s.style.paddingRight = "" }), document.body.style.paddingRight = "", document.documentElement.removeAttribute("data-fls-scrolllock") }, e), bodyLockStatus = !1, setTimeout(function () { bodyLockStatus = !0 }, e) } }, bodyLock = (e = 500) => { if (bodyLockStatus) { const t = document.querySelectorAll("[data-fls-lp]"), s = window.innerWidth - document.body.offsetWidth + "px"; t.forEach(o => { o.style.paddingRight = s }), document.body.style.paddingRight = s, document.documentElement.setAttribute("data-fls-scrolllock", ""), bodyLockStatus = !1, setTimeout(function () { bodyLockStatus = !0 }, e) } }; function uniqArray(e) { return e.filter((t, s, o) => o.indexOf(t) === s) } function dataMediaQueries(e, t) { const s = Array.from(e).filter(n => n.dataset[t]).map(n => { const [a, d = "max"] = n.dataset[t].split(","); return { value: a, type: d, item: n } }); if (s.length === 0) return []; const o = s.map(({ value: n, type: a }) => `(${a}-width: ${n}px),${n},${a}`); return [...new Set(o)].map(n => { const [a, d, f] = n.split(","), p = window.matchMedia(a); return { itemsArray: s.filter(r => r.value === d && r.type === f), matchMedia: p } }) } function spollers() { const e = document.querySelectorAll("[data-fls-spollers]"); if (e.length > 0) { let n = function (r, u = !1) { r.forEach(i => { i = u ? i.item : i, u.matches || !u ? (i.classList.add("--spoller-init"), a(i)) : (i.classList.remove("--spoller-init"), a(i, !1)) }) }, a = function (r, u = !0) { let i = r.querySelectorAll("details"); i.length && i.forEach(c => { let h = c.querySelector("summary"); u ? (h.removeAttribute("tabindex"), c.hasAttribute("data-fls-spollers-open") ? (h.classList.add("--spoller-active"), c.open = !0) : (c.open = !1, h.nextElementSibling.hidden = !0)) : (h.setAttribute("tabindex", "-1"), h.classList.remove("--spoller-active"), c.open = !0, h.nextElementSibling.hidden = !1) }) }, d = function (r) { const u = r.target; if (u.closest("summary") && u.closest("[data-fls-spollers]") && (r.preventDefault(), u.closest("[data-fls-spollers]").classList.contains("--spoller-init"))) { const i = u.closest("summary"), c = i.closest("details"), h = i.closest("[data-fls-spollers]"), v = h.hasAttribute("data-fls-spollers-one"), y = c.hasAttribute("data-fls-spollers-scroll"), g = h.dataset.flsSpollersSpeed ? parseInt(h.dataset.flsSpollersSpeed) : 500; if (!h.querySelectorAll(".--slide").length && (v && !c.open && f(h), c.open ? setTimeout(() => { c.open = !1 }, g) : c.open = !0, i.classList.toggle("--spoller-active"), slideToggle(i.nextElementSibling, g), y && i.classList.contains("--spoller-active"))) { const w = c.dataset.flsSpollersScroll, S = +w ? +w : 0, L = c.hasAttribute("data-fls-spollers-scroll-noheader") ? document.querySelector(".header").offsetHeight : 0; window.scrollTo({ top: c.offsetTop - (S + L), behavior: "smooth" }) } } if (!u.closest("[data-fls-spollers]")) { const i = document.querySelectorAll("[data-fls-spollers-close]"); i.length && i.forEach(c => { const h = c.closest("[data-fls-spollers]"), v = c.parentNode; if (h.classList.contains("--spoller-init")) { const y = h.dataset.flsSpollersSpeed ? parseInt(h.dataset.flsSpollersSpeed) : 500; c.classList.remove("--spoller-active"), slideUp(c.nextElementSibling, y), setTimeout(() => { v.open = !1 }, y) } }) } }, f = function (r) { const u = r.querySelector("details[open]"); if (u && !r.querySelectorAll(".--slide").length) { const i = u.querySelector("summary"), c = r.dataset.flsSpollersSpeed ? parseInt(r.dataset.flsSpollersSpeed) : 500; i.classList.remove("--spoller-active"), slideUp(i.nextElementSibling, c), setTimeout(() => { u.open = !1 }, c) } }; var t = n, s = a, o = d, l = f; document.addEventListener("click", d); const p = Array.from(e).filter(function (r, u, i) { return !r.dataset.flsSpollers.split(",")[0] }); p.length && n(p); let m = dataMediaQueries(e, "flsSpollers"); m && m.length && m.forEach(r => { r.matchMedia.addEventListener("change", function () { n(r.itemsArray, r.matchMedia) }), n(r.itemsArray, r.matchMedia) }) } } window.addEventListener("load", spollers); function menuInit() { document.addEventListener("click", function (e) { bodyLockStatus && e.target.closest("[data-fls-menu]") && (bodyLockToggle(), document.documentElement.toggleAttribute("data-fls-menu-open")) }) } document.querySelector("[data-fls-menu]") && window.addEventListener("load", menuInit), document.addEventListener("DOMContentLoaded", () => { if (window.matchMedia("(hover: none) and (pointer: coarse)").matches) return; const t = document.querySelectorAll(".menu__link"), s = document.getElementById("videoWrapper"), o = document.getElementById("video"); let l = !1; t.forEach((n, a) => { n.addEventListener("mouseenter", () => { l = !1; const d = n.dataset.video; if (!d) return; o.src = d, o.load(), s.classList.remove("menu__video-wrapper--fade", "menu__video-wrapper--wide", "menu__video-wrapper--hidden"); const f = a === 0, p = a === t.length - 1; s.classList.add(f || p ? "menu__video-wrapper--wide" : "menu__video-wrapper--fade") }), n.addEventListener("mouseleave", () => { l = !0, s.classList.remove("menu__video-wrapper--fade", "menu__video-wrapper--wide"); const d = () => { l && (s.classList.add("menu__video-wrapper--hidden"), o.src = ""), s.removeEventListener("transitionend", d) }; s.addEventListener("transitionend", d) }) }) }); function headerScroll() { const e = document.querySelector("[data-fls-header-scroll]"), t = e.hasAttribute("data-fls-header-scroll-show"), s = e.dataset.flsHeaderScrollShow ? e.dataset.flsHeaderScrollShow : 500, o = e.dataset.flsHeaderScroll ? e.dataset.flsHeaderScroll : 1; let l = 0, n; document.addEventListener("scroll", function (a) { const d = window.scrollY; clearTimeout(n), d >= o ? (e.classList.contains("--header-scroll") || e.classList.add("--header-scroll"), t && (d > l ? e.classList.contains("--header-show") && e.classList.remove("--header-show") : e.classList.contains("--header-show") || e.classList.add("--header-show"), n = setTimeout(() => { e.classList.contains("--header-show") || e.classList.add("--header-show") }, s))) : (e.classList.contains("--header-scroll") && e.classList.remove("--header-scroll"), t && e.classList.contains("--header-show") && e.classList.remove("--header-show")), l = d <= 0 ? 0 : d }) } document.querySelector("[data-fls-header-scroll]") && window.addEventListener("load", headerScroll); class ScrollWatcher { constructor(t) { let s = { logging: !0 }; this.config = Object.assign(s, t), this.observer, document.documentElement.classList.contains("watcher") || this.scrollWatcherRun() } scrollWatcherUpdate() { this.scrollWatcherRun() } scrollWatcherRun() { document.documentElement.classList.add("watcher"), this.scrollWatcherConstructor(document.querySelectorAll("[data-fls-watcher]")) } scrollWatcherConstructor(t) { t.length && uniqArray(Array.from(t).map(function (o) { if (o.dataset.flsWatcher === "navigator" && !o.dataset.flsWatcherThreshold) { let l; o.clientHeight > 2 ? (l = window.innerHeight / 2 / (o.clientHeight - 1), l > 1 && (l = 1)) : l = 1, o.setAttribute("data-fls-watcher-threshold", l.toFixed(2)) } return `${o.dataset.flsWatcherRoot ? o.dataset.flsWatcherRoot : null}|${o.dataset.flsWatcherMargin ? o.dataset.flsWatcherMargin : "0px"}|${o.dataset.flsWatcherThreshold ? o.dataset.flsWatcherThreshold : 0}` })).forEach(o => { let l = o.split("|"), n = { root: l[0], margin: l[1], threshold: l[2] }, a = Array.from(t).filter(function (f) { let p = f.dataset.flsWatcherRoot ? f.dataset.flsWatcherRoot : null, m = f.dataset.flsWatcherMargin ? f.dataset.flsWatcherMargin : "0px", r = f.dataset.flsWatcherThreshold ? f.dataset.flsWatcherThreshold : 0; if (String(p) === n.root && String(m) === n.margin && String(r) === n.threshold) return f }), d = this.getScrollWatcherConfig(n); this.scrollWatcherInit(a, d) }) } getScrollWatcherConfig(t) { let s = {}; if (document.querySelector(t.root) ? s.root = document.querySelector(t.root) : t.root, s.rootMargin = t.margin, !(t.margin.indexOf("px") < 0 && t.margin.indexOf("%") < 0)) { if (t.threshold === "prx") { t.threshold = []; for (let o = 0; o <= 1; o += .005)t.threshold.push(o) } else t.threshold = t.threshold.split(","); return s.threshold = t.threshold, s } } scrollWatcherCreate(t) { this.observer = new IntersectionObserver((s, o) => { s.forEach(l => { this.scrollWatcherCallback(l, o) }) }, t) } scrollWatcherInit(t, s) { this.scrollWatcherCreate(s), t.forEach(o => this.observer.observe(o)) } scrollWatcherIntersecting(t, s) { t.isIntersecting ? s.classList.contains("--watcher-view") || s.classList.add("--watcher-view") : s.classList.contains("--watcher-view") && s.classList.remove("--watcher-view") } scrollWatcherOff(t, s) { s.unobserve(t) } scrollWatcherCallback(t, s) { const o = t.target; this.scrollWatcherIntersecting(t, o), o.hasAttribute("data-fls-watcher-once") && t.isIntersecting && this.scrollWatcherOff(o, s), document.dispatchEvent(new CustomEvent("watcherCallback", { detail: { entry: t } })) } } document.querySelector("[data-fls-watcher]") && window.addEventListener("load", () => new ScrollWatcher({})); const canvas = document.getElementById("hero-canvas");
+ <script>
+        const canvas = document.getElementById("hero-canvas");
         const ctx = canvas.getContext("2d");
         let lastPos = null;
 
-        // Force touch-action none to prevent scrolling on the canvas
-        canvas.style.touchAction = "none";
+        // --- FIX 1: Allow default touch actions so users can scroll ---
+        canvas.style.touchAction = "auto"; 
 
         function resizeCanvas() {
-            // Handle High DPI (Retina) displays correctly
             const dpr = window.devicePixelRatio || 1;
-
-            // Set internal buffer size to match device pixels
             canvas.width = window.innerWidth * dpr;
             canvas.height = window.innerHeight * dpr;
-
-            // CSS size remains consistent with the viewport
             canvas.style.width = window.innerWidth + "px";
             canvas.style.height = window.innerHeight + "px";
-
-            // Reset any previous transforms
             ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-            // Scale context to match audio pixel density
             ctx.scale(dpr, dpr);
-
-            // Fill with white
             ctx.globalCompositeOperation = "source-over";
             ctx.fillStyle = "#fff";
             ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-
-            // Prepare for 'scratch' (erasing)
             ctx.globalCompositeOperation = "destination-out";
             ctx.lineCap = "round";
             ctx.lineWidth = 70;
-            ctx.strokeStyle = "rgba(0,0,0,1)"; // Color doesn't matter for destination-out, alpha does
+            ctx.strokeStyle = "rgba(0,0,0,1)";
         }
 
-        // Initialize and listen for resize with redundancy for mobile
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
         window.addEventListener("load", resizeCanvas);
-        // Fallback for mobile browser address bar shifts
         setTimeout(resizeCanvas, 500);
 
         function getCoords(e) {
             const rect = canvas.getBoundingClientRect();
-            // Support both mouse and touch
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             return {
@@ -1571,13 +1729,12 @@
         }
 
         function draw(e) {
-            // Important: prevent scrolling on touch devices
-            if (e.type === 'touchmove') {
-                e.preventDefault();
-            }
+            // --- FIX 2: Removed e.preventDefault() so page can scroll ---
+            // If you want to disable scratching ONLY on mobile to make scrolling easier,
+            // you can uncomment this line:
+            // if (window.innerWidth < 768) return; 
 
             const { x, y } = getCoords(e);
-
             ctx.beginPath();
             if (lastPos) {
                 ctx.moveTo(lastPos.x, lastPos.y);
@@ -1588,9 +1745,7 @@
         }
 
         function handleStart(e) {
-            if (e.type === 'touchstart') {
-                e.preventDefault();
-            }
+            // --- FIX 3: Removed e.preventDefault() here too ---
             const { x, y } = getCoords(e);
             lastPos = { x, y };
         }
@@ -1602,15 +1757,31 @@
         // Mouse Events
         canvas.addEventListener("mousemove", draw);
         canvas.addEventListener("mouseleave", handleEnd);
-        // We can add mousedown if we wanted click-to-erase logic, but staying with hover-erase for desktop as per original.
 
         // Touch Events
-        // Passive: false is crucial for preventDefault() to work
-        canvas.addEventListener("touchstart", handleStart, { passive: false });
-        canvas.addEventListener("touchmove", draw, { passive: false });
+        // --- FIX 4: Changed passive to true (allows scrolling while touching) ---
+        canvas.addEventListener("touchstart", handleStart, { passive: true });
+        canvas.addEventListener("touchmove", draw, { passive: true });
         canvas.addEventListener("touchend", handleEnd);
 
-        // const cursor = document.querySelector(".custom-cursor"); cursor || console.warn("No .custom-cursor found"); const interactiveSelector = ["a[href]", "button", "canvas", '[role="button"]', "input:not([disabled])", "select:not([disabled])", "textarea:not([disabled])", '[data-cursor="interactive"]'].join(","), stickyItems = document.querySelectorAll(".sticky-item"); let isSticky = !1; function isPureBlack(e) { if (!e || !e.startsWith("rgb")) return !1; const [t, s, o] = e.match(/\d+/g).map(Number); return t === 0 && s === 0 && o === 0 } function isBackgroundBlack(e) { for (; e && e !== document.body;) { const t = getComputedStyle(e).backgroundColor; if (t !== "rgba(0, 0, 0, 0)" && !isPureBlack(t)) return !1; e = e.parentElement } return !0 } function getAllElementsAt(e, t) { const s = [], o = []; let l; for (; (l = document.elementFromPoint(e, t)) && !s.includes(l);)s.push(l), o.push({ el: l, pe: l.style.pointerEvents }), l.style.pointerEvents = "none"; return o.forEach(({ el: n, pe: a }) => n.style.pointerEvents = a), s } let rAF = null; function handlePointerMove(e) { rAF || (rAF = requestAnimationFrame(() => { isSticky || (cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`); const s = getAllElementsAt(e.clientX, e.clientY).every(isBackgroundBlack); cursor.classList.toggle("red", s); const o = document.elementFromPoint(e.clientX, e.clientY), l = o && o.closest(interactiveSelector); cursor.classList.toggle("--interactive", !!l), rAF = null })) } document.addEventListener("mousemove", handlePointerMove), stickyItems.forEach(e => { e.addEventListener("mouseenter", () => { const t = e.getBoundingClientRect(), s = t.left + t.width / 2, o = t.top + t.height / 2; cursor.classList.add("--sticky"), cursor.style.transform = `translate(${s}px, ${o}px) translate(-50%, -50%)`, isSticky = !0 }), e.addEventListener("mouseleave", () => { cursor.classList.remove("--sticky"), isSticky = !1 }) }), document.addEventListener("mouseleave", () => cursor.style.opacity = "0"), document.addEventListener("mouseenter", () => cursor.style.opacity = "1");
+        // --- Custom Cursor Logic (Kept unchanged) ---
+        const cursor = document.querySelector(".custom-cursor");
+        if(cursor) { // Added safety check
+            const interactiveSelector = ["a[href]", "button", "canvas", '[role="button"]', "input:not([disabled])", "select:not([disabled])", "textarea:not([disabled])", '[data-cursor="interactive"]'].join(",");
+            const stickyItems = document.querySelectorAll(".sticky-item");
+            let isSticky = false;
+            
+            function isPureBlack(e) { if (!e || !e.startsWith("rgb")) return !1; const [t, s, o] = e.match(/\d+/g).map(Number); return t === 0 && s === 0 && o === 0 }
+            function isBackgroundBlack(e) { for (; e && e !== document.body;) { const t = getComputedStyle(e).backgroundColor; if (t !== "rgba(0, 0, 0, 0)" && !isPureBlack(t)) return !1; e = e.parentElement } return !0 }
+            function getAllElementsAt(e, t) { const s = [], o = []; let l; for (; (l = document.elementFromPoint(e, t)) && !s.includes(l);)s.push(l), o.push({ el: l, pe: l.style.pointerEvents }), l.style.pointerEvents = "none"; return o.forEach(({ el: n, pe: a }) => n.style.pointerEvents = a), s }
+            
+            let rAF = null;
+            function handlePointerMove(e) { rAF || (rAF = requestAnimationFrame(() => { isSticky || (cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`); const s = getAllElementsAt(e.clientX, e.clientY).every(isBackgroundBlack); cursor.classList.toggle("red", s); const o = document.elementFromPoint(e.clientX, e.clientY), l = o && o.closest(interactiveSelector); cursor.classList.toggle("--interactive", !!l), rAF = null })) }
+            document.addEventListener("mousemove", handlePointerMove);
+            stickyItems.forEach(e => { e.addEventListener("mouseenter", () => { const t = e.getBoundingClientRect(), s = t.left + t.width / 2, o = t.top + t.height / 2; cursor.classList.add("--sticky"), cursor.style.transform = `translate(${s}px, ${o}px) translate(-50%, -50%)`, isSticky = !0 }), e.addEventListener("mouseleave", () => { cursor.classList.remove("--sticky"), isSticky = !1 }) });
+            document.addEventListener("mouseleave", () => cursor.style.opacity = "0");
+            document.addEventListener("mouseenter", () => cursor.style.opacity = "1");
+        }
     </script>
 </body>
 
