@@ -87,7 +87,7 @@
             <section class="hero">
                 <video class="hero__video" src="./files/banner-hero.mov" autoplay muted loop playsinline=""></video>
                 <canvas class="hero__canvas" id="hero-canvas"></canvas>
-                <h1 class="hero__title" data-fls-watcher="" data-fls-watcher-once="">
+                <h1 class="hero__title">
                     <span>MARKER</span>
                 </h1>
             </section>
@@ -1059,8 +1059,12 @@
                     gsap.to(container, {
                         opacity: 0,
                         display: 'none',
-                        duration: 0.5,
-                        onComplete: () => ScrollTrigger.refresh()
+                        duration: 0.3, // Faster fade out
+                        onComplete: () => {
+                            ScrollTrigger.refresh();
+                            // --- REVEAL HERO TITLE NOW ---
+                            gsap.to('.hero__title', { autoAlpha: 1, duration: 0.4, ease: 'power2.out' }); // Faster reveal
+                        }
                     });
                 }
             });
