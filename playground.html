@@ -100,7 +100,12 @@
 </head>
 
 <body>
-    <a href="index.html" class="back-btn">← Back to Home</a>
+    <!-- Transition Overlay for Entrance/Exit -->
+    <div class="transition-overlay"
+        style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999; transform-origin:bottom;">
+    </div>
+
+    <a href="#" class="back-btn" onclick="goHome(event)">← Back to Home</a>
 
     <section id="drawing-playground" class="viewport-section" style="height: 100vh; padding: 0;">
         <div class="playground-wrapper" id="playground-wrapper">
@@ -570,6 +575,40 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             initPlayground();
+
+            // --- TRANSITION LOGIC ---
+            const overlay = document.querySelector('.transition-overlay');
+
+            // 1. Entrance Reveal (Slide Curtain Up)
+            if (overlay) {
+                gsap.to(overlay, {
+                    scaleY: 0,
+                    duration: 1,
+                    ease: "power4.inOut",
+                    delay: 0.2
+                });
+            }
+
+            // 2. Return Home Logic
+            window.goHome = function (e) {
+                e.preventDefault();
+                if (overlay) {
+                    gsap.set(overlay, { transformOrigin: "bottom" }); // Ensure it rises from bottom (or falls from top? User wants smooth return)
+                    // Let's make it fall from top for variety? Or consistent bottom-up?
+                    // "Return Home" -> maybe reverse direction? 
+                    // Let's stick to "Curtain Close" (Bottom Up) for consistency with Index
+                    gsap.to(overlay, {
+                        scaleY: 1,
+                        duration: 0.8,
+                        ease: "power4.inOut",
+                        onComplete: () => {
+                            window.location.href = 'index.html';
+                        }
+                    });
+                } else {
+                    window.location.href = 'index.html';
+                }
+            };
         });
     </script>
 </body>

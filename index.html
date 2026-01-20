@@ -319,11 +319,88 @@
             </style>
 
             <section class="viewport-section"
-                style="height: 50vh; display: flex; align-items: center; justify-content: center;">
-                <a href="playground.html"
-                    style="font-size: 2rem; padding: 20px 40px; background: #000; color: #fff; text-decoration: none; border-radius: 50px; font-family: sans-serif;">
-                    Enter Playground
-                </a>
+                style="height: 60vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #fff;">
+
+             
+
+                <div class="magnetic-wrap" id="mag-wrap">
+                    <button class="black-hole-btn" id="mag-btn" onclick="goToPlayground()">
+                        <span class="btn-text">Enter playground</span>
+                        <span class="btn-text-hover">Explore</span>
+                    </button>
+                </div>
+
+                <div class="transition-overlay"></div>
+
+                <script>
+                    const magBtn = document.getElementById('mag-btn');
+                    const magWrap = document.getElementById('mag-wrap');
+
+                    // Magnetic Effect
+                    if (magWrap && magBtn) {
+                        magWrap.addEventListener('mousemove', (e) => {
+                            const rect = magWrap.getBoundingClientRect();
+                            const x = e.clientX - rect.left - rect.width / 2;
+                            const y = e.clientY - rect.top - rect.height / 2;
+
+                            // Move button towards cursor (0.3 strength)
+                            gsap.to(magBtn, {
+                                x: x * 0.3,
+                                y: y * 0.3,
+                                rotation: x * 0.05,
+                                duration: 0.6,
+                                ease: "power3.out"
+                            });
+
+                            // Move text content slightly more for parallax
+                            const textProps = magBtn.querySelector('.btn-text');
+                            if (textProps) {
+                                gsap.to(textProps, {
+                                    x: x * 0.1,
+                                    y: y * 0.1,
+                                    duration: 0.6,
+                                });
+                            }
+                        });
+
+                        magWrap.addEventListener('mouseleave', () => {
+                            gsap.to(magBtn, { x: 0, y: 0, rotation: 0, duration: 1, ease: "elastic.out(1, 0.5)" });
+                            const textProps = magBtn.querySelector('.btn-text');
+                            if (textProps) gsap.to(textProps, { x: 0, y: 0, duration: 1 });
+                        });
+                    }
+
+                    function goToPlayground() {
+                        const overlay = document.querySelector('.transition-overlay');
+                        const btn = document.getElementById('mag-btn');
+
+                        // 1. Explode/Scale Button
+                        if (btn) {
+                            gsap.to(btn, {
+                                scale: 20, // Expand to fill screen? No, let's just pop it
+                                opacity: 0,
+                                duration: 0.4,
+                                ease: "power2.in"
+                            });
+                        }
+
+                        // 2. Curtain Rise
+                        if (overlay) {
+                            gsap.set(overlay, { transformOrigin: "bottom" });
+                            gsap.to(overlay, {
+                                scaleY: 1,
+                                duration: 0.8,
+                                ease: "power4.inOut",
+                                onComplete: () => {
+                                    window.location.href = 'playground.html';
+                                }
+                            });
+                        } else {
+                            // Fallback
+                            window.location.href = 'playground.html';
+                        }
+                    }
+                </script>
             </section>
 
 
