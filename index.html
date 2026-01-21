@@ -306,7 +306,7 @@
                     <h1>Marker empowers creators to define ideas with their purpose.</h1>
                 </div>
             </section>
-            
+
             <style>
                 @media (max-width: 768px) {
 
@@ -322,7 +322,7 @@
             <section class="viewport-section"
                 style="height: 60vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #fff;">
 
-             
+
 
                 <div class="magnetic-wrap" id="mag-wrap">
                     <button class="black-hole-btn" id="mag-btn" onclick="goToPlayground()">
@@ -404,179 +404,196 @@
                 </script>
             </section>
 
+            <footer id="exact-footer">
 
+                <div class="top-row">
+                    <h1 class="headline-text">
+                        LEAVE YOUR <br> MARK.
+                    </h1>
+                </div>
 
-            <footer id="advanced-footer">
+                <div class="main-grid">
 
-                <div class="footer-container">
-
-                    <div class="footer-cta-section">
-                        <div class="cta-text-wrapper">
-                            <span class="cta-label">Have an idea?</span>
-                            <h2 class="cta-big-text" data-fls-typed="duration:0.6; stagger:0.04;">
-                                DEFINING WITH A 🖋️ MARKER</h2>
+                    <div class="grid-col col-cta">
+                        <div class="col-content top">
+                            <span class="label-text">START A PROJECT</span>
+                            <h2 class="sub-heading">Have an <br> idea?</h2>
                         </div>
-                        <a href="#contact" class="magnetic-button  mobile-hidden">
-                            <div class="btn-fill"></div>
-                            <span class="btn-text">Get in Touch</span>
-                            <span class="btn-icon">↗</span>
-                        </a>
-                    </div>
 
-                    <div class="footer-marquee">
-                        <div class="track">
-                            <div class="content">
-                                MARKER DIGITAL — PRECISION TOOLS — MARKER DIGITAL — PRECISION TOOLS — MARKER DIGITAL —
-                                PRECISION TOOLS —
-                                MARKER DIGITAL — PRECISION TOOLS — MARKER DIGITAL — PRECISION TOOLS — MARKER DIGITAL —
-                                PRECISION TOOLS —
-                            </div>
+                        <div class="col-content bottom">
+                            <a href="mailto:hello@marker.com" class="red-circle-cta">
+                                <span class="cta-line">LET'S TALK</span>
+                                <span class="cta-line">EMAIL ME</span>
+                            </a>
                         </div>
                     </div>
 
-                    <div class="footer-grid">
-                        <div class="grid-col brand-col">
-                            <div class="footer-lamp-wrapper">
-                                <div class="lamp">
-                                    <div class="line"></div>
-                                    <div class="base">
-                                        <div class="light"></div>
-                                    </div>
-                                </div>
-                                <div class="lamp-text">
-                                    <span style="margin-top: 70px;color: rgb(87, 87, 87);">MARKER</span>
-                                </div>
-                            </div>
-                            <p style="margin-top: 1rem; opacity: 0.5;">Est. 2025</p>
-                        </div>
-                        <div class="grid-col links-col">
-                            <h4>Socials</h4>
-                            <ul>
-                                <li><a href="#" class="hover-link">Instagram</a></li>
-                                <li><a href="#" class="hover-link">LinkedIn</a></li>
-                                <li><a href="#" class="hover-link">Twitter / X</a></li>
-                                <li><a href="#" class="hover-link">Behance</a></li>
-                            </ul>
+                    <div class="grid-col col-dir">
+                        <div class="dir-header">
+                            <span class="label-text">DIRECTORY</span>
+                            <div class="pulsing-dot"></div>
                         </div>
 
-                        <div class="grid-col newsletter-col">
-                            <h4>Stay Updated</h4>
-                            <form class="newsletter-form">
-                                <input type="email" placeholder="Email address" required>
-                                <button type="submit">→</button>
+                        <ul class="dir-links">
+                            <li><a href="#">Index</a></li>
+                            <li><a href="#">Case Studies</a></li>
+                            <li><a href="#">About Marker</a></li>
+                            <li><a href="#">Documentation</a></li>
+                            <li><a href="#">Playground</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="grid-col col-net">
+
+                        <div class="net-section">
+                            <span class="label-text">NETWORK</span>
+                            <div class="pill-container">
+                                <a href="#" class="pill-btn">Instagram ↗</a>
+                                <a href="#" class="pill-btn">Twitter (X) ↗</a>
+                                <a href="#" class="pill-btn">LinkedIn ↗</a>
+                                <a href="#" class="pill-btn">GitHub ↗</a>
+                            </div>
+                        </div>
+
+                        <div class="input-section">
+                            <span class="label-text">STAY IN THE LOOP</span>
+                            <form class="loop-form">
+                                <input type="email" placeholder="ENTER_EMAIL_ADDRESS" required>
+                                <button type="submit" class="enter-icon">↵</button>
                             </form>
                         </div>
                     </div>
 
-                    <div class="footer-bottom">
-                        <div class="meta-left">
-                            <span>© 2025 Marker Digital.</span>
-                        </div>
-                        <div class="meta-right">
-                            <a href="#" class="scroll-top-btn"
-                                onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
-                                Back to Top ↑
-                            </a>
-                        </div>
+                </div>
+
+                <div class="bottom-bar">
+                    <div class="meta-item left">
+                        <span class="red-dot">●</span>
+                        <span id="exact-time">17:33:19</span>
+                    </div>
+                    <div class="meta-item center">
+                        <span>LOCAL: INDIA</span>
+                    </div>
+                    <div class="meta-item right">
+                        <span>© 2026 MARKER.</span>
                     </div>
                 </div>
+
             </footer>
+            <script>document.addEventListener("DOMContentLoaded", () => {
+                    function updateExactTime() {
+                        const timeEl = document.getElementById("exact-time");
+                        if (timeEl) {
+                            const now = new Date();
+                            // Format to match HH:MM:SS exactly
+                            const timeStr = now.toLocaleTimeString('en-GB', {
+                                hour12: false,
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit'
+                            });
+                            timeEl.textContent = timeStr;
+                        }
+                    }
+                    setInterval(updateExactTime, 1000);
+                    updateExactTime();
+                });</script>
 
         </main>
     </div>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        gsap.registerPlugin(ScrollTrigger);
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            gsap.registerPlugin(ScrollTrigger);
 
-        // Helper function to animate a specific section
-        function animateSection(selector) {
-            const section = document.querySelector(selector);
-            if (!section) return;
+            // Helper function to animate a specific section
+            function animateSection(selector) {
+                const section = document.querySelector(selector);
+                if (!section) return;
 
-            const card = section.querySelector('.content-wrapper');
-            const heading = card ? section.querySelector('h1') : null;
+                const card = section.querySelector('.content-wrapper');
+                const heading = card ? section.querySelector('h1') : null;
 
-            if (!card || !heading) return;
+                if (!card || !heading) return;
 
-            // --- FIX START: WORD-BASED SPLITTING ---
-            // 1. Get the raw text
-            const originalText = heading.innerText.trim();
-            
-            // 2. Split by spaces to get an array of words
-            const words = originalText.split(/\s+/);
-            
-            // 3. Rebuild HTML
-            // We wrap each word in a <span class="word">
-            // We join them back together with a standard space " "
-            heading.innerHTML = words.map(word => {
-                // Split the word into chars for the animation
-                const charSpans = word.split('').map(char => 
-                    `<span class="char" style="display:inline-block;">${char}</span>`
-                ).join('');
-                
-                // Return the word wrapper
-                return `<span class="word">${charSpans}</span>`;
-            }).join(' '); // <--- This ' ' is the break point for the browser
-            // --- FIX END ---
+                // --- FIX START: WORD-BASED SPLITTING ---
+                // 1. Get the raw text
+                const originalText = heading.innerText.trim();
 
-            // 2. Timeline
-            const tl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: section,
-                    start: "top 75%",
-                    end: "bottom 25%",
-                    toggleActions: "play none none reverse"
-                }
-            });
+                // 2. Split by spaces to get an array of words
+                const words = originalText.split(/\s+/);
 
-            // 3. Card Animation
-            tl.fromTo(card,
-                {
-                    scale: 0.2,
-                    opacity: 0,
-                    y: 50,
-                    borderRadius: "10rem"
-                },
-                {
-                    duration: 1.5,
-                    scale: 1,
-                    opacity: 1,
-                    y: 0,
-                    borderRadius: "2rem",
-                    ease: "expo.out",
-                    clearProps: "all"
-                }
-            );
+                // 3. Rebuild HTML
+                // We wrap each word in a <span class="word">
+                // We join them back together with a standard space " "
+                heading.innerHTML = words.map(word => {
+                    // Split the word into chars for the animation
+                    const charSpans = word.split('').map(char =>
+                        `<span class="char" style="display:inline-block;">${char}</span>`
+                    ).join('');
 
-            // 4. Text Animation
-            const chars = heading.querySelectorAll(".char");
-            if (chars.length > 0) {
-                tl.fromTo(chars,
+                    // Return the word wrapper
+                    return `<span class="word">${charSpans}</span>`;
+                }).join(' '); // <--- This ' ' is the break point for the browser
+                // --- FIX END ---
+
+                // 2. Timeline
+                const tl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 75%",
+                        end: "bottom 25%",
+                        toggleActions: "play none none reverse"
+                    }
+                });
+
+                // 3. Card Animation
+                tl.fromTo(card,
                     {
-                        y: 20,
+                        scale: 0.2,
                         opacity: 0,
-                        filter: "blur(10px)"
+                        y: 50,
+                        borderRadius: "10rem"
                     },
                     {
-                        duration: 1,
-                        y: 0,
+                        duration: 1.5,
+                        scale: 1,
                         opacity: 1,
-                        filter: "blur(0px)",
-                        stagger: 0.02,
-                        ease: "power2.out"
-                    }, "-=1.2");
+                        y: 0,
+                        borderRadius: "2rem",
+                        ease: "expo.out",
+                        clearProps: "all"
+                    }
+                );
+
+                // 4. Text Animation
+                const chars = heading.querySelectorAll(".char");
+                if (chars.length > 0) {
+                    tl.fromTo(chars,
+                        {
+                            y: 20,
+                            opacity: 0,
+                            filter: "blur(10px)"
+                        },
+                        {
+                            duration: 1,
+                            y: 0,
+                            opacity: 1,
+                            filter: "blur(0px)",
+                            stagger: 0.02,
+                            ease: "power2.out"
+                        }, "-=1.2");
+                }
             }
-        }
 
-        // Explicitly call for each section
-        animateSection(".intro-viewport");
-        animateSection(".action-trigger-zone");
-        animateSection(".conclusion-viewport");
+            // Explicitly call for each section
+            animateSection(".intro-viewport");
+            animateSection(".action-trigger-zone");
+            animateSection(".conclusion-viewport");
 
-        // Refresh ScrollTrigger
-        ScrollTrigger.refresh();
-    });
-</script>
+            // Refresh ScrollTrigger
+            ScrollTrigger.refresh();
+        });
+    </script>
     <script>
         // --- 1. TYPED SWAP EFFECT LOGIC ---
         function initTypedSwap() {
@@ -878,87 +895,135 @@
             });
         });
     </script>
-<script>
+    <script>
         gsap.registerPlugin(ScrollTrigger);
-        // --- 0. LOADER ANIMATION (OSMO/WILLEM) ---
-        // REPLACE your existing initLoader function with this one:
 
-function initLoader() {
-    const container = document.querySelector('.loader-screen');
-    const loadingLetter = container.querySelectorAll('.willem__letter');
-    const box = container.querySelectorAll('.willem-loader__box');
-    const growingImage = container.querySelectorAll('.willem__growing-image');
-    const headingStart = container.querySelectorAll('.willem__h1-start');
-    const headingEnd = container.querySelectorAll('.willem__h1-end');
-    const coverImageExtra = container.querySelectorAll('.willem__cover-image-extra');
+        function initLoader() {
+            const container = document.querySelector('.loader-screen');
+            const loadingLetter = container.querySelectorAll('.willem__letter');
+            const box = container.querySelectorAll('.willem-loader__box');
+            const growingImage = container.querySelectorAll('.willem__growing-image');
+            const headingStart = container.querySelectorAll('.willem__h1-start');
+            const headingEnd = container.querySelectorAll('.willem__h1-end');
+            const coverImageExtra = container.querySelectorAll('.willem__cover-image-extra');
 
-    // 1. SETUP AUDIO
-    const loaderSound = new Audio('./assets/loader.mp3');
-    loaderSound.volume = 0.5;
+            // 1. SETUP AUDIO
+            const loaderSound = new Audio('./assets/loader.mp3');
+            loaderSound.volume = 0.5;
 
-    const tl = gsap.timeline({
-        defaults: { ease: 'expo.inOut' },
-        onComplete: () => {
-            document.body.classList.remove('is-loading');
+            // --- MOBILE FIX: Unlock Audio Context on First Interaction ---
+            // Mobile browsers block audio until the user interacts. 
+            // This listener waits for the first touch/click anywhere to unlock the sound engine.
+            const unlockAudio = () => {
+                loaderSound.play().then(() => {
+                    // Audio started successfully. 
+                    // If the animation hasn't reached the sound point yet, we pause and reset.
+                    // If it's already playing via the timeline, we let it continue.
+                    if (loaderSound.currentTime > 0.1 && !loaderSound.paused) {
+                        // It's already playing from the timeline, do nothing
+                    } else {
+                        loaderSound.pause();
+                        loaderSound.currentTime = 0;
+                    }
+                }).catch((e) => {
+                    // Still blocked (unlikely if triggered by touch), ignore
+                });
 
-            // --- AUTOMATIC CLICK LOGIC ---
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
+                // Remove listeners so this only happens once
+                document.removeEventListener('touchstart', unlockAudio);
+                document.removeEventListener('click', unlockAudio);
+            };
 
-            // 1. Dispatch 'mousemove' first. 
-            // This wakes up the cursor and stops the idle animation.
-            const moveEvent = new MouseEvent('mousemove', {
-                view: window,
-                bubbles: true,
-                cancelable: true,
-                clientX: centerX,
-                clientY: centerY
+            // Listen for interaction immediately
+            document.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+            document.addEventListener('click', unlockAudio, { once: true });
+
+
+            const tl = gsap.timeline({
+                defaults: { ease: 'expo.inOut' },
+                onComplete: () => {
+                    document.body.classList.remove('is-loading');
+
+                    // --- AUTOMATIC CLICK LOGIC ---
+                    const centerX = window.innerWidth / 2;
+                    const centerY = window.innerHeight / 2;
+
+                    // 1. Dispatch Mouse Events (Desktop)
+                    const moveEvent = new MouseEvent('mousemove', {
+                        view: window, bubbles: true, cancelable: true,
+                        clientX: centerX, clientY: centerY
+                    });
+                    window.dispatchEvent(moveEvent);
+
+                    const clickEvent = new MouseEvent('click', {
+                        view: window, bubbles: true, cancelable: true,
+                        clientX: centerX, clientY: centerY
+                    });
+                    window.dispatchEvent(clickEvent);
+
+                    // 2. Dispatch Touch Events (Mobile Visuals Fix)
+                    if (typeof TouchEvent !== 'undefined') {
+                        try {
+                            const touchObj = new Touch({
+                                identifier: Date.now(),
+                                target: window,
+                                clientX: centerX, clientY: centerY,
+                                radiusX: 2.5, radiusY: 2.5,
+                                rotationAngle: 10, force: 0.5,
+                            });
+
+                            const touchStart = new TouchEvent('touchstart', {
+                                cancelable: true, bubbles: true,
+                                touches: [touchObj], targetTouches: [], changedTouches: [touchObj],
+                                shiftKey: true,
+                            });
+                            window.dispatchEvent(touchStart);
+
+                            const touchEnd = new TouchEvent('touchend', {
+                                cancelable: true, bubbles: true,
+                                touches: [], targetTouches: [], changedTouches: [touchObj],
+                                shiftKey: true,
+                            });
+                            window.dispatchEvent(touchEnd);
+                        } catch (e) {
+                            console.warn("Touch event simulation failed (not supported on this browser).");
+                        }
+                    }
+
+                    gsap.to(container, {
+                        opacity: 0,
+                        display: 'none',
+                        duration: 0.5,
+                        onComplete: () => ScrollTrigger.refresh()
+                    });
+                }
             });
-            window.dispatchEvent(moveEvent);
 
-            // 2. Dispatch 'click'.
-            // This triggers visual ripples or interactions.
-            const clickEvent = new MouseEvent('click', {
-                view: window,
-                bubbles: true,
-                cancelable: true,
-                clientX: centerX,
-                clientY: centerY
-            });
-            window.dispatchEvent(clickEvent);
-            // -----------------------------
+            if (loadingLetter) { tl.from(loadingLetter, { yPercent: 100, stagger: 0.025, duration: 1.25 }); }
+            if (box.length) { tl.fromTo(box, { width: '0em' }, { width: '1em', duration: 1.25 }, '< 1.25'); }
+            if (growingImage.length) { tl.fromTo(growingImage, { width: '0%' }, { width: '100%', duration: 1.25 }, '<'); }
+            if (headingStart.length) { tl.fromTo(headingStart, { x: '0em' }, { x: '-0.05em', duration: 1.25 }, '<'); }
+            if (headingEnd.length) { tl.fromTo(headingEnd, { x: '0em' }, { x: '0.05em', duration: 1.25 }, '<'); }
+            if (coverImageExtra.length) { tl.fromTo(coverImageExtra, { opacity: 1 }, { opacity: 0, duration: 0.05, ease: 'none', stagger: 0.5 }, '-=0.05'); }
 
-            gsap.to(container, {
-                opacity: 0,
-                display: 'none',
-                duration: 0.5,
-                onComplete: () => ScrollTrigger.refresh()
-            });
-        }
-    });
+            // --- 2. SYNCHRONIZED EXPANSION & SOUND ---
+            tl.addLabel("zoomEffect", "< 1.25");
 
-    if (loadingLetter) { tl.from(loadingLetter, { yPercent: 100, stagger: 0.025, duration: 1.25 }); }
-    if (box.length) { tl.fromTo(box, { width: '0em' }, { width: '1em', duration: 1.25 }, '< 1.25'); }
-    if (growingImage.length) { tl.fromTo(growingImage, { width: '0%' }, { width: '100%', duration: 1.25 }, '<'); }
-    if (headingStart.length) { tl.fromTo(headingStart, { x: '0em' }, { x: '-0.05em', duration: 1.25 }, '<'); }
-    if (headingEnd.length) { tl.fromTo(headingEnd, { x: '0em' }, { x: '0.05em', duration: 1.25 }, '<'); }
-    if (coverImageExtra.length) { tl.fromTo(coverImageExtra, { opacity: 1 }, { opacity: 0, duration: 0.05, ease: 'none', stagger: 0.5 }, '-=0.05'); }
+            if (growingImage.length) {
+                tl.to(growingImage, { width: '100vw', height: '100vh', duration: 1.5 }, "zoomEffect");
+            }
 
-    // --- 2. SYNCHRONIZED EXPANSION & SOUND ---
-    tl.addLabel("zoomEffect", "< 1.25");
+            if (box.length) {
+                tl.to(box, { width: '100vw', duration: 1.5 }, "zoomEffect");
+            }
 
-    if (growingImage.length) {
-        tl.to(growingImage, { width: '100vw', height: '100vh', duration: 1.5 }, "zoomEffect");
-    }
-
-    if (box.length) {
-        tl.to(box, { width: '100vw', duration: 1.5 }, "zoomEffect");
-    }
-
-    tl.call(() => {
-        loaderSound.play().catch(e => console.warn("Audio autoplay blocked", e));
-    }, null, "zoomEffect+=0.4");
-}        document.addEventListener('DOMContentLoaded', () => {
+            tl.call(() => {
+                // Attempt to play. If on mobile and user hasn't touched yet, this catch block prevents error.
+                loaderSound.play().catch(e => {
+                    console.log("Audio waiting for user interaction.");
+                });
+            }, null, "zoomEffect+=0.4");
+        } document.addEventListener('DOMContentLoaded', () => {
             initLoader();
             initCarousel();
             initGlobalPageCursor();
@@ -967,7 +1032,7 @@ function initLoader() {
             init3DMarker();
             initGlobalTextAnimations();
             initMobileHeadingEffect();
-        }); 
+        });
         // --- GLOBAL PAGE CURSOR ANIMATION (NEW FUNCTION) ---
         function initGlobalPageCursor() {
             const globalCanvas = document.querySelector('#global-cursor-canvas');

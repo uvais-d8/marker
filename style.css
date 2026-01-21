@@ -130,150 +130,315 @@
     transform: translateY(-0.05em);
     opacity: 1;
 }
-
-/* --- FOOTER LAYOUT --- */
-#advanced-footer {
-    position: relative;
-    width: 100%;
-    /* Use min-height 100vh for desktop, but allow auto for mobile later */
-    min-height: 110vh;
-    background-color: #050505;
+/* --- EXACT REPLICA FOOTER (FINAL FIXED VERSION) --- */
+#exact-footer {
+    background-color: #000000;
     color: #ffffff;
-    overflow: hidden;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-}
-
-.footer-container {
-    position: relative;
-    z-index: 2;
+    font-family: 'Neue Montreal', sans-serif;
+    
+    /* VITAL FIX: min-height ensures it grows if content is too tall */
+    min-height: 100vh;
     width: 100%;
-    max-width: 1800px;
-    margin: 0 auto;
-    padding: 3vh 4vw;
+    
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    flex-grow: 1;
-}
-
-/* --- CTA SECTION --- */
-.footer-cta-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    padding-bottom: 4vh;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 2rem;
-}
-
-.cta-text-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 70%;
-}
-
-.cta-label {
-    font-size: 1rem;
-    color: #888;
-    margin-bottom: 1vh;
-    text-transform: uppercase;
-}
-
-/* Updated Clamp for better mobile scaling */
-.cta-big-text {
-    font-size: clamp(2.5rem, 6.5vw, 8rem);
-    line-height: 0.9;
-    font-weight: 700;
-    margin: 0;
-    cursor: default;
-}
-
-/* Magnetic Button */
-.magnetic-button {
+    
+    border-top: 1px solid #333;
+    box-sizing: border-box;
     position: relative;
-    width: clamp(100px, 12vw, 180px);
-    /* Slightly smaller min-width for tablets */
-    height: clamp(100px, 12vw, 180px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 10;
+    
+    /* Ensure no content is accidentally clipped */
+    overflow: visible; 
+}
+
+/* 1. TOP SECTION */
+.top-row {
+    width: 100%;
+    border-bottom: 1px solid #333;
+    padding: 4rem 3rem 2rem 3rem; /* Exact padding from image */
+    box-sizing: border-box;
+}
+
+.headline-text {
+    font-family: 'Presicav', sans-serif; /* Bold Header Font */
+    font-size: 14vw; /* Huge responsive text */
+    line-height: 0.85;
+    text-transform: uppercase;
+    margin: 0;
+    letter-spacing: -0.02em;
+    color: #fff;
+}
+
+/* 2. MIDDLE GRID */
+.main-grid {
+    /* Flex-grow pushes the bottom bar down, but allows content to expand */
+    flex-grow: 1;
+    display: grid;
+    /* Columns ratios: CTA slightly wider, Dir narrower, Net wide */
+    grid-template-columns: 1.2fr 0.9fr 1.2fr; 
+    width: 100%;
+    border-bottom: 1px solid #333;
+}
+
+.grid-col {
+    border-right: 1px solid #333;
+    padding: 3rem; /* Match image padding */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pushes top/bottom content apart */
+    position: relative;
+    box-sizing: border-box;
+}
+
+.grid-col:last-child {
+    border-right: none;
+}
+
+/* Common Labels */
+.label-text {
+    font-size: 0.7rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 1.5rem;
+}
+
+/* --- Column 1: CTA --- */
+.col-cta {
+    align-items: flex-start;
+}
+
+.sub-heading {
+    font-size: 3rem;
+    font-weight: 400;
+    line-height: 1.1;
+    margin: 0;
+    color: #fff;
+}
+
+.red-circle-cta {
+    width: 150px;
+    height: 150px;
+    background-color: #d91c24; /* Marker Red */
     border-radius: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-decoration: none;
-    color: white;
-    transition: transform 0.3s ease, border-color 0.3s ease;
-    flex-shrink: 0;
-    /* Prevents squishing */
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    text-align: center;
+    margin-top: 4rem; /* Spacing from text */
+    transition: transform 0.2s ease;
 }
 
-.magnetic-button .btn-fill {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: #fff;
-    border-radius: 50%;
-    transform: scale(0);
-    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-    z-index: 0;
-}
-
-.magnetic-button:hover {
-    border-color: transparent;
+.red-circle-cta:hover {
     transform: scale(1.05);
 }
 
-.magnetic-button:hover .btn-fill {
-    transform: scale(1);
+/* --- Column 2: Directory --- */
+.dir-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+    width: 100%;
 }
 
-.btn-text,
-.btn-icon {
-    position: relative;
-    z-index: 1;
-    transition: color 0.3s ease;
+.dir-header .label-text {
+    align-self: flex-start;
 }
 
-.magnetic-button:hover .btn-text,
-.magnetic-button:hover .btn-icon {
+.pulsing-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #fff;
+    border-radius: 50%;
+    margin-top: 10px; /* Space below label */
+}
+
+.dir-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.dir-links li {
+    border-bottom: 1px solid #333;
+    border-top: 1px solid transparent; /* Keeps spacing consistent */
+}
+
+/* Add border to top of first item to match visual list style if needed */
+.dir-links li:first-child {
+    border-top: 1px solid #333; 
+}
+
+.dir-links li a {
+    display: block;
+    padding: 1rem 0;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: padding-left 0.2s, color 0.2s;
+}
+
+.dir-links li a:hover {
+    color: #999;
+    padding-left: 10px;
+}
+
+/* --- Column 3: Network --- */
+.col-net {
+    justify-content: space-between;
+}
+
+.pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pill-btn {
+    border: 1px solid #333;
+    padding: 10px 20px;
+    border-radius: 100px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.85rem;
+    background: transparent;
+    transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+}
+
+.pill-btn:hover {
+    border-color: #fff;
+    background-color: #fff;
     color: #000;
 }
 
-/* --- MARQUEE --- */
-.footer-marquee {
-    width: 100vw;
-    margin-left: -4vw;
-    padding: 2vh 0;
-    background: rgba(255, 255, 255, 0.02);
-    display: flex;
-    overflow: hidden;
+.input-section {
+    width: 100%;
+    margin-top: 4rem;
 }
 
-.track {
+.loop-form {
     display: flex;
-    white-space: nowrap;
-    animation: marquee 20s linear infinite;
+    border-bottom: 1px solid #fff;
+    padding-bottom: 10px;
+    align-items: center;
+    position: relative;
 }
 
-.track .content {
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-weight: 700;
-    color: transparent;
-    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+.loop-form input {
+    background: transparent;
+    border: none;
+    color: #666;
+    width: 100%;
+    font-size: 0.9rem;
     text-transform: uppercase;
-    padding-right: 1rem;
+    outline: none;
+    font-family: inherit;
+    letter-spacing: 0.05em;
 }
 
-@keyframes marquee {
-    0% {
-        transform: translateX(0);
-    }
+.loop-form input:focus {
+    color: #fff;
+}
 
-    100% {
-        transform: translateX(-50%);
+.enter-icon {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0;
+    position: absolute;
+    right: 0;
+}
+/* 3. BOTTOM BAR (Aligned to Right) */
+.bottom-bar {
+    flex-shrink: 0;
+    
+    display: flex;
+    /* KEY CHANGE: Push everything to the end (right) */
+    justify-content: flex-end; 
+    align-items: center;
+    
+    /* Add space between the three items */
+    gap: 3rem; 
+    
+    padding: 1.5rem 3rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #fff;
+    background-color: #000;
+    border-top: 1px solid #333;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    
+    /* KEY CHANGE: Remove fixed width so they sit next to each other */
+    width: auto; 
+}
+
+.red-dot {
+    color: #d91c24;
+    font-size: 1.2em;
+    line-height: 0;
+    margin-bottom: 2px;
+}
+
+/* RESPONSIVE: Stack them on mobile if needed */
+@media (max-width: 768px) {
+    .bottom-bar {
+        flex-direction: column;
+        justify-content: center;
+        gap: 1rem;
     }
+}
+/* --- RESPONSIVE ADJUSTMENTS --- */
+/* Matches behavior to ensure visibility on all devices */
+
+@media (max-width: 1024px) {
+    .headline-text {
+        font-size: 12vw;
+    }
+    .main-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .col-cta { 
+        grid-column: span 2; 
+        border-right: none; 
+        border-bottom: 1px solid #333; 
+        flex-direction: row; 
+        align-items: center;
+        gap: 2rem;
+    }
+    .red-circle-cta { margin-top: 0; }
+    .col-dir { border-right: 1px solid #333; }
+}
+
+@media (max-width: 768px) {
+    #exact-footer { height: auto; }
+    .top-row { padding: 2rem; }
+    .main-grid { grid-template-columns: 1fr; display: flex; flex-direction: column;}
+    .grid-col { border-right: none; border-bottom: 1px solid #333; padding: 2rem; }
+    .bottom-bar { 
+        flex-direction: column; 
+        gap: 1rem; 
+        padding: 2rem;
+    }
+    .meta-item { width: 100%; justify-content: center !important; }
 }
 
 /* --- GRID & LAMP --- */
@@ -3085,71 +3250,70 @@ body.hide-cursor #global-cursor-canvas {
         bottom: 90px;
         right: 20px;
     }
-}
-
-
+}/* Container: Adjusted hit area for the larger text */
 .black-hole-btn {
     position: relative;
-    width: 300px;
-    height: 100px;
-    border-radius: 80px;
-    background: #000;
-    color: #fff;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
-    cursor: pointer;
-    z-index: 10;
-    transition: transform 0.3s ease-out;
-    /* Fallback */
-    text-decoration: none;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: auto;          
+    height: auto;        
+    padding: 20px 40px;   /* Increased padding for a better magnetic hit area */
+    background: transparent; 
     border: none;
+    cursor: pointer;
+    text-decoration: none;
+    z-index: 10;
+    overflow: visible;
 }
 
 .magnetic-wrap {
     display: inline-block;
     position: relative;
-    padding: 50px;
-    /* Area for magnetic catch */
+    padding: 20px;
 }
 
-
-
+/* Main Text: Bigger, Bolder, Darker */
 .btn-text {
     font-family: 'Inter', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 500;
+    font-size: 3rem;      /* Significantly larger */
+    font-weight: 800;     /* Extra Bold */
+    color: #000000;       /* Solid Black for white background */
+    line-height: 1;       /* Tighter line height for large text */
+    letter-spacing: -1px; /* Tighter tracking for a modern feel */
     z-index: 2;
     pointer-events: none;
-    mix-blend-mode: difference;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
+/* Hover Text: Adjusted contrast and position */
 .btn-text-hover {
     position: absolute;
     opacity: 0;
-    font-size: 0.9rem;
-    margin-top: 10px;
-    font-weight: 300;
-    letter-spacing: 2px;
+    font-size: 0.85rem;
+    font-weight: 500;     /* Medium weight */
+    letter-spacing: 3px;  /* Wide spacing for contrast */
     text-transform: uppercase;
-    transform: translateY(20px);
-    transition: all 0.4s ease;
-    color: #fff;
+    color: #333333;       /* Dark Grey */
+    
+    /* Position logic */
+    top: 100%;            
+    transform: translateY(-5px); /* Start slightly higher */
+    transition: all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+    white-space: nowrap;
 }
 
+/* Hover Interaction */
 .black-hole-btn:hover .btn-text-hover {
-    opacity: 0.7;
-    transform: translateY(25px);
+    opacity: 1;
+    transform: translateY(10px); /* Slide down distance */
 }
 
+/* Main text slight lift on hover */
 .black-hole-btn:hover .btn-text {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
 }
-
 /* Liquid Effect */
 .black-hole-btn::after {
     content: '';
