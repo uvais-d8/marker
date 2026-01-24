@@ -730,16 +730,20 @@
         letter-spacing: 1px;
     }
 }
-
 #threejs-marker-container {
-    position: fixed;
+    position: fixed; /* Keeps the marker stuck to the screen */
     top: 0;
-    left: 10%;
+    left: 0;
     width: 100%;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 999;
-    /* Higher than your .urbanist-bg and .content-layer */
+    height: 100%;
+    z-index: 500; /* Ensures it sits above backgrounds but below the loader */
+    pointer-events: none; /* Allows you to click buttons underneath the marker */
+    overflow: hidden;
+}
+
+/* Ensure the loader covers the marker initially */
+.loader-screen {
+    z-index: 9999; 
 }
 
 /* =========================================
